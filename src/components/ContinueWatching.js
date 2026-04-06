@@ -39,7 +39,7 @@ export default function ContinueWatching() {
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-3">
           <div className="w-1.5 h-8 bg-yellow-500 rounded-full shadow-[0_0_15px_rgba(234,179,8,0.4)]"></div>
-          <h2 className="text-2xl font-black text-zinc-100 uppercase tracking-tight">Phim Anh Đang Xem Dở 🍿</h2>
+          <h2 className="text-2xl font-black text-zinc-100 uppercase tracking-tight">Phim Vợ iu Đang Xem Dở 🍿</h2>
         </div>
       </div>
       
