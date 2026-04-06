@@ -1,24 +1,25 @@
 import { getMovies } from '@/lib/movies';
 import Link from 'next/link';
 import Header from '@/components/Header';
-import Footer from '@/components/Footer'; // Import Footer mới tách ra
+import Footer from '@/components/Footer'; 
 import HistoryPopup from '@/components/HistoryPopup';
 import ContinueWatching from '@/components/ContinueWatching';
 import CategoryMenu from '@/components/CategoryMenu';
 import FavoriteList from '@/components/FavoriteList';
 import MovieCard from '@/components/MovieCard';
+import SecretChat from '@/components/SecretChat'; // Import component chat bí mật
 
 export default async function HomePage({ searchParams }) {
   // Đảm bảo tương thích với Next.js 15+
   const sParams = await searchParams;
   const page = sParams?.page || 1;
-  
-  // Gọi dữ liệu phim
+
+  // Gọi dữ liệu phim từ NguonC API
   const data = await getMovies(page);
 
   return (
     <main className="min-h-screen bg-black text-white p-6 md:p-12 font-sans relative overflow-x-hidden">
-      
+
       {/* 1. HEADER: Logo, SearchBox và UserMenu */}
       <Header />
 
@@ -91,7 +92,10 @@ export default async function HomePage({ searchParams }) {
 
       <HistoryPopup />
 
-      {/* 6. FOOTER: Đã chuyển sang file riêng biệt */}
+      {/* 6. SECRET CHAT: Cánh cửa bí mật thay thế cho link ẩn cũ */}
+      <SecretChat />
+
+      {/* 7. FOOTER */}
       <Footer />
     </main>
   );

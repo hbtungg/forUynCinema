@@ -1,12 +1,12 @@
 'use client';
 import { useState, useEffect, use } from 'react';
-import { useSession } from 'next-auth/react'; // Thêm dòng này
+import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
 export default function WatchPage({ params }) {
-  const { data: session } = useSession(); // Lấy thông tin đăng nhập
+  const { data: session } = useSession();
   const decodedParams = use(params);
   const slug = decodedParams.slug;
 
@@ -22,7 +22,7 @@ export default function WatchPage({ params }) {
         if (data.movie) {
           setMovie(data.movie);
 
-          // 1. Lưu vào LocalStorage (Cho khách vãng lai)
+          // 1. Lưu vào LocalStorage
           const history = JSON.parse(localStorage.getItem('watchHistory') || '[]');
           const currentItem = {
             slug: slug,
@@ -37,7 +37,7 @@ export default function WatchPage({ params }) {
           window.dispatchEvent(new Event('storage'));
           window.dispatchEvent(new Event('historyUpdated'));
 
-          // 2. LƯU VÀO MONGODB (Khi đã đăng nhập)
+          // 2. LƯU VÀO MONGODB
           if (session?.user?.email) {
             await fetch('/api/history', {
               method: 'POST',
@@ -54,7 +54,7 @@ export default function WatchPage({ params }) {
       }
     };
     if (slug) fetchMovie();
-  }, [slug, selectedServer, selectedEpisode, session]); // Thêm session vào dependency
+  }, [slug, selectedServer, selectedEpisode, session]);
 
   if (!movie) return (
     <div className="min-h-screen bg-black flex items-center justify-center text-white font-black uppercase tracking-[0.5em] animate-pulse text-[10px]">
@@ -79,6 +79,19 @@ export default function WatchPage({ params }) {
       </div>
 
       <div className="flex flex-col items-center px-4 md:px-10 py-6">
+        
+        {/* NÚT QUAY LẠI KIỂU MINIMALIST ANH THÍCH */}
+        <div className="w-full max-w-5xl">
+          <Link 
+            href="/" 
+            className="text-zinc-500 hover:text-red-600 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 mb-6 transition-all group w-fit"
+          >
+            <span className="group-hover:-translate-x-1 transition-transform duration-300">←</span> 
+            Quay lại trang chủ
+          </Link>
+        </div>
+
+        {/* THÔNG TIN PHIM */}
         <div className="w-full max-w-5xl flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
           <div className="flex flex-col items-start">
             <h1 className="text-2xl md:text-3xl font-black uppercase italic tracking-tighter text-red-600 drop-shadow-[0_0_15px_rgba(220,38,38,0.2)]">
@@ -98,6 +111,7 @@ export default function WatchPage({ params }) {
           </div>
         </div>
 
+        {/* PLAYER */}
         <div className="w-full max-w-5xl aspect-video bg-zinc-950 rounded-[2.5rem] overflow-hidden border-2 border-zinc-900 shadow-2xl mb-8 relative group">
           {currentEpisodes[selectedEpisode]?.embed ? (
             <iframe 
@@ -114,7 +128,9 @@ export default function WatchPage({ params }) {
           )}
         </div>
 
+        {/* SERVER & TẬP PHIM */}
         <div className="w-full max-w-5xl space-y-8 pb-10">
+          {/* ... (Các phần chọn Server và Episode giữ nguyên của anh) ... */}
           {servers.length > 1 && (
             <div className="space-y-4">
               <h2 className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-500 px-2 flex items-center gap-2">
