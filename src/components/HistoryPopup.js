@@ -1,29 +1,81 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 export default function HistoryPopup() {
-  const [lastSeen, setLastSeen] = useState(null);
+  const [lastMovie, setLastMovie] = useState(null);
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // Lấy dữ liệu từ sổ tay trình duyệt
-    const history = JSON.parse(localStorage.getItem('ck_thu_uyn_history') || '{}');
-    const slugs = Object.keys(history);
-    if (slugs.length > 0) {
-      const lastSlug = slugs[slugs.length - 1]; 
-      setLastSeen({ slug: lastSlug, ...history[lastSlug] });
+    // 1. Lấy phim mới nhất từ lịch sử 'watchHistory'
+    const history = JSON.parse(localStorage.getItem('watchHistory') || '[]');
+    
+    if (history.length > 0) {
+      const latest = history[0]; // Luôn là bộ phim vừa xem xong gần nhất
+      setLastMovie(latest);
+
+      // 2. Chờ 1.5 giây sau khi trang tải xong mới hiện pop-up cho tinh tế
+      const timer = setTimeout(() => {
+        setIsVisible(true);
+      }, 1500);
+
+      return () => clearTimeout(timer);
     }
   }, []);
 
-  if (!lastSeen) return null;
+  // Nếu không có lịch sử hoặc người dùng đã tắt thì không hiện
+  if (!isVisible || !lastMovie) return null;
 
   return (
-    <div className="fixed bottom-6 right-6 bg-zinc-900 border border-red-600 p-5 rounded-2xl shadow-2xl z-50 max-w-xs animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <p className="text-sm font-bold text-red-500 mb-1">Vợ iu ơi! Xem tiếp chứ?</p>
-      <p className="text-[11px] text-zinc-400 mb-4 line-clamp-2">Lần trước em đang xem <b>{lastSeen.name}</b> ({lastSeen.lastEp})</p>
-      <div className="flex gap-3">
-        <Link href={lastSeen.url} className="bg-red-600 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-red-700 transition">Xem tiếp</Link>
-        <button onClick={() => setLastSeen(null)} className="text-zinc-500 text-xs hover:text-zinc-300">Bỏ qua</button>
+    <div className="fixed bottom-6 right-6 z-[100] animate-in fade-in slide-in-from-bottom-10 duration-700">
+      <div className="bg-zinc-900/90 backdrop-blur-2xl border border-zinc-800 p-6 rounded-[2.5rem] shadow-[0_25px_60px_rgba(0,0,0,0.8)] w-[320px] relative overflow-hidden group">
+        
+        {/* Hiệu ứng viền phát sáng nhẹ cho "xịn" */}
+        <div className="absolute inset-0 border border-red-600/10 rounded-[2.5rem] group-hover:border-red-600/30 transition-colors pointer-events-none"></div>
+
+        <div className="relative z-10">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse"></span>
+              <h3 className="text-red-500 text-[10px] font-black uppercase tracking-[0.25em]">
+                Xem tiếp chứ?
+              </h3>
+            </div>
+            <button 
+              onClick={() => setIsVisible(false)}
+              className="text-zinc-600 hover:text-white transition-colors p-1"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3">
+                <path d="M18 6L6 18M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+
+          <div className="mb-5">
+            <p className="text-zinc-400 text-[11px] font-medium leading-relaxed">
+              Lần trước em đang xem dở bộ phim <br/>
+              <span className="text-white font-black italic text-xs">"{lastMovie.name}"</span>
+            </p>
+            <p className="text-zinc-500 text-[10px] mt-1 font-bold">
+              Đến <span className="text-red-500 uppercase tracking-tighter">Tập {lastMovie.episode}</span> rồi đó nha!
+            </p>
+          </div>
+
+          <div className="flex gap-3">
+            <Link 
+              href={`/watch/${lastMovie.slug}`}
+              className="flex-1 bg-red-600 hover:bg-red-500 text-white text-[10px] font-black uppercase py-3.5 rounded-2xl text-center shadow-lg shadow-red-900/30 transition-all active:scale-95"
+            >
+              Xem tiếp ngay
+            </Link>
+            <button 
+              onClick={() => setIsVisible(false)}
+              className="px-4 bg-zinc-800 hover:bg-zinc-700 text-zinc-500 text-[9px] font-black uppercase py-3.5 rounded-2xl transition-all"
+            >
+              Bỏ qua
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
