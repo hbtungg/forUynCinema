@@ -1,6 +1,7 @@
 import { getMoviesByCategory } from '@/lib/movies';
 import Link from 'next/link';
-import FavoriteButton from '@/components/FavoriteButton';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 import MovieCard from '@/components/MovieCard';
 
 export default async function CategoryPage({ params, searchParams }) {
@@ -9,47 +10,46 @@ export default async function CategoryPage({ params, searchParams }) {
   const page = Number(sParams?.page || 1);
   const typeFilter = sParams?.type || ''; 
   
-  // 1. LẤY DỮ LIỆU BAN ĐẦU
+  // 1. LẤY DỮ LIỆU BAN ĐẦU ĐỂ BIẾT TỔNG SỐ TRANG
   const initialData = await getMoviesByCategory(slug, page, typeFilter);
-  
-  // MẸO: API Nguonc khi lọc type thường làm mất paginate. 
-  // Nếu mất, ta cho mặc định là 500 trang để Thu Uyên bấm Next thoải mái, 
-  // hoặc dùng page + 10 để luôn thấy trang tiếp theo.
-  const totalPagesFromAPI = initialData.paginate?.total_pages || initialData.total_pages || (page + 20);
+  const totalPagesFromAPI = initialData.paginate?.total_pages || initialData.total_pages || (page + 50);
 
   let finalItems = [];
-  let currentPage = page;
+  let fetchPage = page;
   const targetCount = 12; 
 
-  // 2. Gom phim thông minh
-  while (finalItems.length < targetCount && currentPage <= totalPagesFromAPI && currentPage < page + 5) {
-    const data = (currentPage === page) ? initialData : await getMoviesByCategory(slug, currentPage, typeFilter);
+  // 2. MÁY HÚT PHIM THÔNG MINH (Quét tối đa 10 trang để gom đủ phim)
+  while (finalItems.length < targetCount && fetchPage <= totalPagesFromAPI && fetchPage < page + 10) {
+    const data = (fetchPage === page) ? initialData : await getMoviesByCategory(slug, fetchPage, typeFilter);
+    
     if (!data.items || data.items.length === 0) break;
 
     const filtered = data.items.filter(phim => {
       if (typeFilter === '') return true;
       const label = (phim.current_episode || "").toLowerCase();
-      const isSeries = label.includes('tập') || label.includes('/');
+      const isSeries = label.includes('tập') || label.includes('/') || (phim.episode_total && phim.episode_total !== "1");
       return typeFilter === 'series' ? isSeries : !isSeries;
     });
 
     finalItems = [...finalItems, ...filtered];
     if (typeFilter === '') break; 
-    currentPage++;
+    fetchPage++;
   }
 
   const displayItems = finalItems.slice(0, 15);
 
   return (
-    <main className="min-h-screen bg-black text-white p-6 md:p-12 font-sans overflow-x-hidden">
-      <header className="mb-12 border-b border-zinc-900 pb-8">
-        <Link href="/" className="text-red-600 font-black uppercase text-xs flex items-center gap-2 group">
-          <span className="group-hover:-translate-x-1 transition-transform">←</span> Về trang chủ
-        </Link>
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mt-4">
-          <h1 className="text-3xl font-black text-zinc-100 uppercase italic tracking-tight">
-            Thể loại: <span className="text-red-600">{slug.replace(/-/g, ' ')}</span>
-          </h1>
+    <main className="min-h-screen bg-black text-white p-6 md:p-12 font-sans relative overflow-x-hidden">
+      <Header />
+
+      <header className="mb-12 border-b border-zinc-900 pb-8 mt-10">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="flex items-center gap-3">
+            <div className="w-1.5 h-10 bg-red-600 rounded-full shadow-[0_0_20px_rgba(220,38,38,0.4)]"></div>
+            <h1 className="text-3xl font-black text-zinc-100 uppercase italic tracking-tight">
+              Thể loại: <span className="text-red-600">{slug.replace(/-/g, ' ')}</span>
+            </h1>
+          </div>
           
           <div className="flex bg-zinc-900/50 p-1 rounded-2xl border border-zinc-800 backdrop-blur-md shadow-2xl">
             {[
@@ -74,13 +74,8 @@ export default async function CategoryPage({ params, searchParams }) {
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 md:gap-8">
         {displayItems.length > 0 ? (
            displayItems.map((phim) => (
-            <div key={phim.slug} className="relative group">
+            <div key={phim.slug}>
               <MovieCard movie={phim} />
-              <div className="absolute inset-0 z-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none">
-                <div className="pointer-events-auto flex flex-col items-center gap-3 mt-24">
-                  <FavoriteButton phim={phim} />
-                </div>
-              </div>
             </div>
           ))
         ) : (
@@ -88,7 +83,7 @@ export default async function CategoryPage({ params, searchParams }) {
         )}
       </div>
 
-      {/* THANH PHÂN TRANG BẤT TỬ ❤️ */}
+      {/* 3. THANH PHÂN TRANG BẤT TỬ ĐÃ TRỞ LẠI ❤️ */}
       <div className="flex flex-wrap justify-center items-center mt-20 gap-3 pb-16">
         <Link 
           href={page > 1 ? `/category/${slug}?type=${typeFilter}&page=${page - 1}` : '#'}
@@ -101,27 +96,27 @@ export default async function CategoryPage({ params, searchParams }) {
 
         {(() => {
           let pages = [1];
-          // Nếu ở trang 1, hiện tiếp đến 5
+          // Logic hiển thị cụm số trang thông minh
           if (page <= 3) {
             for (let i = 2; i <= 5; i++) pages.push(i);
           } else {
-            // Nếu ở trang giữa, hiện trang trước và sau
             pages.push(page - 1);
             pages.push(page);
             pages.push(page + 1);
           }
           
-          // Luôn hiện mốc xa hơn để Thu Uyên biết còn nhiều phim
+          // Thêm các mốc trang xa để Thu Uyên chọn nhanh
+          if (!pages.includes(page + 5)) pages.push(page + 5);
           if (!pages.includes(page + 10)) pages.push(page + 10);
           if (totalPagesFromAPI > 100 && !pages.includes(500)) pages.push(500);
 
-          return Array.from(new Set(pages)).sort((a,b) => a - b).map(p => (
+          return Array.from(new Set(pages)).filter(p => p <= totalPagesFromAPI).sort((a,b) => a - b).map(p => (
             <Link 
               key={p} 
               href={`/category/${slug}?type=${typeFilter}&page=${p}`}
               className={`w-12 h-12 flex items-center justify-center rounded-xl font-black transition-all border-2 ${
                 page === p 
-                ? 'border-red-600 text-white bg-transparent shadow-[0_0_20px_rgba(220,38,38,0.3)]' 
+                ? 'border-red-600 text-white bg-red-600/10 shadow-[0_0_20px_rgba(220,38,38,0.3)]' 
                 : 'bg-zinc-900 border-transparent text-zinc-500 hover:text-white hover:bg-zinc-800'
               }`}
             >
@@ -137,6 +132,8 @@ export default async function CategoryPage({ params, searchParams }) {
           Next
         </Link>
       </div>
+
+      <Footer />
     </main>
   );
 }

@@ -1,4 +1,5 @@
 // src/app/layout.js
+import Providers from '@/components/Providers';
 import './globals.css';
 
 export const metadata = {
@@ -18,7 +19,10 @@ export default function RootLayout({ children }) {
       </head>
       <body className="bg-black text-white antialiased"
         suppressHydrationWarning>
-        {children}
+        <Providers>
+          {children}
+        </Providers>
+
       </body>
     </html>
   );
