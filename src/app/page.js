@@ -3,6 +3,7 @@ import Link from 'next/link';
 import SearchBox from '@/components/SearchBox';
 import HistoryPopup from '@/components/HistoryPopup';
 import ContinueWatching from '@/components/ContinueWatching';
+import CategoryMenu from '@/components/CategoryMenu';
 
 export default async function HomePage({ searchParams }) {
   // Lấy số trang từ URL (mặc định là trang 1)
@@ -26,6 +27,8 @@ export default async function HomePage({ searchParams }) {
         
         <SearchBox />
       </header>
+
+      <CategoryMenu />
 
       {/* DANH MỤC: PHIM ĐANG XEM (LAYOUT 4 CỘT NGANG) */}
       <ContinueWatching />
