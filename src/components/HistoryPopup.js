@@ -1,36 +1,53 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { useSession } from "next-auth/react"; // Thêm dòng này
 import Link from 'next/link';
 
 export default function HistoryPopup() {
+  const { data: session, status } = useSession(); // Lấy trạng thái đăng nhập
   const [lastMovie, setLastMovie] = useState(null);
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // 1. Lấy phim mới nhất từ lịch sử 'watchHistory'
-    const history = JSON.parse(localStorage.getItem('watchHistory') || '[]');
-    
-    if (history.length > 0) {
-      const latest = history[0]; // Luôn là bộ phim vừa xem xong gần nhất
-      setLastMovie(latest);
+    // CHỈ CHẠY KHI ĐÃ ĐĂNG NHẬP THÀNH CÔNG
+    if (status === "authenticated" && session?.user?.email) {
+      const fetchLatestHistory = async () => {
+        try {
+          // Lấy phim mới nhất từ Database (Cloud) để đồng bộ xuyên thiết bị
+          const res = await fetch(`/api/history?userEmail=${session.user.email}`);
+          if (res.ok) {
+            const history = await res.json();
+            if (history.length > 0) {
+              setLastMovie(history[0]); // Lấy bộ phim đầu tiên (mới nhất)
 
-      // 2. Chờ 1.5 giây sau khi trang tải xong mới hiện pop-up cho tinh tế
-      const timer = setTimeout(() => {
-        setIsVisible(true);
-      }, 1500);
+              // Chờ 1.5 giây sau khi trang tải xong mới hiện pop-up cho tinh tế
+              const timer = setTimeout(() => {
+                setIsVisible(true);
+              }, 1500);
 
-      return () => clearTimeout(timer);
+              return () => clearTimeout(timer);
+            }
+          }
+        } catch (error) {
+          console.error("Lỗi popup:", error);
+        }
+      };
+
+      fetchLatestHistory();
+    } else {
+      // Nếu đăng xuất thì ẩn ngay lập tức
+      setIsVisible(false);
+      setLastMovie(null);
     }
-  }, []);
+  }, [status, session]);
 
-  // Nếu không có lịch sử hoặc người dùng đã tắt thì không hiện
-  if (!isVisible || !lastMovie) return null;
+  // Nếu không có lịch sử, người dùng đã tắt hoặc CHƯA ĐĂNG NHẬP thì không hiện
+  if (!isVisible || !lastMovie || status !== "authenticated") return null;
 
   return (
     <div className="fixed bottom-6 right-6 z-[100] animate-in fade-in slide-in-from-bottom-10 duration-700">
       <div className="bg-zinc-900/90 backdrop-blur-2xl border border-zinc-800 p-6 rounded-[2.5rem] shadow-[0_25px_60px_rgba(0,0,0,0.8)] w-[320px] relative overflow-hidden group">
         
-        {/* Hiệu ứng viền phát sáng nhẹ cho "xịn" */}
         <div className="absolute inset-0 border border-red-600/10 rounded-[2.5rem] group-hover:border-red-600/30 transition-colors pointer-events-none"></div>
 
         <div className="relative z-10">
