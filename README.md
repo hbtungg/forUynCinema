@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# 🎬 forUyn Cinema - Premium Movie Streaming Experience
+[![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-green?style=for-the-badge&logo=mongodb)](https://www.mongodb.com/)
+[![TailwindCSS](https://img.shields.io/badge/Tailwind-CSS-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
+[![Vercel](https://img.shields.io/badge/Vercel-Deployed-black?style=for-the-badge&logo=vercel)](https://hbtungg.vercel.app)
 
-## Getting Started
+> **Dự án tâm huyết dành tặng Thu Uyên ❤️** – Một nền tảng xem phim trực tuyến hiện đại, mượt mà và cá nhân hóa tối đa.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## ✨ Tính năng tiêu biểu (Key Features)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+* **☁️ Cloud Sync (Đồng bộ đám mây):** Tự động lưu lịch sử "Phim đang xem" và "Danh sách yêu thích" xuyên thiết bị thông qua MongoDB Atlas.
+* **🚀 Hybrid Storage:** Cơ chế lưu trữ kép (LocalStorage + Database) giúp hiển thị dữ liệu tức thì, không độ trễ.
+* **🔐 NextAuth Security:** Hệ thống đăng ký/đăng nhập bảo mật cao, cá nhân hóa trải nghiệm cho từng thành viên.
+* **🔍 Smart Filter:** Tìm kiếm thông minh và bộ lọc phim (Phim bộ/Phim lẻ/Thể loại) với tốc độ xử lý vượt trội.
+* **📱 Ultra Responsive:** Giao diện Dark Mode sang trọng với tone đỏ chủ đạo, tối ưu hoàn hảo cho mọi thiết bị di động.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🛠 Công nghệ chủ đạo (Tech Stack)
 
-## Learn More
+| Thành phần | Công nghệ sử dụng |
+| :--- | :--- |
+| **Framework** | Next.js 15 (App Router) |
+| **Authentication** | NextAuth.js (Credentials Provider) |
+| **Database** | MongoDB Atlas |
+| **Styling** | Tailwind CSS |
+| **Deployment** | Vercel |
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🚀 Hướng dẫn cài đặt nhanh (Installation)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. **Clone dự án:**
+   ```bash
+   git clone [https://github.com/hbtungg/ck-thu-uyen-cinema.git](https://github.com/hbtungg/ck-thu-uyen-cinema.git)
+   cd ck-thu-uyen-cinema
+2. **Cài đặt thư viện:**
+   ```bash
+   npm install
+3. **Cấu hình biến môi trường (.env.local):**
+    ```bash
+    MONGODB_URI=your_mongodb_connection_string
+    NEXTAUTH_SECRET=your_secret_key
+    NEXTAUTH_URL=http://localhost:3000
+4. **Khởi chạy:**
+    ```bash
+    npm run dev
 
-## Deploy on Vercel
+## 📂 Cấu trúc thư mục chính
+* **src/app/api:** Hệ thống API xử lý Logic (Auth, History, Favorites).
+* **src/components:** Các UI Component tái sử dụng (MovieCard, Header, Footer).
+* **src/lib:** Thư viện kết nối Database và định nghĩa các hàm gọi nguồn phim.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Crafted with ❤️ by Huỳnh Bá Thanh Tùng (THTung) Dành riêng cho Thu Uyên – Chúc em có những giờ phút xem phim tuyệt vời nhất! 🍿🎥
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Last updated: 2026-04-07
