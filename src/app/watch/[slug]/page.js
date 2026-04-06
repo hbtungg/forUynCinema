@@ -69,7 +69,7 @@ export default async function WatchPage({ params, searchParams }) {
             </h3>
             <div 
                 className="text-zinc-400 leading-relaxed text-sm space-y-4 font-medium" 
-                dangerouslySetInnerHTML={{ __html: movie?.content || "Dữ liệu đang được cập nhật cho anh yêu..." }}
+                dangerouslySetInnerHTML={{ __html: movie?.content || "Dữ liệu đang được cập nhật cho vợ yêu..." }}
             ></div>
           </div>
         </div>
