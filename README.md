@@ -53,6 +53,6 @@
 * **src/components:** Các UI Component tái sử dụng (MovieCard, Header, Footer).
 * **src/lib:** Thư viện kết nối Database và định nghĩa các hàm gọi nguồn phim.
 
-## Crafted with ❤️ by Huỳnh Bá Thanh Tùng (THTung) Dành riêng cho Thu Uyên – Chúc em có những giờ phút xem phim tuyệt vời nhất! 🍿🎥
+> Crafted with ❤️ by hb.tungg! 🍿🎥
 
 Last updated: 2026-04-07

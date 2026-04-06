@@ -24,7 +24,7 @@ export default function LoginPage() {
       });
 
       if (result.error) {
-        setError("Email hoặc mật khẩu không đúng anh yêu ơi! ❌");
+        setError("Email hoặc mật khẩu không đúng yêu ơi! ❌");
         setLoading(false);
       } else {
         router.push("/");
