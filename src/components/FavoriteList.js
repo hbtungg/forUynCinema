@@ -10,10 +10,22 @@ export default function FavoriteList() {
 
   const loadFavorites = async () => {
     if (status === "authenticated" && session?.user?.email) {
-      const res = await fetch(`/api/favorites?userEmail=${session.user.email}`);
-      if (res.ok) {
-        const data = await res.json();
-        setFavorites(data);
+      const storageKey = `favs_${session.user.email}`;
+      
+      // BƯỚC 1: Hiện ngay từ máy (Cực nhanh)
+      const localData = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      if (localData.length > 0) setFavorites(localData);
+
+      try {
+        // BƯỚC 2: Cập nhật từ Database (Đồng bộ xuyên thiết bị)
+        const res = await fetch(`/api/favorites?userEmail=${session.user.email}`);
+        if (res.ok) {
+          const cloudData = await res.json();
+          setFavorites(cloudData);
+          localStorage.setItem(storageKey, JSON.stringify(cloudData));
+        }
+      } catch (error) {
+        console.error("Lỗi fetch:", error);
       }
     }
   };
@@ -27,7 +39,7 @@ export default function FavoriteList() {
   if (status !== "authenticated" || favorites.length === 0) return null;
 
   return (
-    <section className="mt-16 group/fav">
+    <section className="mt-16 group/fav overflow-x-hidden">
       <div className="flex items-center justify-between mb-10 pr-4">
         <h2 className="text-2xl font-black text-zinc-100 uppercase italic">Phim Em Đã Thích ❤️</h2>
       </div>

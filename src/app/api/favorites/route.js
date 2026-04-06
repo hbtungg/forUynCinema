@@ -1,7 +1,6 @@
 import clientPromise from "@/lib/mongodb";
 import { NextResponse } from "next/server";
 
-// LẤY DANH SÁCH TỪ MÂY
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
@@ -17,11 +16,10 @@ export async function GET(req) {
 
     return NextResponse.json(favorites);
   } catch (e) {
-    return NextResponse.json({ error: "Lỗi lấy danh sách" }, { status: 500 });
+    return NextResponse.json([]);
   }
 }
 
-// LƯU PHIM VÀO MÂY
 export async function POST(req) {
   try {
     const client = await clientPromise;
@@ -33,14 +31,12 @@ export async function POST(req) {
       { $set: { ...movie, userEmail, updatedAt: new Date() } },
       { upsert: true }
     );
-
-    return NextResponse.json({ message: "Đã lưu vào mây! ❤️" });
+    return NextResponse.json({ message: "Đã lưu vào mây ❤️" });
   } catch (e) {
-    return NextResponse.json({ error: "Lỗi lưu phim" }, { status: 500 });
+    return NextResponse.json({ error: "Lỗi" }, { status: 500 });
   }
 }
 
-// XÓA PHIM KHỎI MÂY
 export async function DELETE(req) {
   try {
     const client = await clientPromise;
@@ -48,9 +44,8 @@ export async function DELETE(req) {
     const { slug, userEmail } = await req.json();
 
     await db.collection("favorites").deleteOne({ userEmail, slug });
-
     return NextResponse.json({ message: "Đã xóa khỏi mây" });
   } catch (e) {
-    return NextResponse.json({ error: "Lỗi xóa phim" }, { status: 500 });
+    return NextResponse.json({ error: "Lỗi" }, { status: 500 });
   }
 }
