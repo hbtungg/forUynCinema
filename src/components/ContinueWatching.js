@@ -9,7 +9,7 @@ export default function ContinueWatching() {
   const scrollRef = useRef(null);
 
   const loadHistory = async () => {
-    // Nếu đã đăng nhập thì lấy từ Database, nếu chưa thì lấy từ LocalStorage
+    // CHỈ LOAD KHI ĐÃ ĐĂNG NHẬP
     if (status === "authenticated" && session?.user?.email) {
       try {
         const res = await fetch(`/api/history?userEmail=${session.user.email}`);
@@ -21,9 +21,8 @@ export default function ContinueWatching() {
         console.error("Lỗi lấy lịch sử từ mây:", error);
       }
     } else {
-      // Khách vãng lai vẫn dùng local
-      const saved = JSON.parse(localStorage.getItem('watchHistory') || '[]');
-      setHistory(saved);
+      // ĐĂNG XUẤT THÌ XÓA TRẮNG STATE LUÔN
+      setHistory([]);
     }
   };
 
@@ -37,7 +36,6 @@ export default function ContinueWatching() {
     };
   }, [status, session]);
 
-  // Hàm xóa này cũng cần gọi API nếu anh muốn xóa vĩnh viễn trên mây
   const removeHistory = (slug) => {
     const saved = JSON.parse(localStorage.getItem('watchHistory') || '[]');
     const updated = saved.filter(item => item.slug !== slug);
@@ -46,7 +44,8 @@ export default function ContinueWatching() {
     window.dispatchEvent(new Event('historyUpdated'));
   };
 
-  if (history.length === 0) return null;
+  // ĐIỀU KIỆN QUYẾT ĐỊNH: PHẢI CÓ SESSION + CÓ DATA MỚI HIỆN
+  if (status !== "authenticated" || history.length === 0) return null;
 
   return (
     <section className="mt-16 group/section">
@@ -70,7 +69,7 @@ export default function ContinueWatching() {
 
               <Link href={`/watch/${item.slug}`} className="block relative aspect-video rounded-[1.5rem] overflow-hidden border border-zinc-800 shadow-2xl bg-zinc-900">
                 <img src={item.thumb_url} alt={item.name} className="w-full h-full object-cover opacity-60" />
-                <div className="absolute inset-x-0 bottom-0 p-5 bg-gradient-to-t from-black to-transparent">
+                <div className="absolute inset-x-0 bottom-0 p-5 bg-gradient-to-t from-black via-black/60 to-transparent">
                   <h3 className="text-white font-black text-[11px] uppercase truncate">{item.name}</h3>
                   <span className="text-yellow-500 text-[9px] font-black uppercase">● {item.episode}</span>
                   <div className="mt-3 w-full h-1 bg-zinc-800 rounded-full overflow-hidden">

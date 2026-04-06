@@ -65,21 +65,21 @@ export default function LoginPage() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
             <label className="block text-[10px] font-black text-zinc-600 uppercase ml-1 tracking-[0.2em]">
-              Email của anh yêu
+              Email
             </label>
             <input 
               type="email" 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full bg-black/60 border border-zinc-800 rounded-2xl px-6 py-4 text-sm text-white focus:outline-none focus:border-red-600/50 focus:ring-1 focus:ring-red-600/20 transition-all placeholder:text-zinc-800 shadow-inner"
-              placeholder="anh_yeu_thu_uyen@gmail.com"
+              placeholder="xxx@gmail.com"
               required
             />
           </div>
 
           <div className="space-y-2">
             <label className="block text-[10px] font-black text-zinc-600 uppercase ml-1 tracking-[0.2em]">
-              Mật khẩu bí mật
+              Password
             </label>
             <input 
               type="password" 

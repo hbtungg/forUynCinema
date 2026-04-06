@@ -43,7 +43,7 @@ export default function RegisterPage() {
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <input 
-            type="text" placeholder="Tên của anh/em" required
+            type="text" placeholder="Your name" required
             className="w-full bg-black/60 border border-zinc-800 rounded-2xl px-6 py-4 text-white focus:border-red-600 outline-none"
             onChange={(e) => setFormData({...formData, name: e.target.value})}
           />
@@ -53,12 +53,12 @@ export default function RegisterPage() {
             onChange={(e) => setFormData({...formData, email: e.target.value})}
           />
           <input 
-            type="password" placeholder="Mật khẩu bí mật" required
+            type="password" placeholder="Password" required
             className="w-full bg-black/60 border border-zinc-800 rounded-2xl px-6 py-4 text-white focus:border-red-600 outline-none"
             onChange={(e) => setFormData({...formData, password: e.target.value})}
           />
           <button className="w-full bg-red-600 text-white font-black py-4 rounded-2xl shadow-lg active:scale-95 transition-all">
-            {loading ? "Đang tạo tài khoản..." : "Đăng ký thành viên ❤️"}
+            {loading ? "Đang tạo tài khoản..." : "Sign Up ❤️"}
           </button>
         </form>
         
