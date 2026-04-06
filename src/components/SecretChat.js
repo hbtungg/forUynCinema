@@ -8,7 +8,8 @@ export default function SecretChat() {
   const [error, setError] = useState(false);
   const router = useRouter();
 
-  const SECRET_KEYWORD = "ghequa"; // Anh có thể đổi thành mật mã riêng của 2 người
+  // Mật mã "Ghê quá" của anh đây ạ
+  const SECRET_KEYWORD = "ghequa"; 
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -24,9 +25,9 @@ export default function SecretChat() {
 
   return (
     <div className="fixed bottom-6 left-6 z-[100] font-sans">
-      {/* 1. Chat Box */}
+      {/* 1. Chat Box - Đã chỉnh để bung sang phải (left-0) */}
       {isOpen && (
-        <div className="absolute bottom-16 right-0 w-72 bg-zinc-950 border border-zinc-800 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,1)] overflow-hidden transition-all duration-500 animate-in fade-in slide-in-from-bottom-4">
+        <div className="absolute bottom-16 left-0 w-72 bg-zinc-950 border border-zinc-800 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,1)] overflow-hidden transition-all duration-500 animate-in fade-in slide-in-from-bottom-4 origin-bottom-left">
           <div className="p-5 border-b border-zinc-900 flex items-center gap-3 bg-zinc-900/20">
             <div className="w-2 h-2 bg-red-600 rounded-full animate-pulse"></div>
             <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Private Message</span>
@@ -50,7 +51,7 @@ export default function SecretChat() {
         </div>
       )}
 
-      {/* 2. Toggle Button (Biểu tượng tin nhắn) */}
+      {/* 2. Toggle Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-500 shadow-2xl border ${
