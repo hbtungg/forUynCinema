@@ -32,3 +32,26 @@ export async function DELETE(req) {
     return NextResponse.json({ error: "Lỗi xóa phim" }, { status: 500 });
   }
 }
+
+// Thêm hàm này vào cuối file route.js hiện tại của anh
+export async function GET(req) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const userEmail = searchParams.get('userEmail');
+
+    if (!userEmail) return NextResponse.json([], { status: 200 });
+
+    const client = await clientPromise;
+    const db = client.db("ForUynDB");
+    
+    // Tìm tất cả phim yêu thích của đúng email này
+    const favorites = await db.collection("favorites")
+      .find({ userEmail: userEmail })
+      .sort({ updatedAt: -1 })
+      .toArray();
+
+    return NextResponse.json(favorites);
+  } catch (e) {
+    return NextResponse.json({ error: "Lỗi lấy danh sách" }, { status: 500 });
+  }
+}
