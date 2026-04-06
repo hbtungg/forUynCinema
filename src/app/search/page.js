@@ -37,7 +37,7 @@ export default async function SearchPage({ searchParams }) {
         </div>
       ) : (
         <div className="text-center py-20 bg-zinc-900/20 rounded-3xl border border-dashed border-zinc-800">
-          <p className="text-zinc-500 font-medium italic text-lg">Không tìm thấy phim này rồi anh yêu ơi! Anh thử gõ tên khác xem sao nha.</p>
+          <p className="text-zinc-500 font-medium italic text-lg">Không tìm thấy phim này rồi vợ yêu ơi! Vợ thử gõ tên khác xem sao nha.</p>
         </div>
       )}
     </main>

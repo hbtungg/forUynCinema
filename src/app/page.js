@@ -20,7 +20,7 @@ export default async function HomePage({ searchParams }) {
             Ck ThuUyn 🎬
           </h1>
           <p className="text-zinc-500 text-sm mt-2 italic">
-            Chào anh yêu! Chúc anh và Thu Uyên xem phim thật vui nhé.
+            Chào vợ iu! Chúc vợ ThuUyn xem phim thật vui nhé.
           </p>
         </div>
         
