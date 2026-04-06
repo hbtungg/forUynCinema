@@ -1,6 +1,7 @@
+'use client';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
-// Bộ dữ liệu dự phòng ĐẦY ĐỦ (phòng trường hợp API lỗi)
 const FALLBACK_DATA = {
   categories: [
     { name: 'Hành Động', slug: 'hanh-dong' }, { name: 'Phiêu Lưu', slug: 'phieu-luu' }, { name: 'Hoạt Hình', slug: 'hoat-hinh' },
@@ -9,78 +10,117 @@ const FALLBACK_DATA = {
     { name: 'Lịch Sử', slug: 'lich-su' }, { name: 'Kinh Dị', slug: 'kinh-di' }, { name: 'Nhạc', slug: 'nhac' },
     { name: 'Bí Ẩn', slug: 'bi-an' }, { name: 'Lãng Mạn', slug: 'lang-man' }, { name: 'Khoa Học Viễn Tưởng', slug: 'khoa-hoc-vien-tuong' },
     { name: 'Gây Cấn', slug: 'gay-can' }, { name: 'Chiến Tranh', slug: 'chien-tranh' }, { name: 'Tâm Lý', slug: 'tam-ly' },
-    { name: 'Tình Cảm', slug: 'tinh-cam' }, { name: 'Cổ Trang', slug: 'co-trang' }, { name: 'Miền Tây', slug: 'mien-tay' },
-    { name: 'Phim 18+', slug: 'phim-18' }
+    { name: 'Tình Cảm', slug: 'tinh-cam' }, { name: 'Cổ Trang', slug: 'co-trang' }
   ],
   countries: [
     { name: 'Âu Mỹ', slug: 'au-my' }, { name: 'Anh', slug: 'anh' }, { name: 'Trung Quốc', slug: 'trung-quoc' },
-    { name: 'Indonesia', slug: 'indonesia' }, { name: 'Việt Nam', slug: 'viet-nam' }, { name: 'Pháp', slug: 'phap' },
-    { name: 'Hồng Kông', slug: 'hong-kong' }, { name: 'Hàn Quốc', slug: 'han-quoc' }, { name: 'Nhật Bản', slug: 'nhat-ban' },
-    { name: 'Thái Lan', slug: 'thai-lan' }, { name: 'Đài Loan', slug: 'dai-loan' }, { name: 'Nga', slug: 'nga' },
-    { name: 'Hà Lan', slug: 'ha-lan' }, { name: 'Philippines', slug: 'philippines' }, { name: 'Ấn Độ', slug: 'an-do' },
-    { name: 'Quốc gia khác', slug: 'quoc-gia-khac' }
+    { name: 'Việt Nam', slug: 'viet-nam' }, { name: 'Pháp', slug: 'phap' }, { name: 'Hồng Kông', slug: 'hong-kong' },
+    { name: 'Hàn Quốc', slug: 'han-quoc' }, { name: 'Nhật Bản', slug: 'nhat-ban' }, { name: 'Thái Lan', slug: 'thai-lan' }
   ]
 };
 
-async function getMenuData() {
-  try {
-    const [catRes, countRes] = await Promise.all([
-      fetch('https://phim.nguonc.com/api/the-loai', { next: { revalidate: 86400 } }),
-      fetch('https://phim.nguonc.com/api/quoc-gia', { next: { revalidate: 86400 } })
-    ]);
+export default function CategoryMenu() {
+  const [data, setData] = useState(FALLBACK_DATA);
+  const [openMenu, setOpenMenu] = useState(null);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
 
-    // Nếu API trả về lỗi HTML (lỗi <), ném lỗi để nhảy vào catch
-    if (!catRes.ok || !countRes.ok) throw new Error("API bận");
+  useEffect(() => {
+    // 1. Kiểm tra xem có phải thiết bị cảm ứng không
+    setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0);
 
-    const cats = await catRes.json();
-    const counts = await countRes.json();
-    
-    return {
-      categories: cats.items?.length > 0 ? cats.items : FALLBACK_DATA.categories,
-      countries: counts.items?.length > 0 ? counts.items : FALLBACK_DATA.countries
-    };
-  } catch (error) {
-    console.log("Sử dụng dữ liệu dự phòng đầy đủ cho anh yêu...");
-    return FALLBACK_DATA;
-  }
-}
+    // 2. Lấy dữ liệu API
+    async function fetchData() {
+      try {
+        const [catRes, countRes] = await Promise.all([
+          fetch('https://phim.nguonc.com/api/the-loai'),
+          fetch('https://phim.nguonc.com/api/quoc-gia')
+        ]);
+        if (catRes.ok && countRes.ok) {
+          const cats = await catRes.json();
+          const counts = await countRes.json();
+          setData({
+            categories: cats.items?.length > 0 ? cats.items : FALLBACK_DATA.categories,
+            countries: counts.items?.length > 0 ? counts.items : FALLBACK_DATA.countries
+          });
+        }
+      } catch (e) { console.log("Dùng fallback data cho Thu Uyên"); }
+    }
+    fetchData();
 
-export default async function CategoryMenu() {
-  const { categories, countries } = await getMenuData();
+    // 3. Đóng menu khi click ra ngoài
+    const close = () => setOpenMenu(null);
+    window.addEventListener('click', close);
+    return () => window.removeEventListener('click', close);
+  }, []);
+
+  // Hàm xử lý khi rà chuột (Chỉ dùng cho PC)
+  const handleMouseEnter = (type) => {
+    if (!isTouchDevice) setOpenMenu(type);
+  };
+
+  const handleMouseLeave = () => {
+    if (!isTouchDevice) setOpenMenu(null);
+  };
+
+  // Hàm xử lý khi chạm/click (Dùng cho cả 2 nhưng ưu tiên cho Mobile)
+  const handleClick = (e, type) => {
+    if (isTouchDevice) {
+      e.stopPropagation();
+      setOpenMenu(openMenu === type ? null : type);
+    }
+  };
 
   return (
-    <div className="flex flex-wrap gap-4 mb-10 font-sans relative">
+    <div className="flex flex-wrap gap-3 mb-10 font-sans relative">
       
       {/* DROPDOWN THỂ LOẠI */}
-      <div className="relative group">
-        <button className="px-6 py-2 bg-red-600 text-white text-[11px] font-black uppercase rounded-xl shadow-[0_0_20px_rgba(220,38,38,0.3)] hover:bg-red-500 transition-all flex items-center gap-2">
-          Thể Loại <span className="text-[8px] opacity-60">▼</span>
+      <div 
+        className="relative"
+        onMouseEnter={() => handleMouseEnter('cat')}
+        onMouseLeave={handleMouseLeave}
+      >
+        <button 
+          onClick={(e) => handleClick(e, 'cat')}
+          className="px-5 py-2.5 bg-red-600 text-white text-[11px] font-black uppercase rounded-xl shadow-lg flex items-center gap-2 active:scale-95 transition-all"
+        >
+          Thể Loại <span>{openMenu === 'cat' ? '▲' : '▼'}</span>
         </button>
         
-        <div className="absolute top-full left-0 mt-2 w-[480px] bg-zinc-900/98 backdrop-blur-2xl border border-zinc-800 p-5 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[999] grid grid-cols-3 gap-1">
-          {categories.map((cat) => (
-            <Link key={cat.slug} href={`/category/${cat.slug}`}
-              className="px-3 py-2 text-[10px] font-bold text-zinc-400 hover:text-white hover:bg-red-600 rounded-lg transition-all uppercase truncate">
-              {cat.name}
-            </Link>
-          ))}
-        </div>
+        {openMenu === 'cat' && (
+          <div className="absolute top-full left-0 mt-2 w-[90vw] md:w-[480px] bg-zinc-900 border border-zinc-800 p-4 rounded-2xl shadow-2xl z-[999] grid grid-cols-2 md:grid-cols-3 gap-1">
+            {data.categories.map((cat) => (
+              <Link key={cat.slug} href={`/category/${cat.slug}`} onClick={() => setOpenMenu(null)}
+                className="px-3 py-2 text-[10px] font-bold text-zinc-400 hover:text-white hover:bg-red-600 rounded-lg transition-all uppercase truncate">
+                {cat.name}
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* DROPDOWN QUỐC GIA */}
-      <div className="relative group">
-        <button className="px-6 py-2 bg-zinc-800 text-zinc-300 text-[11px] font-black uppercase rounded-xl hover:bg-zinc-700 transition-all border border-zinc-700/50 flex items-center gap-2">
-          Quốc Gia <span className="text-[8px] opacity-60">▼</span>
+      <div 
+        className="relative"
+        onMouseEnter={() => handleMouseEnter('count')}
+        onMouseLeave={handleMouseLeave}
+      >
+        <button 
+          onClick={(e) => handleClick(e, 'count')}
+          className="px-5 py-2.5 bg-zinc-800 text-zinc-300 text-[11px] font-black uppercase rounded-xl border border-zinc-700 flex items-center gap-2 active:scale-95 transition-all"
+        >
+          Quốc Gia <span>{openMenu === 'count' ? '▲' : '▼'}</span>
         </button>
         
-        <div className="absolute top-full left-0 mt-2 w-[350px] bg-zinc-900/98 backdrop-blur-2xl border border-zinc-800 p-5 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[999] grid grid-cols-2 gap-1">
-          {countries.map((c) => (
-            <Link key={c.slug} href={`/country/${c.slug}`}
-              className="px-3 py-2 text-[10px] font-bold text-zinc-400 hover:text-white hover:bg-zinc-600 rounded-lg transition-all uppercase truncate">
-              {c.name}
-            </Link>
-          ))}
-        </div>
+        {openMenu === 'count' && (
+          <div className="absolute top-full left-0 mt-2 w-[90vw] md:w-[320px] bg-zinc-900 border border-zinc-800 p-4 rounded-2xl shadow-2xl z-[999] grid grid-cols-2 gap-1">
+            {data.countries.map((c) => (
+              <Link key={c.slug} href={`/country/${c.slug}`} onClick={() => setOpenMenu(null)}
+                className="px-3 py-2 text-[10px] font-bold text-zinc-400 hover:text-white hover:bg-zinc-600 rounded-lg transition-all uppercase truncate">
+                {c.name}
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
 
     </div>
