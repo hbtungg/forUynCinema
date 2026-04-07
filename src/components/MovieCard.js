@@ -5,11 +5,24 @@ import FavoriteButton from './FavoriteButton';
 export default function MovieCard({ movie }) {
   const finalHref = `/watch/${movie.slug}`;
 
+  // HÀM LẤY NHÃN TẬP PHIM - ĐÃ FIX LỖI LUÔN HIỆN MOVIE
   const getEpisodeLabel = () => {
     const current = movie.episode_current || movie.sub_doc || "";
+    const total = movie.episode_total || movie.total_episodes || movie.episodes_count || 0;
+
+    // 1. Kiểm tra nếu trong chuỗi episode_current có chữ "tập"
     if (current && current.toLowerCase().includes("tập")) {
-      return `Series: ${current.replace(/[^0-9]/g, '') || '??'} EP`;
+      const epNumber = current.replace(/[^0-9]/g, '');
+      return `Series: ${epNumber || '??'} EP`;
     }
+
+    // 2. Nếu không có chữ "tập", kiểm tra tổng số tập (total)
+    // Nếu total > 1 thì chắc chắn là phim bộ
+    if (parseInt(total) > 1) {
+      return `Series: ${total} EP`;
+    }
+
+    // 3. Cuối cùng mới trả về Movie
     return "Movie";
   };
 
@@ -28,15 +41,9 @@ export default function MovieCard({ movie }) {
           <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/90 to-transparent z-20"></div>
         </Link>
 
-        {/* NÚT TRÁI TIM TRÒN - ÉP HIỆN TRÊN MOBILE BẰNG TAILWIND */}
-        <div className="absolute bottom-4 right-4 z-40 
-          /* Mặc định hiện (Mobile/Tablet) | Trên Desktop (md:) chỉ hiện khi hover */
-          flex opacity-100 md:opacity-0 md:group-hover:opacity-100 
-          scale-100 md:scale-90 md:group-hover:scale-100 
-          transition-all duration-300">
-          
+        {/* NÚT TRÁI TIM TRÒN */}
+        <div className="absolute bottom-4 right-4 z-40 flex opacity-100 md:opacity-0 md:group-hover:opacity-100 scale-100 md:scale-90 md:group-hover:scale-100 transition-all duration-300">
           <div className="flex items-center justify-center w-10 h-10 bg-black/60 backdrop-blur-xl border border-white/10 rounded-full shadow-lg active:scale-75 overflow-hidden">
-            {/* Dùng CSS Selector trực tiếp trong className để ẩn chữ bên trong FavoriteButton */}
             <div className="[&_span]:hidden [&_p]:hidden [&_label]:hidden [&_button]:bg-transparent [&_button]:border-none [&_button]:p-0 [&_svg]:w-5 [&_svg]:h-5 [&_svg]:m-0 flex items-center justify-center">
               <FavoriteButton phim={movie} />
             </div>
