@@ -69,7 +69,15 @@ export default function Header() {
           </button>
           
           {isMenuOpen && (
-            <div className="absolute top-full right-0 mt-4 w-56 bg-zinc-950 border border-zinc-800 rounded-[2.5rem] shadow-[0_30px_70px_rgba(0,0,0,1)] p-6 z-[150] animate-in fade-in slide-in-from-top-4 origin-top-right">
+            /* 1. Tăng w-56 lên w-72 để không gian thở thoải mái hơn
+               2. Dùng bg-zinc-950/80 + backdrop-blur để tạo hiệu ứng kính
+               3. Giảm p-6 xuống p-4 để nhường chỗ cho UserMenu tự hiển thị
+            */
+            <div className="absolute top-[calc(100%+12px)] right-0 w-72 bg-zinc-950/80 backdrop-blur-2xl border border-zinc-800/50 rounded-[2.5rem] shadow-[0_20px_80px_rgba(0,0,0,0.8)] p-4 z-[150] animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-300 origin-top-right">
+              
+              {/* Một cái "đuôi" nhỏ để nối với nút icon cho tinh tế */}
+              <div className="absolute -top-1.5 right-6 w-3 h-3 bg-zinc-900 border-t border-l border-zinc-800/50 rotate-45 md:block hidden"></div>
+              
               <UserMenu />
             </div>
           )}
