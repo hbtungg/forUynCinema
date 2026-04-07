@@ -1,132 +1,119 @@
 // --- FILE: src/lib/movies.js ---
 const BASE_URL = "https://phim.nguonc.com/api";
 
-// 1. Lấy phim mới cập nhật (Trang chủ)
-export async function getMovies(page = 1) {
-  const res = await fetch(`${BASE_URL}/films/phim-moi-cap-nhat?page=${page}`, { 
-    next: { revalidate: 3600 } 
-  });
-  return res.json();
-}
-
-// 2. Lấy chi tiết một bộ phim
-export async function getMovieDetail(slug) {
-  const res = await fetch(`${BASE_URL}/film/${slug}`);
-  return res.json();
-}
-
-// 3. Tìm kiếm phim
-export async function searchMovies(keyword, page = 1) {
-  const res = await fetch(`${BASE_URL}/films/search?keyword=${encodeURIComponent(keyword)}&page=${page}`);
-  return res.json();
-}
-
-// 4. Lấy phim theo THỂ LOẠI (Đã tích hợp lọc Phim bộ/Phim lẻ)
-export async function getMoviesByCategory(slug, page = 1, type = '') {
-  const url = `${BASE_URL}/films/the-loai/${slug}?page=${page}${type ? `&type=${type}` : ''}`;
-  const res = await fetch(url, { next: { revalidate: 3600 } });
-  return res.json();
-}
-
-// 5. Lấy phim theo QUỐC GIA (Đã tích hợp lọc Phim bộ/Phim lẻ)
-export async function getMoviesByCountry(slug, page = 1, type = '') {
-  const url = `${BASE_URL}/films/quoc-gia/${slug}?page=${page}${type ? `&type=${type}` : ''}`;
-  const res = await fetch(url, { next: { revalidate: 3600 } });
-  return res.json();
-}
-
-// 6. Lấy phim theo NĂM PHÁT HÀNH
-export async function getMoviesByYear(slug, page = 1) {
-  const res = await fetch(`${BASE_URL}/films/nam-phat-hanh/${slug}?page=${page}`, { next: { revalidate: 3600 } });
-  return res.json();
-}
-
-// Lấy danh sách tất cả Thể loại từ API
-export async function getCategories() {
-  const res = await fetch('https://phim.nguonc.com/api/the-loai', { next: { revalidate: 86400 } });
-  const data = await res.json();
-  return data.items || [];
-}
-
-// Lấy danh sách tất cả Quốc gia từ API
-export async function getCountries() {
-  const res = await fetch('https://phim.nguonc.com/api/quoc-gia', { next: { revalidate: 86400 } });
-  const data = await res.json();
-  return data.items || [];
-}
-
-// --- BỔ SUNG HỆ THỐNG MỚI (LUST API) ---
-const LUST_BASE_URL = "https://lust.scathach.id/pornhub";
-
-export async function getPornhubDetail(id) {
+/**
+ * HÀM HELPER: Kiểm tra phản hồi có phải JSON sạch không
+ */
+async function safeFetch(url, options = {}) {
   try {
-    const res = await fetch(`${LUST_BASE_URL}/get?id=${id}`, {
-      // Vì nội dung này có thể thay đổi hoặc cần tính riêng tư, 
-      // anh có thể chỉnh revalidate thấp xuống hoặc dùng no-store
-      next: { revalidate: 1800 } 
+    const res = await fetch(url, {
+      ...options,
+      headers: { 'Accept': 'application/json', ...options.headers }
     });
-    
+
     if (!res.ok) return null;
-    return res.json();
+
+    const contentType = res.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) return null;
+
+    return await res.json();
   } catch (error) {
-    console.error("Lỗi khi fetch Lust API:", error);
+    console.error(`Fetch Error tại ${url}:`, error);
     return null;
   }
 }
 
-// src/lib/movies.js
+// 1. Lấy phim mới cập nhật (Trang chủ)
+export async function getMovies(page = 1) {
+  const data = await safeFetch(`${BASE_URL}/films/phim-moi-cap-nhat?page=${page}`, { next: { revalidate: 3600 } });
+  return data || { items: [], paginate: { total_pages: 1 } };
+}
+
+// 2. Lấy chi tiết một bộ phim
+export async function getMovieDetail(slug) {
+  return await safeFetch(`${BASE_URL}/film/${slug}`);
+}
+
+// 3. Tìm kiếm phim
+export async function searchMovies(keyword, page = 1) {
+  const encoded = encodeURIComponent(keyword);
+  const data = await safeFetch(`${BASE_URL}/films/search?keyword=${encoded}&page=${page}`);
+  return data || { items: [], paginate: { total_pages: 1 } };
+}
+
+// 4. Lấy phim theo THỂ LOẠI
+export async function getMoviesByCategory(slug, page = 1, type = '') {
+  const url = `${BASE_URL}/films/the-loai/${slug}?page=${page}${type ? `&type=${type}` : ''}`;
+  const data = await safeFetch(url, { next: { revalidate: 3600 } });
+  return data || { items: [], paginate: { total_pages: 1 } };
+}
+
+// 5. Lấy phim theo QUỐC GIA
+export async function getMoviesByCountry(slug, page = 1, type = '') {
+  const url = `${BASE_URL}/films/quoc-gia/${slug}?page=${page}${type ? `&type=${type}` : ''}`;
+  const data = await safeFetch(url, { next: { revalidate: 3600 } });
+  return data || { items: [], paginate: { total_pages: 1 } };
+}
+
+// 6. Lấy phim theo NĂM PHÁT HÀNH
+export async function getMoviesByYear(slug, page = 1) {
+  const data = await safeFetch(`${BASE_URL}/films/nam-phat-hanh/${slug}?page=${page}`, { next: { revalidate: 3600 } });
+  return data || { items: [], paginate: { total_pages: 1 } };
+}
+
+// Lấy danh mục & Quốc gia
+export async function getCategories() {
+  const data = await safeFetch(`${BASE_URL}/the-loai`, { next: { revalidate: 86400 } });
+  return data?.items || [];
+}
+
+export async function getCountries() {
+  const data = await safeFetch(`${BASE_URL}/quoc-gia`, { next: { revalidate: 86400 } });
+  return data?.items || [];
+}
+
+// --- HỆ THỐNG EPO (PRIVATE - SỬA LỖI ẢNH VÀ VIEWS) ---
 const EPO_BASE_URL = "https://www.eporner.com/api/v2/video";
 
-export async function getEpoVideos(page = 1, query = 'all') {
+export async function getEpoVideos(page = 1, query = 'all', order = 'latest') {
   try {
     const params = new URLSearchParams({
       query: query,
       per_page: '30',
       page: page.toString(),
-      thumbsize: 'big', // Lấy size lớn theo docs
-      order: 'latest',
+      thumbsize: 'big',
+      order: order,
       format: 'json'
     });
 
-    const res = await fetch(`${EPO_BASE_URL}/search/?${params.toString()}`, {
-      next: { revalidate: 3600 }
-    });
-
-    if (!res.ok) return { videos: [] };
+    const res = await fetch(`${EPO_BASE_URL}/search/?${params.toString()}`, { next: { revalidate: 3600 } });
+    if (!res.ok) return { videos: [], total_pages: 1 };
 
     const data = await res.json();
     
-    // Ánh xạ dữ liệu để tương thích với MovieCard của anh
+    // FORMAT LẠI DỮ LIỆU CHUẨN ĐỂ MOVIECARD KHÔNG BỊ LỖI
     const formattedVideos = (data.videos || []).map(v => ({
       id: v.id,
       title: v.title,
-      // Lấy đúng đường dẫn ảnh từ object default_thumb của EPO
-      thumb: v.default_thumb?.src || '', 
+      // FIX: Trỏ thẳng vào .src để MovieCard lấy được URL ảnh đầu tiên
+      thumb: v.default_thumb?.src || (Array.isArray(v.thumbs) ? v.thumbs[0]?.src : ''), 
       duration: v.length_min,
-      added: v.added
+      added: v.added, // Đây là năm
+      views: v.views, // Đây là lượt xem (con số lớn)
+      rate: v.rate
     }));
 
-    return { videos: formattedVideos };
+    return { 
+      videos: formattedVideos, 
+      total_pages: data.total_pages || 1 
+    };
   } catch (error) {
     console.error("EPO API Error:", error);
-    return { videos: [] };
+    return { videos: [], total_pages: 1 };
   }
 }
 
 export async function getEpoVideoDetail(id) {
-  try {
-    const res = await fetch(`https://www.eporner.com/api/v2/video/id/?id=${id}&format=json`, {
-      next: { revalidate: 3600 }
-    });
-
-    if (!res.ok) return null;
-    const data = await res.json();
-    
-    // EPO trả về object video trực tiếp hoặc mảng, ta lấy cái đầu tiên
-    const video = Array.isArray(data) ? data[0] : data;
-    return video;
-  } catch (error) {
-    console.error("Lỗi lấy chi tiết EPO:", error);
-    return null;
-  }
+  const data = await safeFetch(`https://www.eporner.com/api/v2/video/id/?id=${id}&format=json`, { next: { revalidate: 3600 } });
+  return Array.isArray(data) ? data[0] : data;
 }
