@@ -41,7 +41,8 @@ export default function FavoriteList() {
   return (
     <section className="mt-16 group/fav overflow-x-hidden">
       <div className="flex items-center justify-between mb-10 pr-4">
-        <h2 className="text-2xl font-black text-zinc-100 uppercase italic">Phim Em Đã Thích ❤️</h2>
+        <div className="w-1.5 h-8 bg-red-600 rounded-full shadow-[0_0_20px_rgba(220,38,38,0.4)]"></div>
+        <h2 className="text-2xl font-black text-zinc-100 uppercase tracking-tight italic text-shadow">PHIM EM THÍCH 🍿</h2>
       </div>
       <div ref={scrollRef} className="overflow-x-auto scrollbar-hide flex gap-6 pb-8">
         {favorites.map((phim) => (

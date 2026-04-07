@@ -9,9 +9,7 @@ export default function NewMoviesGrid({ data, page }) {
       <div className="flex items-center justify-between mb-10">
         <div className="flex items-center gap-3">
           <div className="w-1.5 h-8 bg-red-600 rounded-full shadow-[0_0_20px_rgba(220,38,38,0.4)]"></div>
-          <h2 className="text-2xl font-black text-zinc-100 uppercase tracking-tight">
-            Phim Mới Cập Nhật
-          </h2>
+          <h2 className="text-2xl font-black text-zinc-100 uppercase tracking-tight italic text-shadow">PHIM MỚI CẬP NHẬT</h2>
         </div>
         
         {/* BÂY GIỜ NÓ SẼ HIỆN SỐ TRANG CHUẨN ĐÉT */}
