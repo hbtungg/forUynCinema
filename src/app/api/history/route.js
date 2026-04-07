@@ -1,6 +1,7 @@
 import clientPromise from "@/lib/mongodb";
 import { NextResponse } from "next/server";
 
+// 1. GHI NHỚ LỊCH SỬ XEM (POST)
 export async function POST(req) {
   try {
     const client = await clientPromise;
@@ -21,7 +22,7 @@ export async function POST(req) {
   }
 }
 
-// THÊM HÀM NÀY ĐỂ LẤY LỊCH SỬ VỀ
+// 2. LẤY LỊCH SỬ XEM VỀ (GET)
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
@@ -37,9 +38,37 @@ export async function GET(req) {
       .limit(10)
       .toArray();
 
-    // Map lại dữ liệu để trả về danh sách movie phẳng cho dễ dùng
+    // Trả về danh sách movie phẳng
     return NextResponse.json(history.map(item => item.movie));
   } catch (e) {
     return NextResponse.json([]);
+  }
+}
+
+// 3. XÓA MỘT BỘ PHIM KHỎI LỊCH SỬ (DELETE) - MỚI CẬP NHẬT
+export async function DELETE(req) {
+  try {
+    const client = await clientPromise;
+    const db = client.db("ForUynDB");
+    const { userEmail, slug } = await req.json();
+
+    if (!userEmail || !slug) {
+      return NextResponse.json({ error: "Thiếu email hoặc slug" }, { status: 400 });
+    }
+
+    // Xóa bản ghi dựa trên email người dùng và slug phim
+    const result = await db.collection("history").deleteOne({
+      userEmail: userEmail,
+      "movie.slug": slug
+    });
+
+    if (result.deletedCount === 1) {
+      return NextResponse.json({ message: "Đã dọn dẹp kho báu 🧹" });
+    } else {
+      return NextResponse.json({ error: "Không tìm thấy phim để xóa" }, { status: 404 });
+    }
+  } catch (e) {
+    console.error("Lỗi xóa lịch sử:", e);
+    return NextResponse.json({ error: "Lỗi Server" }, { status: 500 });
   }
 }
