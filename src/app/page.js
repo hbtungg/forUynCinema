@@ -24,7 +24,7 @@ export default async function HomePage({ searchParams }) {
       <Header />
       {/* <CategoryMenu /> */}
 
-      <LoveGallery />
+      
       <ContinueWatching />
       <FavoriteList />
 
@@ -73,6 +73,7 @@ export default async function HomePage({ searchParams }) {
         </Link>
       </div>
       
+      <LoveGallery />
       <HistoryPopup />
       {/* <EpoTrigger /> */}
       <SecretChat />
