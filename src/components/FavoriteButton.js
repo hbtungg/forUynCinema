@@ -16,7 +16,7 @@ export default function FavoriteButton({ phim }) {
 
   const toggleFavorite = async (e) => {
     e.preventDefault();
-    if (!session) return alert("Anh yêu đăng nhập mới lưu được tim nhé! ❤️");
+    if (!session) return alert("Em iu log in mới thả tim được nhó");
 
     const storageKey = `favs_${session.user.email}`;
     const method = isFavorite ? 'DELETE' : 'POST';

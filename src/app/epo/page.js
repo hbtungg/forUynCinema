@@ -2,24 +2,28 @@ import { getEpoVideos } from '@/lib/movies';
 import Footer from '@/components/Footer';
 import MovieCard from '@/components/MovieCard';
 import EpoSort from '@/components/EpoSort';
+import EpoCategoryMenu from '@/components/EpoCategoryMenu'; // 1. IMPORT COMPONENT MỚI
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
 export default async function EpoPage({ searchParams }) {
   const sParams = await searchParams;
   const page = Number(sParams?.page) || 1;
-  const query = sParams?.q || 'all';
+  
+  // 2. SỬ DỤNG THAM SỐ CATEGORY (mặc định là 'all')
+  const category = sParams?.category || sParams?.q || 'all'; 
   const order = sParams?.order || 'latest';
 
-  // Lấy dữ liệu (Đã bao gồm fix logic lấy ảnh và views ở lib/movies.js)
-  const data = await getEpoVideos(page, query, order);
+  // Lấy dữ liệu theo category mới
+  const data = await getEpoVideos(page, category, order);
   const videos = data?.videos || [];
   const totalPages = data?.total_pages || 1000;
 
   async function handleSearch(formData) {
     'use server';
     const searchTerm = formData.get('q');
-    redirect(`/epo?q=${encodeURIComponent(searchTerm)}&order=latest&page=1`);
+    // Khi search, mình gửi từ khóa vào param category để hàm getEpoVideos lọc theo query
+    redirect(`/epo?category=${encodeURIComponent(searchTerm)}&order=latest&page=1`);
   }
 
   return (
@@ -34,7 +38,7 @@ export default async function EpoPage({ searchParams }) {
         </div>
 
         {/* HEADER & TOOLBAR */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12">
           <div className="flex items-center gap-4">
             <div className="w-1.5 h-12 bg-red-600 shadow-[0_0_20px_rgba(220,38,38,0.5)] rounded-full"></div>
             <div>
@@ -44,8 +48,7 @@ export default async function EpoPage({ searchParams }) {
           </div>
 
           <div className="flex flex-col md:flex-row items-center gap-4">
-            {/* COMPONENT SẮP XẾP CUSTOM XỊN XÒ */}
-            <EpoSort currentOrder={order} query={query} />
+            <EpoSort currentOrder={order} query={category} />
 
             <form action={handleSearch} className="relative w-full md:w-80 group">
               <input name="q" type="text" placeholder="Tìm kiếm bí mật..." className="w-full bg-zinc-900/30 border border-zinc-800 rounded-2xl py-4 px-6 text-[11px] focus:outline-none focus:border-red-600/50 transition-all font-black tracking-widest placeholder:text-zinc-800" />
@@ -58,13 +61,14 @@ export default async function EpoPage({ searchParams }) {
           </div>
         </div>
 
-        {/* GRID PHIM - BẢN FIX TRIỆT ĐỂ LỖI HIỂN THỊ */}
+        {/* 3. HIỂN THỊ MENU PHÂN LOẠI Ở ĐÂY */}
+        <EpoCategoryMenu />
+
+        {/* GRID PHIM */}
         {videos.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-8 md:gap-10">
             {videos.map((video) => (
               <div key={video.id} className="group flex flex-col">
-                
-                {/* 1. CONTAINER ẢNH - Sạch sẽ 100% */}
                 <div className="relative rounded-[2.5rem] overflow-hidden border-2 border-transparent group-hover:border-red-600/30 transition-all duration-500 shadow-2xl">
                   <MovieCard 
                     movie={{ 
@@ -78,10 +82,8 @@ export default async function EpoPage({ searchParams }) {
                   <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
                 </div>
 
-                {/* 2. THÔNG TIN DƯỚI ẢNH - Gọn gàng trên một hàng */}
                 <div className="mt-4 px-2 space-y-1.5">
                   <div className="flex items-center justify-between gap-4">
-                    {/* Lượt xem: Ép trên 1 dòng */}
                     <div className="flex items-center gap-1.5 text-red-600 flex-shrink-0 whitespace-nowrap">
                       <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="currentColor" viewBox="0 0 16 16">
                         <path d="M10.5 8a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
@@ -92,17 +94,14 @@ export default async function EpoPage({ searchParams }) {
                       </span>
                     </div>
                     
-                    {/* Ngày tháng rút gọn: Chỉ lấy phần Ngày/Tháng/Năm */}
                     <span className="text-[9px] font-bold text-zinc-700 uppercase tracking-widest truncate">
                       {video.added ? video.added.split(' ')[0] : 'PRIVATE'}
                     </span>
                   </div>
 
-                  {/* Tên phim phụ (Chống lỗi hiển thị) */}
                   <h3 className="text-[11px] font-black uppercase text-zinc-400 leading-tight line-clamp-1 group-hover:text-white transition-colors duration-300">
                     {video.title}
                   </h3>
-                  
                   <div className="w-0 h-[1px] bg-red-600/50 group-hover:w-full transition-all duration-700 origin-left"></div>
                 </div>
               </div>
@@ -114,11 +113,11 @@ export default async function EpoPage({ searchParams }) {
           </div>
         )}
 
-        {/* PHÂN TRANG */}
+        {/* PHÂN TRANG - CẬP NHẬT LINK THEO CATEGORY */}
         <div className="mt-32 flex flex-col items-center">
           <div className="flex flex-wrap justify-center items-center gap-3 mb-16">
             {page > 1 && (
-              <Link href={`/epo?q=${query}&order=${order}&page=${page - 1}`} className="px-5 py-2.5 bg-zinc-900/50 text-zinc-500 rounded-xl font-black hover:text-white border border-zinc-800 uppercase text-[10px] tracking-widest transition-all shadow-lg">←</Link>
+              <Link href={`/epo?category=${category}&order=${order}&page=${page - 1}`} className="px-5 py-2.5 bg-zinc-900/50 text-zinc-500 rounded-xl font-black hover:text-white border border-zinc-800 uppercase text-[10px] tracking-widest transition-all shadow-lg">←</Link>
             )}
 
             {Array.from({ length: 5 }, (_, i) => {
@@ -130,27 +129,18 @@ export default async function EpoPage({ searchParams }) {
 
               if (pageNum > 0 && pageNum <= totalPages) {
                 return (
-                  <Link key={pageNum} href={`/epo?q=${query}&order=${order}&page=${pageNum}`} className={`w-11 h-11 flex items-center justify-center rounded-xl font-black transition-all border ${page === pageNum ? 'bg-red-600 border-red-500 text-white shadow-[0_0_20px_rgba(220,38,38,0.4)] scale-110 z-10' : 'bg-zinc-900/40 border-zinc-800 text-zinc-600 hover:border-zinc-500 hover:text-white'}`}>{pageNum}</Link>
+                  <Link key={pageNum} href={`/epo?category=${category}&order=${order}&page=${pageNum}`} className={`w-11 h-11 flex items-center justify-center rounded-xl font-black transition-all border ${page === pageNum ? 'bg-red-600 border-red-500 text-white shadow-[0_0_20px_rgba(220,38,38,0.4)] scale-110 z-10' : 'bg-zinc-900/40 border-zinc-800 text-zinc-600 hover:border-zinc-500 hover:text-white'}`}>{pageNum}</Link>
                 );
               }
               return null;
             })}
 
             {page < totalPages && (
-              <Link href={`/epo?q=${query}&order=${order}&page=${page + 1}`} className="px-5 py-2.5 bg-zinc-900/50 text-zinc-500 rounded-xl font-black hover:text-white border border-zinc-800 uppercase text-[10px] tracking-widest transition-all shadow-lg">→</Link>
+              <Link href={`/epo?category=${category}&order=${order}&page=${page + 1}`} className="px-5 py-2.5 bg-zinc-900/50 text-zinc-500 rounded-xl font-black hover:text-white border border-zinc-800 uppercase text-[10px] tracking-widest transition-all shadow-lg">→</Link>
             )}
           </div>
-
-          <div className="mb-12 text-center text-zinc-800 text-[8px] font-black uppercase tracking-[0.5em]">
+          <div className="mb-24 text-center text-zinc-800 text-[8px] font-black uppercase tracking-[0.5em]">
             Trang {page} trên tổng {totalPages}
-          </div>
-
-          {/* RỜI KHỎI VÙNG AN TOÀN */}
-          <div className="pt-12 border-t border-zinc-900/50 w-full max-w-sm flex justify-center pb-24">
-            <Link href="/" className="group flex items-center gap-4 text-zinc-800 hover:text-zinc-400 transition-all duration-700">
-              <span className="text-[9px] font-black uppercase tracking-[0.6em] italic">Rời khỏi vùng an toàn</span>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="transform group-hover:translate-x-3 transition-transform duration-500"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </Link>
           </div>
         </div>
       </div>

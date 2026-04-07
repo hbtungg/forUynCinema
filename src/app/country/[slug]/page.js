@@ -52,7 +52,13 @@ export default async function CountryPage({ params, searchParams }) {
       
       {/* HEADER ĐÃ CHỈNH MÀU TRẮNG - ĐỎ - TRẮNG */}
       <Header />
-
+      {/* Nút quay lại lãng mạn */}
+        <Link 
+          href="/" 
+          className="text-zinc-500 hover:text-red-600 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 mb-6 transition-all group"
+        >
+          <span className="group-hover:-translate-x-1 transition-transform">←</span> Quay lại trang chủ
+        </Link>
       <header className="mb-12 border-b border-zinc-900 pb-8 mt-10">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="flex items-center gap-3">

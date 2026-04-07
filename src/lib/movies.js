@@ -72,13 +72,22 @@ export async function getCountries() {
   return data?.items || [];
 }
 
-// --- HỆ THỐNG EPO (PRIVATE - SỬA LỖI ẢNH VÀ VIEWS) ---
+// --- HỆ THỐNG EPO (BẢN NÂNG CẤP PHÂN LOẠI THEO THỂ LOẠI) ---
 const EPO_BASE_URL = "https://www.eporner.com/api/v2/video";
 
-export async function getEpoVideos(page = 1, query = 'all', order = 'latest') {
+/**
+ * Lấy danh sách video từ EPO
+ * @param {number} page - Trang hiện tại
+ * @param {string} category - Thể loại (ví dụ: 'asian', 'japanese', 'all')
+ * @param {string} order - Sắp xếp (latest, top-rated, v.v.)
+ */
+export async function getEpoVideos(page = 1, category = 'all', order = 'latest') {
   try {
+    // Nếu category là 'all' thì query mặc định là 'all', ngược lại dùng category làm query
+    const searchQuery = category && category !== 'all' ? category : 'all';
+
     const params = new URLSearchParams({
-      query: query,
+      query: searchQuery,
       per_page: '30',
       page: page.toString(),
       thumbsize: 'big',
@@ -86,26 +95,29 @@ export async function getEpoVideos(page = 1, query = 'all', order = 'latest') {
       format: 'json'
     });
 
-    const res = await fetch(`${EPO_BASE_URL}/search/?${params.toString()}`, { next: { revalidate: 3600 } });
+    const url = `${EPO_BASE_URL}/search/?${params.toString()}`;
+    const res = await fetch(url, { next: { revalidate: 3600 } });
+    
     if (!res.ok) return { videos: [], total_pages: 1 };
 
     const data = await res.json();
     
-    // FORMAT LẠI DỮ LIỆU CHUẨN ĐỂ MOVIECARD KHÔNG BỊ LỖI
+    // FORMAT DỮ LIỆU ĐỂ HIỂN THỊ ĐỒNG BỘ
     const formattedVideos = (data.videos || []).map(v => ({
       id: v.id,
       title: v.title,
-      // FIX: Trỏ thẳng vào .src để MovieCard lấy được URL ảnh đầu tiên
+      // Lấy ảnh thumbnail chất lượng cao nhất
       thumb: v.default_thumb?.src || (Array.isArray(v.thumbs) ? v.thumbs[0]?.src : ''), 
       duration: v.length_min,
-      added: v.added, // Đây là năm
-      views: v.views, // Đây là lượt xem (con số lớn)
+      added: v.added, // Năm phát hành
+      views: v.views, // Lượt xem
       rate: v.rate
     }));
 
     return { 
       videos: formattedVideos, 
-      total_pages: data.total_pages || 1 
+      total_pages: data.total_pages || 1,
+      current_category: category // Trả về category hiện tại để làm menu highlight
     };
   } catch (error) {
     console.error("EPO API Error:", error);

@@ -47,15 +47,19 @@ export default function MovieCard({ movie }) {
           <div className={`absolute inset-x-0 bottom-0 ${isEpo ? 'h-1/2' : 'h-2/3'} bg-gradient-to-t from-black via-black/60 to-transparent z-20`}></div>
         </Link>
 
-        {/* 2. CỤM NÚT TRUNG TÂM */}
-        <div className={`absolute inset-0 z-40 flex flex-col items-center justify-center gap-3 pointer-events-none transition-all duration-500 ${isEpo ? 'opacity-0 group-hover:opacity-100' : 'opacity-100 md:opacity-0 md:group-hover:opacity-100'}`}>
-            <div className={`pointer-events-auto transform transition-transform duration-500 ${!isTouch && 'translate-y-4 md:group-hover:translate-y-[-10px]'}`}>
-                <Link href={finalHref} className="bg-red-600 text-white text-[9px] md:text-[10px] font-black w-[90px] md:w-[110px] h-9 md:h-10 rounded-full uppercase flex items-center justify-center shadow-[0_0_25px_rgba(220,38,38,0.5)] active:scale-95 transition-all">
+        {/* 2. CỤM NÚT TRUNG TÂM - Tối ưu cho Mobile */}
+        <div className={`absolute inset-0 z-40 flex flex-col items-center justify-center gap-2 md:gap-3 pointer-events-none transition-all duration-500 ${isEpo ? 'opacity-0 group-hover:opacity-100' : 'opacity-100 md:opacity-0 md:group-hover:opacity-100'}`}>
+            
+            {/* Nút Xem Ngay */}
+            <div className={`pointer-events-auto transform transition-transform duration-500 ${!isTouch ? 'translate-y-4 md:group-hover:translate-y-[-10px]' : 'scale-90 md:scale-100'}`}>
+                <Link href={finalHref} className="bg-red-600 text-white text-[9px] md:text-[10px] font-black w-[85px] md:w-[110px] h-8 md:h-10 rounded-full uppercase flex items-center justify-center shadow-[0_0_25px_rgba(220,38,38,0.5)] active:scale-95 transition-all">
                     <span>Xem Ngay</span>
                 </Link>
             </div>
+
+            {/* Nút Yêu Thích - Trên mobile sẽ nhỏ gọn hơn */}
             {!isEpo && (
-              <div className={`pointer-events-auto transform transition-transform duration-500 pt-1 ${!isTouch && 'translate-y-6 md:group-hover:translate-y-[-10px]'} ${isTouch && 'scale-105'}`}>
+              <div className={`pointer-events-auto transform transition-transform duration-500 ${!isTouch ? 'translate-y-6 md:group-hover:translate-y-[-10px]' : 'scale-90 md:scale-100'}`}>
                   <FavoriteButton phim={movie} />
               </div>
             )}
@@ -82,8 +86,8 @@ export default function MovieCard({ movie }) {
           )}
         </div>
 
-        {/* Badge Chất lượng / Thời lượng */}
-        <div className="absolute bottom-16 md:bottom-5 right-3 px-1.5 md:px-2 h-3.5 md:h-4 bg-yellow-500 rounded-sm text-black font-black text-[7px] md:text-[8px] z-50 uppercase flex items-center justify-center shadow-lg">
+        {/* Badge Chất lượng / Thời lượng - FIX: Đẩy cao lên trên Mobile để không bị nút Yêu Thích đè */}
+        <div className="absolute bottom-4 right-3 px-1.5 md:px-2 h-4 bg-yellow-500 rounded-sm text-black font-black text-[7px] md:text-[8px] z-50 uppercase flex items-center justify-center shadow-lg">
           {movie.quality || 'FHD'}
         </div>
 
