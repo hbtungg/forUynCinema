@@ -4,6 +4,7 @@ import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import RelatedMovies from '@/components/RelatedMovies';
 
 export default function WatchPage({ params }) {
   const { data: session } = useSession();
@@ -17,7 +18,10 @@ export default function WatchPage({ params }) {
   useEffect(() => {
     const fetchMovie = async () => {
       try {
-        const res = await fetch(`https://phim.nguonc.com/api/film/${slug}`);
+        // FIX 1: Thêm cache: 'no-store' để đảm bảo categories luôn mới
+        const res = await fetch(`https://phim.nguonc.com/api/film/${slug}`, {
+          cache: 'no-store'
+        });
         const data = await res.json();
         if (data.movie) {
           setMovie(data.movie);
@@ -33,7 +37,7 @@ export default function WatchPage({ params }) {
           };
           const newHistory = [currentItem, ...history.filter(item => item.slug !== slug)].slice(0, 10);
           localStorage.setItem('watchHistory', JSON.stringify(newHistory));
-          
+
           window.dispatchEvent(new Event('storage'));
           window.dispatchEvent(new Event('historyUpdated'));
 
@@ -42,9 +46,9 @@ export default function WatchPage({ params }) {
             await fetch('/api/history', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ 
+              body: JSON.stringify({
                 movie: currentItem,
-                userEmail: session.user.email 
+                userEmail: session.user.email
               })
             });
           }
@@ -79,14 +83,14 @@ export default function WatchPage({ params }) {
       </div>
 
       <div className="flex flex-col items-center px-4 md:px-10 py-6">
-        
-        {/* NÚT QUAY LẠI KIỂU MINIMALIST ANH THÍCH */}
+
+        {/* NÚT QUAY LẠI KIỂU MINIMALIST */}
         <div className="w-full max-w-5xl">
-          <Link 
-            href="/" 
+          <Link
+            href="/"
             className="text-zinc-500 hover:text-red-600 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 mb-6 transition-all group w-fit"
           >
-            <span className="group-hover:-translate-x-1 transition-transform duration-300">←</span> 
+            <span className="group-hover:-translate-x-1 transition-transform duration-300">←</span>
             Quay lại trang chủ
           </Link>
         </div>
@@ -98,10 +102,10 @@ export default function WatchPage({ params }) {
               {movie.name}
             </h1>
             <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mt-1 opacity-70">
-              {movie.original_name} • {movie.category?.['3']?.list[0]?.name}
+              {movie.original_name} • {movie.category?.['3']?.list[0]?.name || "Đang cập nhật"}
             </p>
           </div>
-          
+
           <div className="flex gap-4 text-zinc-600 text-[9px] font-black uppercase tracking-tighter bg-zinc-900/40 px-5 py-2.5 rounded-full border border-zinc-800/50">
             <span>Tập {currentEpisodes[selectedEpisode]?.name || '1'}</span>
             <span className="text-zinc-800">|</span>
@@ -114,8 +118,8 @@ export default function WatchPage({ params }) {
         {/* PLAYER */}
         <div className="w-full max-w-5xl aspect-video bg-zinc-950 rounded-[2.5rem] overflow-hidden border-2 border-zinc-900 shadow-2xl mb-8 relative group">
           {currentEpisodes[selectedEpisode]?.embed ? (
-            <iframe 
-              key={`${slug}-${selectedServer}-${selectedEpisode}`} 
+            <iframe
+              key={`${slug}-${selectedServer}-${selectedEpisode}`}
               src={getCleanEmbedUrl()}
               className="w-full h-full"
               allowFullScreen
@@ -130,7 +134,8 @@ export default function WatchPage({ params }) {
 
         {/* SERVER & TẬP PHIM */}
         <div className="w-full max-w-5xl space-y-8 pb-10">
-          {/* ... (Các phần chọn Server và Episode giữ nguyên của anh) ... */}
+          
+          {/* CHỌN SERVER */}
           {servers.length > 1 && (
             <div className="space-y-4">
               <h2 className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-500 px-2 flex items-center gap-2">
@@ -141,11 +146,10 @@ export default function WatchPage({ params }) {
                   <button
                     key={index}
                     onClick={() => { setSelectedServer(index); setSelectedEpisode(0); }}
-                    className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase transition-all border-2 ${
-                      selectedServer === index 
-                      ? 'bg-red-600 border-red-500 text-white shadow-lg' 
+                    className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase transition-all border-2 ${selectedServer === index
+                      ? 'bg-red-600 border-red-500 text-white shadow-lg'
                       : 'bg-zinc-950 border-zinc-900 text-zinc-500 hover:text-white hover:border-zinc-700'
-                    }`}
+                      }`}
                   >
                     {server.server_name}
                   </button>
@@ -154,6 +158,7 @@ export default function WatchPage({ params }) {
             </div>
           )}
 
+          {/* DANH SÁCH TẬP */}
           <div className="space-y-4">
             <h2 className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-500 px-2 flex items-center gap-2">
               <span className="w-1 h-3 bg-zinc-600 rounded-full"></span> Danh sách tập phim ({currentEpisodes.length})
@@ -163,11 +168,10 @@ export default function WatchPage({ params }) {
                 <button
                   key={index}
                   onClick={() => setSelectedEpisode(index)}
-                  className={`min-w-[50px] px-4 py-3 rounded-xl text-[10px] font-black transition-all border-2 ${
-                    selectedEpisode === index 
-                    ? 'bg-white border-white text-black scale-105 shadow-xl' 
+                  className={`min-w-[50px] px-4 py-3 rounded-xl text-[10px] font-black transition-all border-2 ${selectedEpisode === index
+                    ? 'bg-white border-white text-black scale-105 shadow-xl'
                     : 'bg-zinc-950 border-zinc-900 text-zinc-600 hover:border-zinc-700 hover:text-zinc-400'
-                  }`}
+                    }`}
                 >
                   {ep.name === 'Full' ? 'BẢN FULL' : `TẬP ${ep.name}`}
                 </button>
@@ -175,12 +179,23 @@ export default function WatchPage({ params }) {
             </div>
           </div>
 
+          {/* NỘI DUNG PHIM */}
           <div className="p-8 bg-zinc-900/20 rounded-[2.5rem] border border-zinc-900/50 backdrop-blur-sm">
             <h3 className="text-[10px] font-black uppercase text-red-600 mb-4 tracking-[0.3em]">Nội dung phim</h3>
-            <div 
+            <div
               className="text-zinc-500 text-[11px] leading-relaxed opacity-90 font-medium"
               dangerouslySetInnerHTML={{ __html: movie.description }}
             />
+          </div>
+
+          {/* FIX 2: PHẦN ĐỀ XUẤT CỦA THU UYÊN */}
+          <div className="w-full max-w-5xl">
+            {movie && (
+              <RelatedMovies
+                key={slug} // BUỘC PHẢI CÓ KEY ĐỂ RESET PHIM CŨ
+                allCategories={movie.category}
+              />
+            )}
           </div>
         </div>
       </div>

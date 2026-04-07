@@ -81,14 +81,16 @@ const EPO_BASE_URL = "https://www.eporner.com/api/v2/video";
  * @param {string} category - Thể loại (ví dụ: 'asian', 'japanese', 'all')
  * @param {string} order - Sắp xếp (latest, top-rated, v.v.)
  */
+// --- TRONG FILE: src/lib/movies.js ---
+
 export async function getEpoVideos(page = 1, category = 'all', order = 'latest') {
   try {
-    // Nếu category là 'all' thì query mặc định là 'all', ngược lại dùng category làm query
-    const searchQuery = category && category !== 'all' ? category : 'all';
+    // Ép searchQuery luôn có giá trị để API không trả về kết quả ngẫu nhiên
+    const searchQuery = (category && category !== 'all') ? category : 'all';
 
     const params = new URLSearchParams({
       query: searchQuery,
-      per_page: '30',
+      per_page: '32', // Eporner hoạt động tốt nhất với số 30
       page: page.toString(),
       thumbsize: 'big',
       order: order,
@@ -96,28 +98,33 @@ export async function getEpoVideos(page = 1, category = 'all', order = 'latest')
     });
 
     const url = `${EPO_BASE_URL}/search/?${params.toString()}`;
+    // Tăng revalidate lên một chút để ổn định dữ liệu giữa các trang
     const res = await fetch(url, { next: { revalidate: 3600 } });
     
     if (!res.ok) return { videos: [], total_pages: 1 };
 
     const data = await res.json();
     
-    // FORMAT DỮ LIỆU ĐỂ HIỂN THỊ ĐỒNG BỘ
+    // Nếu API trả về "lèo tèo", có thể do từ khóa quá hẹp. 
+    // Ta bóc tách cẩn thận để tránh lỗi render
     const formattedVideos = (data.videos || []).map(v => ({
       id: v.id,
       title: v.title,
-      // Lấy ảnh thumbnail chất lượng cao nhất
       thumb: v.default_thumb?.src || (Array.isArray(v.thumbs) ? v.thumbs[0]?.src : ''), 
+      preview_url: v.preview_url || v.test_previews || "", 
+      quality: v.quality || 'HD', // Lấy thêm quality từ gốc
       duration: v.length_min,
-      added: v.added, // Năm phát hành
-      views: v.views, // Lượt xem
+      added: v.added, 
+      views: v.views, 
       rate: v.rate
     }));
 
+    // CẬP NHẬT: Eporner trả về số lượng trang đôi khi bị "ảo", 
+    // ta lấy đúng số từ data.total_pages nhưng giới hạn tối đa để tránh lỗi phân trang vô tận
     return { 
       videos: formattedVideos, 
-      total_pages: data.total_pages || 1,
-      current_category: category // Trả về category hiện tại để làm menu highlight
+      total_pages: Math.min(data.total_pages || 1, 500), // Giới hạn 500 trang cho ổn định
+      current_category: category 
     };
   } catch (error) {
     console.error("EPO API Error:", error);
@@ -128,4 +135,10 @@ export async function getEpoVideos(page = 1, category = 'all', order = 'latest')
 export async function getEpoVideoDetail(id) {
   const data = await safeFetch(`https://www.eporner.com/api/v2/video/id/?id=${id}&format=json`, { next: { revalidate: 3600 } });
   return Array.isArray(data) ? data[0] : data;
+}
+
+// Lấy phim gợi ý dựa trên thể loại (Related Movies)
+export async function getRelatedMovies(categorySlug, limit = 8) {
+  const data = await safeFetch(`${BASE_URL}/films/the-loai/${categorySlug}?page=1`, { next: { revalidate: 3600 } });
+  return data?.items?.slice(0, limit) || [];
 }
