@@ -10,6 +10,7 @@ import SecretChat from '@/components/SecretChat';
 // IMPORT COMPONENT MỚI Ở ĐÂY
 import NewMoviesGrid from '@/components/NewMoviesGrid';
 import EpoTrigger from '@/components/EpoTrigger';
+import LoveGallery from '@/components/LoveGallery';
 
 export default async function HomePage({ searchParams }) {
   const sParams = await searchParams;
@@ -23,6 +24,7 @@ export default async function HomePage({ searchParams }) {
       <Header />
       {/* <CategoryMenu /> */}
 
+      <LoveGallery />
       <ContinueWatching />
       <FavoriteList />
 
