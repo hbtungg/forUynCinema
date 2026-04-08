@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, use } from 'react';
 import { useSession } from 'next-auth/react';
+import { useSearchParams } from 'next/navigation'; // GIỮ LẠI ĐỂ ĐỌC URL
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -8,6 +9,7 @@ import RelatedMovies from '@/components/RelatedMovies';
 
 export default function WatchPage({ params }) {
   const { data: session } = useSession();
+  const searchParams = useSearchParams();
   const decodedParams = use(params);
   const slug = decodedParams.slug;
 
@@ -15,10 +17,12 @@ export default function WatchPage({ params }) {
   const [selectedServer, setSelectedServer] = useState(0);
   const [selectedEpisode, setSelectedEpisode] = useState(0);
 
+  // Lấy số tập từ URL
+  const epFromUrl = searchParams.get('ep');
+
   useEffect(() => {
     const fetchMovie = async () => {
       try {
-        // FIX 1: Thêm cache: 'no-store' để đảm bảo categories luôn mới
         const res = await fetch(`https://phim.nguonc.com/api/film/${slug}`, {
           cache: 'no-store'
         });
@@ -26,22 +30,31 @@ export default function WatchPage({ params }) {
         if (data.movie) {
           setMovie(data.movie);
 
-          // 1. Lưu vào LocalStorage
-          const history = JSON.parse(localStorage.getItem('watchHistory') || '[]');
+          // LOGIC TỰ ĐỘNG NHẢY TẬP (MỚI THÊM)
+          const allEpisodes = data.movie.episodes[selectedServer]?.items || [];
+          if (epFromUrl && allEpisodes.length > 0) {
+            const index = allEpisodes.findIndex(e => e.name === epFromUrl);
+            if (index !== -1) {
+              setSelectedEpisode(index);
+            }
+          }
+
+          // LƯU LỊCH SỬ (GIỮ NGUYÊN CODE CỦA ANH)
           const currentItem = {
             slug: slug,
             name: data.movie.name,
             thumb_url: data.movie.thumb_url,
             time: new Date().toLocaleDateString('vi-VN'),
-            episode: data.movie.episodes[selectedServer]?.items[selectedEpisode]?.name || '1'
+            episode: allEpisodes[selectedEpisode]?.name || '1'
           };
+
+          const history = JSON.parse(localStorage.getItem('watchHistory') || '[]');
           const newHistory = [currentItem, ...history.filter(item => item.slug !== slug)].slice(0, 10);
           localStorage.setItem('watchHistory', JSON.stringify(newHistory));
 
           window.dispatchEvent(new Event('storage'));
           window.dispatchEvent(new Event('historyUpdated'));
 
-          // 2. LƯU VÀO MONGODB
           if (session?.user?.email) {
             await fetch('/api/history', {
               method: 'POST',
@@ -58,7 +71,7 @@ export default function WatchPage({ params }) {
       }
     };
     if (slug) fetchMovie();
-  }, [slug, selectedServer, selectedEpisode, session]);
+  }, [slug, selectedServer, selectedEpisode, session, epFromUrl]);
 
   if (!movie) return (
     <div className="min-h-screen bg-black flex items-center justify-center text-white font-black uppercase tracking-[0.5em] animate-pulse text-[10px]">
@@ -83,19 +96,12 @@ export default function WatchPage({ params }) {
       </div>
 
       <div className="flex flex-col items-center px-4 md:px-10 py-6">
-
-        {/* NÚT QUAY LẠI KIỂU MINIMALIST */}
         <div className="w-full max-w-5xl">
-          <Link
-            href="/"
-            className="text-zinc-500 hover:text-red-600 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 mb-6 transition-all group w-fit"
-          >
-            <span className="group-hover:-translate-x-1 transition-transform duration-300">←</span>
-            Quay lại trang chủ
+          <Link href="/" className="text-zinc-500 hover:text-red-600 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 mb-6 transition-all group w-fit">
+            <span className="group-hover:-translate-x-1 transition-transform duration-300">←</span> Quay lại trang chủ
           </Link>
         </div>
 
-        {/* THÔNG TIN PHIM */}
         <div className="w-full max-w-5xl flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
           <div className="flex flex-col items-start">
             <h1 className="text-2xl md:text-3xl font-black uppercase italic tracking-tighter text-red-600 drop-shadow-[0_0_15px_rgba(220,38,38,0.2)]">
@@ -115,7 +121,6 @@ export default function WatchPage({ params }) {
           </div>
         </div>
 
-        {/* PLAYER */}
         <div className="w-full max-w-5xl aspect-video bg-zinc-950 rounded-[2.5rem] overflow-hidden border-2 border-zinc-900 shadow-2xl mb-8 relative group">
           {currentEpisodes[selectedEpisode]?.embed ? (
             <iframe
@@ -123,19 +128,15 @@ export default function WatchPage({ params }) {
               src={getCleanEmbedUrl()}
               className="w-full h-full"
               allowFullScreen
-              sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"
             ></iframe>
           ) : (
             <div className="flex items-center justify-center h-full text-zinc-700 italic text-xs text-center px-10">
-              Nguồn phim đang gặp sự cố hoặc đang cập nhật...
+              Nguồn phim đang gặp sự cố...
             </div>
           )}
         </div>
 
-        {/* SERVER & TẬP PHIM */}
         <div className="w-full max-w-5xl space-y-8 pb-10">
-          
-          {/* CHỌN SERVER */}
           {servers.length > 1 && (
             <div className="space-y-4">
               <h2 className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-500 px-2 flex items-center gap-2">
@@ -146,10 +147,7 @@ export default function WatchPage({ params }) {
                   <button
                     key={index}
                     onClick={() => { setSelectedServer(index); setSelectedEpisode(0); }}
-                    className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase transition-all border-2 ${selectedServer === index
-                      ? 'bg-red-600 border-red-500 text-white shadow-lg'
-                      : 'bg-zinc-950 border-zinc-900 text-zinc-500 hover:text-white hover:border-zinc-700'
-                      }`}
+                    className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase transition-all border-2 ${selectedServer === index ? 'bg-red-600 border-red-500 text-white shadow-lg' : 'bg-zinc-950 border-zinc-900 text-zinc-500 hover:text-white hover:border-zinc-700'}`}
                   >
                     {server.server_name}
                   </button>
@@ -158,7 +156,6 @@ export default function WatchPage({ params }) {
             </div>
           )}
 
-          {/* DANH SÁCH TẬP */}
           <div className="space-y-4">
             <h2 className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-500 px-2 flex items-center gap-2">
               <span className="w-1 h-3 bg-zinc-600 rounded-full"></span> Danh sách tập phim ({currentEpisodes.length})
@@ -168,10 +165,7 @@ export default function WatchPage({ params }) {
                 <button
                   key={index}
                   onClick={() => setSelectedEpisode(index)}
-                  className={`min-w-[50px] px-4 py-3 rounded-xl text-[10px] font-black transition-all border-2 ${selectedEpisode === index
-                    ? 'bg-white border-white text-black scale-105 shadow-xl'
-                    : 'bg-zinc-950 border-zinc-900 text-zinc-600 hover:border-zinc-700 hover:text-zinc-400'
-                    }`}
+                  className={`min-w-[50px] px-4 py-3 rounded-xl text-[10px] font-black transition-all border-2 ${selectedEpisode === index ? 'bg-white border-white text-black scale-105 shadow-xl' : 'bg-zinc-950 border-zinc-900 text-zinc-600 hover:border-zinc-700 hover:text-zinc-400'}`}
                 >
                   {ep.name === 'Full' ? 'BẢN FULL' : `TẬP ${ep.name}`}
                 </button>
@@ -179,23 +173,13 @@ export default function WatchPage({ params }) {
             </div>
           </div>
 
-          {/* NỘI DUNG PHIM */}
           <div className="p-8 bg-zinc-900/20 rounded-[2.5rem] border border-zinc-900/50 backdrop-blur-sm">
             <h3 className="text-[10px] font-black uppercase text-red-600 mb-4 tracking-[0.3em]">Nội dung phim</h3>
-            <div
-              className="text-zinc-500 text-[11px] leading-relaxed opacity-90 font-medium"
-              dangerouslySetInnerHTML={{ __html: movie.description }}
-            />
+            <div className="text-zinc-500 text-[11px] leading-relaxed opacity-90 font-medium" dangerouslySetInnerHTML={{ __html: movie.description }} />
           </div>
 
-          {/* FIX 2: PHẦN ĐỀ XUẤT CỦA THU UYÊN */}
           <div className="w-full max-w-5xl">
-            {movie && (
-              <RelatedMovies
-                key={slug} // BUỘC PHẢI CÓ KEY ĐỂ RESET PHIM CŨ
-                allCategories={movie.category}
-              />
-            )}
+            {movie && <RelatedMovies key={slug} allCategories={movie.category} />}
           </div>
         </div>
       </div>
