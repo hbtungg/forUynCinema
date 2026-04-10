@@ -1,26 +1,23 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { useSession } from "next-auth/react"; // Thêm dòng này
+import { useSession } from "next-auth/react";
 import Link from 'next/link';
 
 export default function HistoryPopup() {
-  const { data: session, status } = useSession(); // Lấy trạng thái đăng nhập
+  const { data: session, status } = useSession();
   const [lastMovie, setLastMovie] = useState(null);
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // CHỈ CHẠY KHI ĐÃ ĐĂNG NHẬP THÀNH CÔNG
     if (status === "authenticated" && session?.user?.email) {
       const fetchLatestHistory = async () => {
         try {
-          // Lấy phim mới nhất từ Database (Cloud) để đồng bộ xuyên thiết bị
           const res = await fetch(`/api/history?userEmail=${session.user.email}`);
           if (res.ok) {
             const history = await res.json();
             if (history.length > 0) {
-              setLastMovie(history[0]); // Lấy bộ phim đầu tiên (mới nhất)
+              setLastMovie(history[0]);
 
-              // Chờ 1.5 giây sau khi trang tải xong mới hiện pop-up cho tinh tế
               const timer = setTimeout(() => {
                 setIsVisible(true);
               }, 1500);
@@ -35,13 +32,11 @@ export default function HistoryPopup() {
 
       fetchLatestHistory();
     } else {
-      // Nếu đăng xuất thì ẩn ngay lập tức
       setIsVisible(false);
       setLastMovie(null);
     }
   }, [status, session]);
 
-  // Nếu không có lịch sử, người dùng đã tắt hoặc CHƯA ĐĂNG NHẬP thì không hiện
   if (!isVisible || !lastMovie || status !== "authenticated") return null;
 
   return (
@@ -79,8 +74,9 @@ export default function HistoryPopup() {
           </div>
 
           <div className="flex gap-3">
+            {/* FIX TẠI ĐÂY: Thêm query ?ep= để đồng bộ với trang xem phim */}
             <Link 
-              href={`/watch/${lastMovie.slug}`}
+              href={`/watch/${lastMovie.slug}?ep=${encodeURIComponent(lastMovie.episode || '1')}`}
               className="flex-1 bg-red-600 hover:bg-red-500 text-white text-[10px] font-black uppercase py-3.5 rounded-2xl text-center shadow-lg shadow-red-900/30 transition-all active:scale-95"
             >
               Xem tiếp ngay

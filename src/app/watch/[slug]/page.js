@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect, use } from 'react';
 import { useSession } from 'next-auth/react';
-import { useSearchParams } from 'next/navigation'; // GIỮ LẠI ĐỂ ĐỌC URL
+import { useSearchParams } from 'next/navigation'; 
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -16,6 +16,9 @@ export default function WatchPage({ params }) {
   const [movie, setMovie] = useState(null);
   const [selectedServer, setSelectedServer] = useState(0);
   const [selectedEpisode, setSelectedEpisode] = useState(0);
+  
+  // BIẾN CHỐT CHẶN: Chỉ cho phép nhảy tập từ URL đúng 1 lần đầu tiên
+  const [hasInitialJump, setHasInitialJump] = useState(false);
 
   // Lấy số tập từ URL
   const epFromUrl = searchParams.get('ep');
@@ -30,16 +33,18 @@ export default function WatchPage({ params }) {
         if (data.movie) {
           setMovie(data.movie);
 
-          // LOGIC TỰ ĐỘNG NHẢY TẬP (MỚI THÊM)
           const allEpisodes = data.movie.episodes[selectedServer]?.items || [];
-          if (epFromUrl && allEpisodes.length > 0) {
+          
+          // LOGIC NHẢY TẬP THÔNG MINH: Chỉ chạy nếu có ep trên URL và chưa nhảy lần nào
+          if (epFromUrl && !hasInitialJump && allEpisodes.length > 0) {
             const index = allEpisodes.findIndex(e => e.name === epFromUrl);
             if (index !== -1) {
               setSelectedEpisode(index);
+              setHasInitialJump(true); // Khóa chốt lại ngay sau khi nhảy thành công
             }
           }
 
-          // LƯU LỊCH SỬ (GIỮ NGUYÊN CODE CỦA ANH)
+          // LƯU LỊCH SỬ
           const currentItem = {
             slug: slug,
             name: data.movie.name,
@@ -71,7 +76,9 @@ export default function WatchPage({ params }) {
       }
     };
     if (slug) fetchMovie();
-  }, [slug, selectedServer, selectedEpisode, session, epFromUrl]);
+    
+    // Thêm hasInitialJump vào dependency để quản lý vòng đời
+  }, [slug, selectedServer, selectedEpisode, session, epFromUrl, hasInitialJump]);
 
   if (!movie) return (
     <div className="min-h-screen bg-black flex items-center justify-center text-white font-black uppercase tracking-[0.5em] animate-pulse text-[10px]">
