@@ -38,8 +38,8 @@ export default async function HomePage() {
       {/* GIẢM space-y-24 xuống space-y-8 để cực kỳ khít */}
       <div className="relative z-10 p-4 md:p-10 space-y-8 pt-6">
         
-        <ContinueWatching />
-        <FavoriteList />
+        {/* <ContinueWatching />
+        <FavoriteList /> */}
 
         {/* Danh sách các Section phim */}
         <div className="space-y-6"> {/* Khoảng cách cực nhỏ giữa các hàng */}
