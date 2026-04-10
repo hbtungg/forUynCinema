@@ -51,7 +51,7 @@ export default async function HomePage() {
         </div>
 
         <div className="pt-10">
-          <LoveGallery />
+          {/* <LoveGallery /> */}
           <HistoryPopup />
           <SecretChat />
           <Footer />

@@ -42,7 +42,6 @@ export default function HistoryPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userEmail: session.user.email, slug: slug }),
       });
-      // Cập nhật lại localStorage để đồng bộ toàn web
       const saved = JSON.parse(localStorage.getItem('watchHistory') || '[]');
       const updatedLocal = saved.filter(item => item.slug !== slug);
       localStorage.setItem('watchHistory', JSON.stringify(updatedLocal));
@@ -53,15 +52,25 @@ export default function HistoryPage() {
   };
 
   return (
-    <main className="min-h-screen bg-black text-white">
+    <main className="min-h-screen bg-black text-white font-sans overflow-x-hidden">
       <Header />
       
-      <div className="max-w-[1600px] mx-auto px-6 py-32 md:py-40">
-        {/* TIÊU ĐỀ TRANG CỰC CHÁY */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-20 border-l-[6px] border-red-600 pl-8">
+      {/* 1. ĐỒNG BỘ PADDING VÀ VỊ TRÍ VỚI SEARCH PAGE */}
+      <div className="px-6 md:px-12 pt-24 md:pt-32 pb-20">
+        
+        {/* 2. NÚT QUAY LẠI LÃNG MẠN */}
+        <Link 
+          href="/" 
+          className="text-zinc-500 hover:text-red-600 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 mb-8 transition-all group w-fit"
+        >
+          <span className="group-hover:-translate-x-1 transition-transform">←</span> Quay lại trang chủ
+        </Link>
+
+        {/* 3. TIÊU ĐỀ TRANG CỰC CHÁY */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16 border-l-[6px] border-red-600 pl-8">
           <div>
             <p className="text-red-600 font-black uppercase tracking-[0.5em] text-[10px] mb-2">Personal Cinema</p>
-            <h1 className="text-5xl md:text-8xl font-black italic uppercase tracking-tighter leading-none">
+            <h1 className="text-5xl md:text-7xl font-black italic uppercase tracking-tighter leading-none">
               Phim đang <span className="text-zinc-800">xem</span>
             </h1>
           </div>
@@ -70,7 +79,7 @@ export default function HistoryPage() {
           </div>
         </div>
 
-        {/* NỘI DUNG CHÍNH */}
+        {/* 4. NỘI DUNG CHÍNH */}
         {isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
             {[1, 2, 3, 4].map(i => (
@@ -81,7 +90,6 @@ export default function HistoryPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10 md:gap-x-8 md:gap-y-16">
             {history.map((item) => (
               <div key={item.slug} className="group/card relative">
-                {/* Nút xóa tinh tế hơn */}
                 <button
                   onClick={() => removeHistory(item.slug)}
                   className="absolute -top-3 -right-3 w-10 h-10 bg-zinc-900 border border-white/10 rounded-full flex items-center justify-center text-zinc-500 hover:bg-red-600 hover:text-white transition-all z-20 shadow-2xl opacity-0 group-hover/card:opacity-100"
@@ -96,8 +104,6 @@ export default function HistoryPage() {
                       alt={item.name} 
                       className="w-full h-full object-cover opacity-60 group-hover/card:opacity-100 group-hover/card:scale-105 transition-all duration-700" 
                     />
-                    
-                    {/* Overlay thông tin */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent p-6 flex flex-col justify-end">
                       <h3 className="text-white font-black text-sm md:text-base uppercase truncate tracking-tight mb-1">
                         {item.name}
@@ -108,8 +114,6 @@ export default function HistoryPage() {
                           Tập {item.episode || "1"}
                         </span>
                       </div>
-                      
-                      {/* Thanh tiến trình (Progress Bar) */}
                       <div className="mt-4 w-full h-1 bg-white/10 rounded-full overflow-hidden">
                         <div className="w-[65%] h-full bg-red-600 shadow-[0_0_15px_rgba(220,38,38,0.8)]"></div>
                       </div>
@@ -121,9 +125,9 @@ export default function HistoryPage() {
           </div>
         ) : (
           <div className="py-40 text-center">
-            <div className="text-zinc-900 text-[120px] font-black mb-4 leading-none select-none">EMPTY</div>
-            <p className="text-zinc-500 font-bold uppercase tracking-[0.4em] text-xs">Anh chưa có bộ phim nào trong danh sách đang xem</p>
-            <Link href="/" className="inline-block mt-10 px-10 py-4 bg-zinc-900 hover:bg-red-600 text-white text-[10px] font-black uppercase tracking-[0.3em] rounded-2xl transition-all">
+            <div className="text-zinc-900 text-[100px] md:text-[150px] font-black mb-4 leading-none select-none opacity-50">EMPTY</div>
+            <p className="text-zinc-500 font-bold uppercase tracking-[0.4em] text-xs">Em iu chưa có phim nào trong danh sách đang xem</p>
+            <Link href="/" className="inline-block mt-10 px-10 py-4 bg-zinc-900 hover:bg-red-600 text-white text-[10px] font-black uppercase tracking-[0.3em] rounded-2xl transition-all shadow-xl">
               Khám phá ngay
             </Link>
           </div>

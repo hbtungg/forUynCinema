@@ -31,9 +31,18 @@ export default async function ListPage({ searchParams }) {
     <main className="min-h-screen bg-black text-white font-sans overflow-x-hidden">
       <Header />
       
-      <div className="max-w-[1400px] mx-auto px-6 py-32 md:py-40">
+      {/* Container bọc toàn bộ nội dung sau Header */}
+      <div className="px-6 md:px-12 pt-24 md:pt-32 pb-10">
         
-        {/* TIÊU ĐỀ DANH MỤC (IMAGE 2) - ĐÃ LƯỢC BỎ DÒNG THỪA */}
+        {/* NÚT QUAY LẠI: Đồng bộ 100% vị trí và style với Search Page */}
+        <Link 
+          href="/" 
+          className="text-zinc-500 hover:text-red-600 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 mb-8 transition-all group w-fit"
+        >
+          <span className="group-hover:-translate-x-1 transition-transform">←</span> Quay lại trang chủ
+        </Link>
+
+        {/* TIÊU ĐỀ DANH MỤC */}
         <div className="mb-16 border-l-[6px] border-red-600 pl-8 transition-all">
             <h1 className="text-5xl md:text-7xl font-black italic uppercase tracking-tighter leading-none">
                 {type.replace(/-/g, ' ')}
@@ -60,46 +69,49 @@ export default async function ListPage({ searchParams }) {
            )}
         </div>
 
-        {/* PHÂN TRANG (IMAGE 1 STYLE) */}
-        <div className="flex flex-wrap justify-center items-center mt-28 gap-3 pb-20">
-          {page > 1 && (
-            <Link 
-              href={`/danh-sach?type=${type}&page=${page - 1}`} 
-              className="px-6 py-3.5 bg-zinc-900/50 text-zinc-500 rounded-2xl font-black hover:text-white border border-zinc-800/50 uppercase text-[10px] tracking-widest transition-all active:scale-90"
-            >
-              ← Trước
-            </Link>
-          )}
+        {/* PHÂN TRANG (Dưới Grid) */}
+        {totalPages > 1 && (
+            <div className="flex flex-wrap justify-center items-center mt-28 gap-3 pb-10">
+                {page > 1 && (
+                    <Link 
+                        href={`/danh-sach?type=${type}&page=${page - 1}`} 
+                        className="px-6 py-3.5 bg-zinc-900/50 text-zinc-500 rounded-2xl font-black hover:text-white border border-zinc-800/50 uppercase text-[10px] tracking-widest transition-all active:scale-90"
+                    >
+                        ← Trước
+                    </Link>
+                )}
 
-          {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-            let pageNum = totalPages <= 5 
-                ? i + 1 
-                : Math.max(1, Math.min(page - 2, totalPages - 4)) + i;
-            
-            return (
-              <Link
-                key={pageNum}
-                href={`/danh-sach?type=${type}&page=${pageNum}`}
-                className={`w-12 h-12 md:w-14 md:h-14 flex items-center justify-center rounded-2xl font-black text-xs transition-all border ${
-                  page === pageNum 
-                    ? 'bg-red-600 border-red-500 text-white shadow-[0_15px_35px_rgba(220,38,38,0.4)] scale-110 z-10' 
-                    : 'bg-zinc-900/30 border-zinc-800/50 text-zinc-600 hover:border-zinc-500 hover:text-white'
-                }`}
-              >
-                {pageNum}
-              </Link>
-            );
-          })}
+                {/* Logic hiển thị các số trang (giữ nguyên của anh) */}
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNum = totalPages <= 5 
+                        ? i + 1 
+                        : Math.max(1, Math.min(page - 2, totalPages - 4)) + i;
+                    
+                    return (
+                        <Link
+                            key={pageNum}
+                            href={`/danh-sach?type=${type}&page=${pageNum}`}
+                            className={`w-12 h-12 md:w-14 md:h-14 flex items-center justify-center rounded-2xl font-black text-xs transition-all border ${
+                            page === pageNum 
+                                ? 'bg-red-600 border-red-500 text-white shadow-[0_15px_35px_rgba(220,38,38,0.4)] scale-110 z-10' 
+                                : 'bg-zinc-900/30 border-zinc-800/50 text-zinc-600 hover:border-zinc-500 hover:text-white'
+                            }`}
+                        >
+                            {pageNum}
+                        </Link>
+                    );
+                })}
 
-          {page < totalPages && (
-            <Link 
-              href={`/danh-sach?type=${type}&page=${page + 1}`} 
-              className="px-6 py-3.5 bg-zinc-900/50 text-zinc-500 rounded-2xl font-black hover:text-white border border-zinc-800/50 uppercase text-[10px] tracking-widest transition-all active:scale-90"
-            >
-              Sau →
-            </Link>
-          )}
-        </div>
+                {page < totalPages && (
+                    <Link 
+                        href={`/danh-sach?type=${type}&page=${page + 1}`} 
+                        className="px-6 py-3.5 bg-zinc-900/50 text-zinc-500 rounded-2xl font-black hover:text-white border border-zinc-800/50 uppercase text-[10px] tracking-widest transition-all active:scale-90"
+                    >
+                        Sau →
+                    </Link>
+                )}
+            </div>
+        )}
       </div>
       <Footer />
     </main>
