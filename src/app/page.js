@@ -1,83 +1,62 @@
 import { getMovies } from '@/lib/movies';
-import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import HistoryPopup from '@/components/HistoryPopup';
 import ContinueWatching from '@/components/ContinueWatching';
-import CategoryMenu from '@/components/CategoryMenu';
 import FavoriteList from '@/components/FavoriteList';
 import SecretChat from '@/components/SecretChat';
-// IMPORT COMPONENT MỚI Ở ĐÂY
-import NewMoviesGrid from '@/components/NewMoviesGrid';
-import EpoTrigger from '@/components/EpoTrigger';
 import LoveGallery from '@/components/LoveGallery';
+import HeroSlider from '@/components/HeroSlider';
+import MovieSection from '@/components/MovieSection';
 
-export default async function HomePage({ searchParams }) {
-  const sParams = await searchParams;
-  const page = sParams?.page || 1;
+async function getMoviesBySlug(path) {
+  try {
+    // Tăng page_size hoặc lấy nhiều phim hơn để slider hoạt động
+    const res = await fetch(`https://phim.nguonc.com/api/films/${path}?page=1`, { next: { revalidate: 3600 } });
+    const data = await res.json();
+    return data.items || [];
+  } catch (error) { return []; }
+}
 
-  // Gọi dữ liệu phim
-  const data = await getMovies(page);
+export default async function HomePage() {
+  const [allMovies, koreaMovies, actionMovies, chinaMovies, animeMovies] = await Promise.all([
+    getMovies(1).then(d => d?.items || []),
+    getMoviesBySlug('quoc-gia/han-quoc'),
+    getMoviesBySlug('the-loai/hanh-dong'),
+    getMoviesBySlug('quoc-gia/trung-quoc'),
+    getMoviesBySlug('the-loai/hoat-hinh')
+  ]);
 
   return (
-    <main className="min-h-screen bg-black text-white p-6 md:p-12 font-sans relative overflow-x-hidden">
+    <main className="min-h-screen bg-black text-white font-sans relative overflow-x-hidden">
       <Header />
-      {/* <CategoryMenu /> */}
 
-      
-      <ContinueWatching />
-      <FavoriteList />
-
-      {/* 4. SỬ DỤNG COMPONENT MỚI GỌN GÀNG */}
-      <NewMoviesGrid data={data} page={page} />
-
-      {/* 5. PHÂN TRANG (PAGINATION) */}
-      {/* 5. PHÂN TRANG (PAGINATION) */}
-      <div className="flex flex-wrap justify-center items-center mt-20 gap-3 pb-24">
-
-        {/* Nút TRƯỚC */}
-        {Number(page) > 1 && (
-          <Link
-            href={`/?page=${Number(page) - 1}`}
-            className="px-5 py-2.5 bg-zinc-900 text-zinc-500 rounded-xl font-black hover:text-white border border-zinc-800 uppercase text-[10px] tracking-widest transition-all active:scale-95 shadow-lg"
-          >
-            ← TRƯỚC
-          </Link>
-        )}
-
-        {/* DÃY SỐ TRANG: Hiển thị 5 trang thông minh */}
-        {Array.from({ length: 5 }, (_, i) => {
-          // Tính toán để trang hiện tại nằm ở giữa (ví dụ: đang ở trang 3 thì hiện 1 2 [3] 4 5)
-          const pageNum = Math.max(1, Number(page) - 2) + i;
-
-          return (
-            <Link
-              key={pageNum}
-              href={`/?page=${pageNum}`}
-              className={`w-12 h-12 flex items-center justify-center rounded-xl font-black transition-all border ${Number(page) == pageNum
-                  ? 'bg-red-600 border-red-500 text-white shadow-[0_0_20px_rgba(220,38,38,0.4)] scale-110 z-10'
-                  : 'bg-zinc-900 border-zinc-800 text-zinc-600 hover:border-zinc-600 hover:text-white'
-                }`}
-            >
-              {pageNum}
-            </Link>
-          );
-        })}
-
-        {/* Nút SAU */}
-        <Link
-          href={`/?page=${Number(page) + 1}`}
-          className="px-5 py-2.5 bg-zinc-900 text-zinc-500 rounded-xl font-black hover:text-white border border-zinc-800 uppercase text-[10px] tracking-widest transition-all active:scale-95 shadow-lg"
-        >
-          SAU →
-        </Link>
+      <div className="mt-20 relative z-0">
+        <HeroSlider movies={allMovies} />
       </div>
-      
-      <LoveGallery />
-      <HistoryPopup />
-      {/* <EpoTrigger /> */}
-      <SecretChat />
-      <Footer />
+
+      {/* GIẢM space-y-24 xuống space-y-8 để cực kỳ khít */}
+      <div className="relative z-10 p-4 md:p-10 space-y-8 pt-6">
+        
+        <ContinueWatching />
+        <FavoriteList />
+
+        {/* Danh sách các Section phim */}
+        <div className="space-y-6"> {/* Khoảng cách cực nhỏ giữa các hàng */}
+            <MovieSection title="Phim Đang Chiếu" movies={allMovies.slice(0, 12)} viewAllLink="/danh-sach?type=phim-moi-cap-nhat" />
+            <MovieSection title="Phim Hàn Quốc" movies={koreaMovies.slice(0, 12)} viewAllLink="/danh-sach?type=han-quoc" />
+            <MovieSection title="Phim Hành Động" movies={actionMovies.slice(0, 12)} viewAllLink="/danh-sach?type=hanh-dong" />
+            <MovieSection title="Phim Trung Quốc" movies={chinaMovies.slice(0, 12)} viewAllLink="/danh-sach?type=trung-quoc" />
+            <MovieSection title="Phim Hoạt Hình" movies={animeMovies.slice(0, 12)} viewAllLink="/danh-sach?type=hoat-hinh" />
+        </div>
+
+        <div className="pt-10">
+          <LoveGallery />
+          <HistoryPopup />
+          <SecretChat />
+          <Footer />
+        </div>
+      </div>
     </main>
   );
 }
