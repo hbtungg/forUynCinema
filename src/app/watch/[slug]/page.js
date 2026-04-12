@@ -31,6 +31,7 @@ export default function WatchPage({ params }) {
           setMovie(data.movie);
           const allEpisodes = data.movie.episodes[selectedServer]?.items || [];
           
+          // Logic nhảy tập lần đầu tiên khi vào trang từ URL có ?ep=
           if (epFromUrl && !hasInitialJump && allEpisodes.length > 0) {
             const index = allEpisodes.findIndex(e => e.name === epFromUrl);
             if (index !== -1) {
@@ -90,13 +91,9 @@ export default function WatchPage({ params }) {
 
   return (
     <main className="min-h-screen bg-black text-white font-sans overflow-x-hidden">
-      {/* 1. HEADER FIXED */}
       <Header />
 
-      {/* 2. CONTAINER CHÍNH - pt-24 md:pt-32 để đồng bộ vị trí nút Quay lại */}
       <div className="px-6 md:px-12 pt-24 md:pt-32 pb-10">
-        
-        {/* NÚT QUAY LẠI LÃNG MẠN - Đã căn lề trái chuẩn xác */}
         <Link 
           href="/" 
           className="text-zinc-500 hover:text-red-600 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 mb-8 transition-all group w-fit"
@@ -104,7 +101,6 @@ export default function WatchPage({ params }) {
           <span className="group-hover:-translate-x-1 transition-transform duration-300">←</span> Quay lại trang chủ
         </Link>
 
-        {/* PHẦN PLAYER & THÔNG TIN - Căn giữa nội dung xem phim */}
         <div className="flex flex-col items-center">
           <div className="w-full max-w-5xl flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
             <div className="flex flex-col items-start">
@@ -140,7 +136,6 @@ export default function WatchPage({ params }) {
             )}
           </div>
 
-          {/* CÁC THÀNH PHẦN BÊN DƯỚI PLAYER */}
           <div className="w-full max-w-5xl space-y-8 pb-10">
             {servers.length > 1 && (
               <div className="space-y-4">
@@ -169,7 +164,14 @@ export default function WatchPage({ params }) {
                 {currentEpisodes.map((ep, index) => (
                   <button
                     key={index}
-                    onClick={() => setSelectedEpisode(index)}
+                    onClick={() => {
+                      // 1. Cập nhật tập phim trong giao diện
+                      setSelectedEpisode(index);
+                      
+                      // 2. Cập nhật URL trình duyệt để lưu tập phim hiện tại
+                      const newUrl = `/watch/${slug}?ep=${ep.name}`;
+                      window.history.pushState({ path: newUrl }, '', newUrl);
+                    }}
                     className={`min-w-[50px] px-4 py-3 rounded-xl text-[10px] font-black transition-all border-2 ${selectedEpisode === index ? 'bg-white border-white text-black scale-105 shadow-xl' : 'bg-zinc-950 border-zinc-900 text-zinc-600 hover:border-zinc-700 hover:text-zinc-400'}`}
                   >
                     {ep.name === 'Full' ? 'BẢN FULL' : `TẬP ${ep.name}`}

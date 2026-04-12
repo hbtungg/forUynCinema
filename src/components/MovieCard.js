@@ -5,25 +5,35 @@ import FavoriteButton from './FavoriteButton';
 export default function MovieCard({ movie }) {
   const finalHref = `/watch/${movie.slug}`;
 
-  // HÀM LẤY NHÃN TẬP PHIM - ĐÃ FIX LỖI LUÔN HIỆN MOVIE
+  // 1. HÀM LẤY NHÃN TẬP PHIM - RÚT GỌN (CHỈ HIỆN SỐ EP)
   const getEpisodeLabel = () => {
     const current = movie.episode_current || movie.sub_doc || "";
     const total = movie.episode_total || movie.total_episodes || movie.episodes_count || 0;
 
-    // 1. Kiểm tra nếu trong chuỗi episode_current có chữ "tập"
+    // Kiểm tra nếu là phim bộ (dựa trên chuỗi "tập" hoặc tổng số tập > 1)
     if (current && current.toLowerCase().includes("tập")) {
       const epNumber = current.replace(/[^0-9]/g, '');
-      return `Series: ${epNumber || '??'} EP`;
+      return `${epNumber || '??'} EP`;
     }
 
-    // 2. Nếu không có chữ "tập", kiểm tra tổng số tập (total)
-    // Nếu total > 1 thì chắc chắn là phim bộ
     if (parseInt(total) > 1) {
-      return `Series: ${total} EP`;
+      return `${total} EP`;
     }
 
-    // 3. Cuối cùng mới trả về Movie
     return "Movie";
+  };
+
+  // 2. HÀM LẤY NHÃN PHỤ ĐỀ / THUYẾT MINH - CHUẨN HÓA THEO YÊU CẦU
+  const getLanguageLabel = () => {
+    const lang = movie.language || "";
+    const isPude = lang.toLowerCase().includes("phụ đề") || lang.toLowerCase().includes("vietsub");
+    const isThminh = lang.toLowerCase().includes("thuyết minh");
+
+    if (isPude && isThminh) return "P.Đề + T.Minh";
+    if (isThminh) return "T.Minh";
+    if (isPude) return "P.Đề";
+    
+    return lang || "FHD"; // Mặc định nếu không khớp các chuỗi trên
   };
 
   return (
@@ -55,8 +65,8 @@ export default function MovieCard({ movie }) {
             {getEpisodeLabel()}
         </div>
 
-        <div className="absolute top-3 right-3 px-2 h-5 bg-black/50 backdrop-blur-md rounded-lg border border-white/10 z-50 flex items-center justify-center text-[7px] md:text-[8px] font-black text-zinc-400 uppercase tracking-widest">
-          {movie.quality || 'FHD'}
+        <div className="absolute top-3 right-3 px-2.5 h-5 bg-black/50 backdrop-blur-md rounded-lg border border-white/10 z-50 flex items-center justify-center text-[7px] md:text-[8px] font-black text-zinc-300 uppercase tracking-widest">
+          {getLanguageLabel()}
         </div>
       </div>
 
@@ -67,12 +77,10 @@ export default function MovieCard({ movie }) {
         </h3>
         
         <div className="flex items-center justify-between border-t border-zinc-900 pt-2 mt-2">
-          <span className="text-zinc-500 text-[8px] font-black uppercase tracking-widest truncate pr-4 max-w-[75%]">
+          <span className="text-zinc-500 text-[8px] font-black uppercase tracking-widest truncate pr-4 max-w-[90%]">
             {movie.origin_name || movie.original_name || "Original Title"}
           </span>
-          <span className="text-zinc-600 text-[10px] font-black italic tracking-widest">
-            {movie.year || '2026'}
-          </span>
+          {/* ĐÃ XÓA PHẦN HIỂN THỊ SỐ NĂM TẠI ĐÂY */}
         </div>
       </div>
     </div>
