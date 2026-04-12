@@ -2,6 +2,10 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
 
+export const metadata = {
+  title: 'Miễn trừ trách nhiệm', // Trình duyệt sẽ hiện: Giới thiệu - forUyn Cinema 🍿
+};
+
 export default function DisclaimerPage() {
   return (
     <main className="min-h-screen bg-black text-white font-sans">

@@ -4,6 +4,15 @@ import Footer from '@/components/Footer';
 import MovieCard from '@/components/MovieCard';
 import Link from 'next/link';
 
+export async function generateMetadata({ searchParams }) {
+  const sParams = await searchParams;
+  const keyword = sParams?.keyword || ''; // Đổi q thành keyword cho đồng bộ
+  
+  return {
+    title: keyword ? `Tìm kiếm "${keyword}"` : 'Tìm kiếm phim',
+  };
+}
+
 export default async function SearchPage({ searchParams }) {
   const sParams = await searchParams;
   const keyword = sParams?.keyword || '';

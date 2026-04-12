@@ -3,8 +3,14 @@ import Providers from '@/components/Providers';
 import './globals.css';
 
 export const metadata = {
-  title: 'forUyn Cinema 🍿',
-  description: 'fck Netflix',
+  title: {
+    default: 'forUyn Cinema 🍿', // Tiêu đề mặc định khi trang con không khai báo
+    template: '%s - forUyn Cinema 🍿', // %s sẽ được thay bằng tiêu đề của trang con
+  },
+  description: 'Em bảo em thích xem phim',
+  icons: {
+    icon: '/favicon.ico', // Đảm bảo anh có icon để tab trông xịn hơn
+  },
 };
 
 export default function RootLayout({ children }) {

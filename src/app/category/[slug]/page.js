@@ -4,12 +4,48 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import MovieCard from '@/components/MovieCard';
 
+// 1. BẢNG TRA CỨU TÊN THỂ LOẠI CÓ DẤU
+const categoryMap = {
+  'hanh-dong': 'Hành Động',
+  'tinh-cam': 'Tình Cảm',
+  'hai-huoc': 'Hài Hước',
+  'co-trang': 'Cổ Trang',
+  'tam-ly': 'Tâm Lý',
+  'hinh-su': 'Hình Sự',
+  'chien-tranh': 'Chiến Tranh',
+  'the-thao': 'Thể Thao',
+  'vo-thuat': 'Võ Thuật',
+  'vien-tuong': 'Viễn Tưởng',
+  'phieu-luu': 'Phiêu Lưu',
+  'kinh-di': 'Kinh Dị',
+  'hoat-hinh': 'Hoạt Hình',
+  'gia-dinh': 'Gia Đình',
+  'than-thoai': 'Thần Thoại',
+  'tai-lieu': 'Tài Liệu',
+  'hoc-duong': 'Học Đường',
+  'am-nhac': 'Âm Nhạc',
+  'kinh-dien': 'Kinh Điển',
+};
+
+// 2. CẬP NHẬT METADATA CHO TAB TRÌNH DUYỆT
+export async function generateMetadata({ params }) {
+  const { slug } = await params;
+  const categoryName = categoryMap[slug] || slug.replace(/-/g, ' ');
+
+  return {
+    title: `Thể loại: ${categoryName}`,
+  };
+}
+
 export default async function CategoryPage({ params, searchParams }) {
   const { slug } = await params;
   const sParams = await searchParams;
   const page = Number(sParams?.page || 1);
   const typeFilter = sParams?.type || ''; 
   
+  // Tên hiển thị chuẩn Tiếng Việt cho tiêu đề trang
+  const displayName = categoryMap[slug] || slug.replace(/-/g, ' ');
+
   // 1. LẤY DỮ LIỆU BAN ĐẦU ĐỂ BIẾT TỔNG SỐ TRANG
   const initialData = await getMoviesByCategory(slug, page, typeFilter);
   const totalPagesFromAPI = initialData.paginate?.total_pages || initialData.total_pages || (page + 50);
@@ -18,7 +54,7 @@ export default async function CategoryPage({ params, searchParams }) {
   let fetchPage = page;
   const targetCount = 12; 
 
-  // 2. MÁY HÚT PHIM THÔNG MINH (Quét tối đa 10 trang để gom đủ phim)
+  // 2. MÁY HÚT PHIM THÔNG MINH (Giữ nguyên logic của anh)
   while (finalItems.length < targetCount && fetchPage <= totalPagesFromAPI && fetchPage < page + 10) {
     const data = (fetchPage === page) ? initialData : await getMoviesByCategory(slug, fetchPage, typeFilter);
     
@@ -41,19 +77,20 @@ export default async function CategoryPage({ params, searchParams }) {
   return (
     <main className="min-h-screen bg-black text-white p-6 md:p-12 font-sans relative overflow-x-hidden">
       <Header />
-      {/* Nút quay lại lãng mạn */}
-        <Link 
-          href="/" 
-          className="text-zinc-500 hover:text-red-600 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 mb-6 transition-all group"
-        >
-          <span className="group-hover:-translate-x-1 transition-transform">←</span> Quay lại trang chủ
-        </Link>
+      
+      <Link 
+        href="/" 
+        className="text-zinc-500 hover:text-red-600 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 mb-6 transition-all group"
+      >
+        <span className="group-hover:-translate-x-1 transition-transform">←</span> Quay lại trang chủ
+      </Link>
+
       <header className="mb-12 border-b border-zinc-900 pb-8 mt-10">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="flex items-center gap-3">
             <div className="w-1.5 h-10 bg-red-600 rounded-full shadow-[0_0_20px_rgba(220,38,38,0.4)]"></div>
             <h1 className="text-3xl font-black text-zinc-100 uppercase italic tracking-tight">
-              Thể loại: <span className="text-red-600">{slug.replace(/-/g, ' ')}</span>
+              Thể loại: <span className="text-red-600">{displayName}</span>
             </h1>
           </div>
           
@@ -89,7 +126,6 @@ export default async function CategoryPage({ params, searchParams }) {
         )}
       </div>
 
-      {/* 3. THANH PHÂN TRANG BẤT TỬ ĐÃ TRỞ LẠI ❤️ */}
       <div className="flex flex-wrap justify-center items-center mt-20 gap-3 pb-16">
         <Link 
           href={page > 1 ? `/category/${slug}?type=${typeFilter}&page=${page - 1}` : '#'}
@@ -102,7 +138,6 @@ export default async function CategoryPage({ params, searchParams }) {
 
         {(() => {
           let pages = [1];
-          // Logic hiển thị cụm số trang thông minh
           if (page <= 3) {
             for (let i = 2; i <= 5; i++) pages.push(i);
           } else {
@@ -111,7 +146,6 @@ export default async function CategoryPage({ params, searchParams }) {
             pages.push(page + 1);
           }
           
-          // Thêm các mốc trang xa để Thu Uyên chọn nhanh
           if (!pages.includes(page + 5)) pages.push(page + 5);
           if (!pages.includes(page + 10)) pages.push(page + 10);
           if (totalPagesFromAPI > 100 && !pages.includes(500)) pages.push(500);

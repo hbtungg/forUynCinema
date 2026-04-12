@@ -3,6 +3,29 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import NewMoviesGrid from '@/components/NewMoviesGrid';
 
+// 1. BẢNG TRA CỨU CÁC LOẠI TYPE CHỦ CHỐT (Chuẩn Tiếng Việt)
+const listTypeMap = {
+  'han-quoc': 'Phim Hàn Quốc',
+  'phim-moi-cap-nhat': 'Phim Mới Cập Nhật',
+  'hanh-dong': 'Phim Hành Động',
+  'hoat-hinh': 'Phim Hoạt Hình',
+  'trung-quoc': 'Phim Trung Quốc',
+  // Dự phòng các type khác nếu có phát sinh
+  'phim-bo': 'Phim Bộ Mới',
+  'phim-le': 'Phim Lẻ Mới',
+};
+
+// 2. CẬP NHẬT METADATA
+export async function generateMetadata({ searchParams }) {
+  const sParams = await searchParams;
+  const type = sParams?.type || 'phim-moi-cap-nhat';
+  const typeName = listTypeMap[type] || type.replace(/-/g, ' ');
+
+  return {
+    title: typeName, 
+  };
+}
+
 async function getMoviesByList(type, page) {
     try {
         const url = type === 'phim-moi-cap-nhat' 
@@ -26,15 +49,16 @@ export default async function ListPage({ searchParams }) {
   const data = await getMoviesByList(type, page);
   const totalPages = data?.paginate?.total_page || 1;
   const totalItems = data?.paginate?.total_items || 0;
+  
+  // Lấy tên hiển thị từ bảng tra cứu
+  const displayName = listTypeMap[type] || type.replace(/-/g, ' ');
 
   return (
     <main className="min-h-screen bg-black text-white font-sans overflow-x-hidden">
       <Header />
       
-      {/* Container bọc toàn bộ nội dung sau Header */}
       <div className="px-6 md:px-12 pt-24 md:pt-32 pb-10">
         
-        {/* NÚT QUAY LẠI: Đồng bộ 100% vị trí và style với Search Page */}
         <Link 
           href="/" 
           className="text-zinc-500 hover:text-red-600 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 mb-8 transition-all group w-fit"
@@ -42,10 +66,10 @@ export default async function ListPage({ searchParams }) {
           <span className="group-hover:-translate-x-1 transition-transform">←</span> Quay lại trang chủ
         </Link>
 
-        {/* TIÊU ĐỀ DANH MỤC */}
+        {/* TIÊU ĐỀ DANH MỤC CÓ DẤU */}
         <div className="mb-16 border-l-[6px] border-red-600 pl-8 transition-all">
             <h1 className="text-5xl md:text-7xl font-black italic uppercase tracking-tighter leading-none">
-                {type.replace(/-/g, ' ')}
+                {displayName}
             </h1>
             <div className="flex items-center gap-4 mt-4">
                 <p className="text-zinc-500 text-[10px] md:text-xs font-black uppercase tracking-[0.4em] opacity-80">
@@ -58,7 +82,6 @@ export default async function ListPage({ searchParams }) {
             </div>
         </div>
 
-        {/* GRID PHIM */}
         <div className="min-h-[60vh]">
            {data?.items ? (
              <NewMoviesGrid data={data} page={page} />
@@ -69,7 +92,7 @@ export default async function ListPage({ searchParams }) {
            )}
         </div>
 
-        {/* PHÂN TRANG (Dưới Grid) */}
+        {/* PHÂN TRANG (Giữ nguyên logic của anh) */}
         {totalPages > 1 && (
             <div className="flex flex-wrap justify-center items-center mt-28 gap-3 pb-10">
                 {page > 1 && (
@@ -81,7 +104,6 @@ export default async function ListPage({ searchParams }) {
                     </Link>
                 )}
 
-                {/* Logic hiển thị các số trang (giữ nguyên của anh) */}
                 {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                     let pageNum = totalPages <= 5 
                         ? i + 1 

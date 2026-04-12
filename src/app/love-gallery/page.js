@@ -3,6 +3,10 @@ import Footer from '@/components/Footer';
 import LoveGallery from '@/components/LoveGallery';
 import Link from 'next/link';
 
+export const metadata = {
+  title: 'Love Gallery', // Trình duyệt sẽ hiện: Giới thiệu - forUyn Cinema 🍿
+};
+
 export default function LoveGalleryPage() {
   return (
     <main className="min-h-screen bg-black text-white font-sans overflow-x-hidden">

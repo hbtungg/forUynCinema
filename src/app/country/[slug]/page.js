@@ -4,12 +4,43 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import MovieCard from '@/components/MovieCard';
 
+// 1. BẢNG TRA CỨU TÊN QUỐC GIA CÓ DẤU (Đảm bảo hiển thị chuẩn Tiếng Việt)
+const countryMap = {
+  'han-quoc': 'Hàn Quốc',
+  'trung-quoc': 'Trung Quốc',
+  'nhat-ban': 'Nhật Bản',
+  'thai-lan': 'Thái Lan',
+  'au-my': 'Âu Mỹ',
+  'dai-loan': 'Đài Loan',
+  'an-do': 'Ấn Độ',
+  'hong-kong': 'Hồng Kông',
+  'viet-nam': 'Việt Nam',
+  'phap': 'Pháp',
+  'duc': 'Đức',
+  'anh': 'Anh',
+  'canada': 'Canada',
+};
+
+export async function generateMetadata({ params }) {
+  const { slug } = await params;
+  
+  // Lấy tên từ bảng tra cứu, nếu không có mới dùng slug thay thế
+  const countryName = countryMap[slug] || slug.replace(/-/g, ' ');
+
+  return {
+    title: `Phim ${countryName}`,
+  };
+}
+
 export default async function CountryPage({ params, searchParams }) {
   const { slug } = await params;
   const sParams = await searchParams;
   const page = Number(sParams?.page || 1);
   const typeFilter = sParams?.type || ''; 
   
+  // Tên hiển thị có dấu chuẩn cho Header
+  const displayName = countryMap[slug] || slug.replace(/-/g, ' ');
+
   // 1. LẤY DỮ LIỆU BAN ĐẦU ĐỂ BIẾT TỔNG SỐ TRANG
   const initialData = await getMoviesByCountry(slug, page, typeFilter);
   const totalPagesFromAPI = initialData.paginate?.total_pages || initialData.total_pages || (page + 50);
@@ -50,21 +81,22 @@ export default async function CountryPage({ params, searchParams }) {
   return (
     <main className="min-h-screen bg-black text-white p-6 md:p-12 font-sans relative overflow-x-hidden">
       
-      {/* HEADER ĐÃ CHỈNH MÀU TRẮNG - ĐỎ - TRẮNG */}
       <Header />
+      
       {/* Nút quay lại lãng mạn */}
-        <Link 
-          href="/" 
-          className="text-zinc-500 hover:text-red-600 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 mb-6 transition-all group"
-        >
-          <span className="group-hover:-translate-x-1 transition-transform">←</span> Quay lại trang chủ
-        </Link>
+      <Link 
+        href="/" 
+        className="text-zinc-500 hover:text-red-600 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 mb-6 transition-all group"
+      >
+        <span className="group-hover:-translate-x-1 transition-transform">←</span> Quay lại trang chủ
+      </Link>
+
       <header className="mb-12 border-b border-zinc-900 pb-8 mt-10">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="flex items-center gap-3">
             <div className="w-1.5 h-10 bg-red-600 rounded-full shadow-[0_0_20px_rgba(220,38,38,0.4)]"></div>
             <h1 className="text-3xl font-black text-zinc-100 uppercase italic tracking-tight">
-              Quốc gia: <span className="text-red-600">{slug.replace(/-/g, ' ')}</span>
+              Quốc gia: <span className="text-red-600">{displayName}</span>
             </h1>
           </div>
           
@@ -88,7 +120,7 @@ export default async function CountryPage({ params, searchParams }) {
         </div>
       </header>
 
-      {/* DANH SÁCH PHIM: Layout 5 cột chuẩn chỉnh */}
+      {/* DANH SÁCH PHIM */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 md:gap-8">
         {displayItems.length > 0 ? (
            displayItems.map((phim) => (
@@ -101,7 +133,7 @@ export default async function CountryPage({ params, searchParams }) {
         )}
       </div>
 
-      {/* THANH PHÂN TRANG BẤT TỬ ❤️ */}
+      {/* THANH PHÂN TRANG */}
       <div className="flex flex-wrap justify-center items-center mt-20 gap-3 pb-16">
         <Link 
           href={page > 1 ? `/country/${slug}?type=${typeFilter}&page=${page - 1}` : '#'}
@@ -114,7 +146,6 @@ export default async function CountryPage({ params, searchParams }) {
 
         {(() => {
           let pages = [1];
-          // Cụm trang hiện tại
           if (page <= 3) {
             for (let i = 2; i <= 5; i++) pages.push(i);
           } else {
@@ -123,7 +154,6 @@ export default async function CountryPage({ params, searchParams }) {
             pages.push(page + 1);
           }
           
-          // Các mốc nhảy trang để Thu Uyên không thấy thiếu trang
           if (!pages.includes(page + 5)) pages.push(page + 5);
           if (!pages.includes(page + 10)) pages.push(page + 10);
           if (totalPagesFromAPI > 100 && !pages.includes(500)) pages.push(500);

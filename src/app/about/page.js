@@ -2,6 +2,15 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Link from 'next/link';
 
+// export const metadata = {
+//   title: 'Giới thiệu - forUyn Cinema 🍿',
+//   description: 'Tại em bảo em thích xem phim',
+// };
+
+export const metadata = {
+  title: 'Giới thiệu', // Trình duyệt sẽ hiện: Giới thiệu - forUyn Cinema 🍿
+};
+
 export default function AboutPage() {
   return (
     <main className="min-h-screen bg-black text-white font-sans overflow-x-hidden">
