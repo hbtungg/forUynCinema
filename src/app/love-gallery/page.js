@@ -1,10 +1,10 @@
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import LoveGallery from '@/components/LoveGallery';
 import Link from 'next/link';
+import LoveGalleryClient from './LoveGalleryClient'; // Import file vừa tạo
 
 export const metadata = {
-  title: 'Love Gallery', // Trình duyệt sẽ hiện: Giới thiệu - forUyn Cinema 🍿
+  title: 'Love Gallery',
 };
 
 export default function LoveGalleryPage() {
@@ -13,7 +13,6 @@ export default function LoveGalleryPage() {
       <Header />
       
       <div className="px-6 md:px-12 pt-24 md:pt-32 pb-10">
-        {/* NÚT QUAY LẠI LÃNG MẠN (Đồng bộ với các trang khác của anh) */}
         <Link 
           href="/" 
           className="text-zinc-500 hover:text-red-600 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 mb-8 transition-all group w-fit"
@@ -21,8 +20,8 @@ export default function LoveGalleryPage() {
           <span className="group-hover:-translate-x-1 transition-transform">←</span> Quay lại trang chủ
         </Link>
 
-        {/* COMPONENT GALLERY */}
-        <LoveGallery />
+        {/* Gọi component xử lý mật khẩu */}
+        <LoveGalleryClient />
       </div>
       
       <Footer />
