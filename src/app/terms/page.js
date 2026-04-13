@@ -11,7 +11,7 @@ export default function TermsPage() {
     <main className="min-h-screen bg-black text-white font-sans">
       <Header />
       <div className="px-6 md:px-12 pt-24 md:pt-32 pb-20 max-w-4xl mx-auto">
-        <Link href="/" className="text-zinc-500 hover:text-red-600 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 mb-8 transition-all group w-fit">
+        <Link href="/home" className="text-zinc-500 hover:text-red-600 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 mb-8 transition-all group w-fit">
           <span className="group-hover:-translate-x-1 transition-transform">←</span> Trang chủ
         </Link>
 

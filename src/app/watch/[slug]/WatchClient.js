@@ -83,7 +83,7 @@ export default function WatchClient({ initialMovie, slug }) {
       <Header />
       <div className="px-6 md:px-12 pt-24 md:pt-32 pb-10">
         <Link 
-          href="/" 
+          href="/home" 
           className="text-zinc-500 hover:text-red-600 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 mb-8 transition-all group w-fit"
         >
           <span className="group-hover:-translate-x-1 transition-transform duration-300">←</span> Quay lại trang chủ

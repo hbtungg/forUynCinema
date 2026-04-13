@@ -84,7 +84,7 @@ export default function Header() {
 
         {/* --- 2. LOGO --- */}
         <div className={`absolute left-1/2 -translate-x-1/2 md:static md:translate-x-0 transition-all duration-500 ${isSearchOpen ? 'opacity-0 invisible' : 'opacity-100 visible'}`}>
-          <Link href="/" onClick={() => setIsMenuOpen(false)}>
+          <Link href="/home" onClick={() => setIsMenuOpen(false)}>
             <h1 className="text-xl md:text-3xl font-black tracking-tighter italic leading-none group">
               <span className="text-white group-hover:text-red-600 transition-colors">for</span>
               <span className="text-red-600 group-hover:text-white transition-colors">Uyn</span>

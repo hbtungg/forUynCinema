@@ -115,7 +115,7 @@ export default function LoginPage() {
             </Link>
           </p>
 
-          <Link href="/" className="text-zinc-700 text-[9px] font-black uppercase hover:text-red-600 transition-all tracking-[0.3em] inline-flex items-center gap-2 group">
+          <Link href="/home" className="text-zinc-700 text-[9px] font-black uppercase hover:text-red-600 transition-all tracking-[0.3em] inline-flex items-center gap-2 group">
             <span className="group-hover:-translate-x-1 transition-transform">←</span> Quay lại trang chủ
           </Link>
         </footer>
