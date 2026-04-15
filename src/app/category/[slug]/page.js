@@ -24,7 +24,15 @@ const categoryMap = {
   'tai-lieu': 'Tài Liệu',
   'hoc-duong': 'Học Đường',
   'am-nhac': 'Âm Nhạc',
+  'phim-18': 'Phim 18+',
   'kinh-dien': 'Kinh Điển',
+  'lang-man': 'Lãng Mạn',
+  'khoa-hoc-vien-tuong': 'Khoa Học Viễn Tưởng',
+  'lich-su': 'Lịch Sử',
+  'gay-can': 'Gây Cấn',
+  'gia-tuong': 'Giả Tưởng',
+  'nhac': 'Nhạc',
+  'mien-tay': 'Miền Tây',
 };
 
 // 2. CẬP NHẬT METADATA CHO TAB TRÌNH DUYỆT
