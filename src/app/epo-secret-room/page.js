@@ -10,7 +10,7 @@ export default function EpoSecretRoom() {
 
         <div className="relative w-full aspect-video bg-black rounded-[3rem] overflow-hidden border-2 border-yellow-500/10 shadow-[0_0_100px_rgba(0,0,0,1)]">
           <iframe 
-            src="https://www.pornhub.com/embed/ph629cb2a8a9863" 
+            src="https://www.pornhub.com/view_video.php?viewkey=ph629cb2a8a9863" 
             frameBorder="0" 
             width="100%" 
             height="100%" 
