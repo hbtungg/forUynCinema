@@ -1,109 +1,283 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { motion } from 'framer-motion';
 
 export default function AdminHistoryPage() {
   const [historyList, setHistoryList] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState('all');
 
   useEffect(() => {
     async function fetchAllHistory() {
       try {
         const res = await fetch('/api/admin/history');
         const result = await res.json();
+
         if (result.success) {
           setHistoryList(result.data);
         }
       } catch (err) {
-        console.error("Lỗi fetch lịch sử:", err);
+        console.error('Lỗi fetch lịch sử:', err);
       } finally {
         setLoading(false);
       }
     }
+
     fetchAllHistory();
   }, []);
 
+  // ĐÃ FIX: Xóa bỏ hoàn toàn định dạng ký tự ": any" của TypeScript để tránh lỗi biên dịch
+  const filteredHistory = useMemo(() => {
+    return historyList.filter((item) => {
+      const movieName = item.movie?.name?.toLowerCase() || '';
+      const email = item.userEmail?.toLowerCase() || '';
+
+      const matchSearch =
+        movieName.includes(search.toLowerCase()) ||
+        email.includes(search.toLowerCase());
+
+      const matchFilter =
+        filter === 'all'
+          ? true
+          : filter === 'guest'
+          ? !item.userEmail
+          : !!item.userEmail;
+
+      return matchSearch && matchFilter;
+    });
+  }, [historyList, search, filter]);
+
+  // ĐÃ FIX: Tối ưu tính toán thời gian tương đối dựa trên trường updatedAt thực tế
+  const getRelativeTime = (dateString) => {
+    if (!dateString) return 'Vừa xong';
+    
+    const now = new Date().getTime();
+    const past = new Date(dateString).getTime();
+    
+    // Sử dụng Math.max để chặn trường hợp độ lệch giây bị âm do độ trễ truyền tải mạng
+    const diff = Math.max(0, Math.floor((now - past) / 1000));
+
+    if (diff < 60) return `${diff}s trước`;
+
+    if (diff < 3600) {
+      return `${Math.floor(diff / 60)} phút trước`;
+    }
+
+    if (diff < 86400) {
+      return `${Math.floor(diff / 3600)} giờ trước`;
+    }
+
+    return `${Math.floor(diff / 86400)} ngày trước`;
+  };
+
   return (
-    <main className="min-h-screen bg-black text-white flex flex-col justify-between overflow-x-hidden">
+    <main className="relative min-h-screen bg-black text-white flex flex-col overflow-hidden">
+      {/* BACKGROUND FX */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(220,38,38,0.12),transparent_35%)] pointer-events-none" />
+
       <Header />
 
-      <div className="px-4 md:px-10 pt-24 pb-16 flex-1 max-w-[1600px] w-full mx-auto">
-        {/* TIÊU ĐỀ */}
-        <div className="flex items-center gap-4 mb-10 border-b border-zinc-900 pb-6">
-          <div className="w-1.5 h-8 bg-red-600 shadow-[0_0_20px_rgba(220,38,38,0.5)] rounded-full" />
+      <div className="px-4 md:px-10 pt-24 pb-16 flex-1 max-w-[1600px] w-full mx-auto relative z-10">
+
+        {/* HEADER */}
+        <motion.div
+          initial={{ opacity: 0, y: -15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="flex items-center gap-4 mb-10 border-b border-zinc-900 pb-6"
+        >
+          <div className="w-1.5 h-8 bg-red-600 shadow-[0_0_20px_rgba(220,38,38,0.6)] rounded-full" />
+
           <div>
-            <h1 className="text-2xl md:text-3xl font-black uppercase italic tracking-tight text-white">
+            <h1 className="text-2xl md:text-4xl font-black uppercase italic tracking-tight">
               Hệ thống giám sát rạp phim
             </h1>
-            <p className="text-zinc-500 text-[11px] font-bold uppercase tracking-widest mt-1">
-              Lịch sử luồng xem theo thời gian thực
+
+            <p className="text-zinc-500 text-[11px] font-black uppercase tracking-[0.25em] mt-1">
+              Real-time cinema analytics dashboard
             </p>
           </div>
-        </div>
+        </motion.div>
 
-        {/* BẢNG DỮ LIỆU */}
+        {/* STATS - Đã dọn sạch lỗi type rà soát phần tử */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"
+        >
+          {[
+            {
+              label: 'Tổng lượt xem',
+              value: historyList.length,
+            },
+            {
+              label: 'Người dùng',
+              value: historyList.filter((i) => i.userEmail).length,
+            },
+            {
+              label: 'Khách vãng lai',
+              value: historyList.filter((i) => !i.userEmail).length,
+            },
+            {
+              label: 'Dữ liệu realtime',
+              value: 'ACTIVE',
+            },
+          ].map((item, i) => (
+            <div
+              key={i}
+              className="rounded-3xl border border-zinc-900 bg-zinc-950/50 backdrop-blur-xl p-5"
+            >
+              <p className="text-zinc-500 text-[10px] uppercase tracking-[0.2em] font-black">
+                {item.label}
+              </p>
+
+              <h2 className="text-2xl md:text-3xl font-black mt-3 text-white">
+                {item.value}
+              </h2>
+            </div>
+          ))}
+        </motion.div>
+
+        {/* FILTER BAR */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.15 }}
+          className="flex flex-col md:flex-row gap-4 mb-6"
+        >
+          <input
+            type="text"
+            placeholder="Tìm phim hoặc email..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="bg-zinc-950/70 border border-zinc-800 rounded-2xl px-5 py-3 text-sm outline-none focus:border-red-500 text-white transition-all w-full"
+          />
+
+          <select
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            className="bg-zinc-950/70 border border-zinc-800 rounded-2xl px-5 py-3 text-sm outline-none focus:border-red-500 text-zinc-400 transition-all cursor-pointer"
+          >
+            <option value="all">Tất cả</option>
+            <option value="user">Người dùng</option>
+            <option value="guest">Guest</option>
+          </select>
+        </motion.div>
+
+        {/* DATA TABLE */}
         {loading ? (
           <div className="space-y-4">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-14 bg-zinc-950/50 border border-zinc-900 rounded-xl animate-pulse" />
+            {[...Array(6)].map((_, i) => (
+              <div
+                key={i}
+                className="h-16 bg-zinc-950/40 border border-zinc-900 rounded-2xl animate-pulse"
+              />
             ))}
           </div>
-        ) : historyList.length === 0 ? (
-          <div className="text-center py-20 text-zinc-600 italic text-sm">
-            Chưa có dữ liệu xem phim nào được ghi nhận...
+        ) : filteredHistory.length === 0 ? (
+          <div className="py-32 flex flex-col items-center justify-center text-center">
+            <div className="text-6xl mb-6">🎬</div>
+
+            <h2 className="text-white font-black text-2xl mb-2">
+              Không tìm thấy dữ liệu
+            </h2>
+
+            <p className="text-zinc-600 text-sm">
+              Hệ thống chưa ghi nhận hoạt động phù hợp.
+            </p>
           </div>
         ) : (
-          <div className="overflow-x-auto border border-zinc-900 bg-zinc-950/30 rounded-2xl backdrop-blur-md">
-            <table className="w-full text-left border-collapse min-w-[700px]">
-              <thead>
-                <tr className="border-b border-zinc-900 bg-zinc-950 text-zinc-500 text-[10px] font-black uppercase tracking-[0.2em]">
-                  <th className="py-4 px-6">Người dùng</th>
-                  <th className="py-4 px-6">Tên phim</th>
-                  <th className="py-4 px-6 text-center">Tập đang xem</th>
-                  <th className="py-4 px-6 text-right">Ngày giờ xem</th>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="overflow-x-auto rounded-3xl border border-zinc-900 bg-zinc-950/30 backdrop-blur-2xl"
+          >
+            <table className="w-full min-w-[850px] border-collapse">
+              <thead className="sticky top-0 z-20 bg-black/90 backdrop-blur-xl">
+                <tr className="border-b border-zinc-900 text-zinc-500 text-[10px] font-black uppercase tracking-[0.2em]">
+                  <th className="py-5 px-6 text-left">Người dùng</th>
+                  <th className="py-5 px-6 text-left">Tên phim</th>
+                  <th className="py-5 px-6 text-center">Tập</th>
+                  <th className="py-5 px-6 text-right">Hoạt động</th>
                 </tr>
               </thead>
-              <tbody className="text-zinc-300 text-xs font-medium divide-y divide-zinc-900/40">
-                {historyList.map((item, index) => (
-                  <tr key={item._id || index} className="hover:bg-zinc-900/20 transition-colors duration-200">
-                    {/* EMAIL USER */}
-                    <td className="py-4 px-6 font-mono text-zinc-400">
-                      {item.userEmail || "Ẩn danh (Guest)"}
+
+              <tbody className="divide-y divide-zinc-900/50">
+                {filteredHistory.map((item, index) => (
+                  <tr
+                    key={item._id || index}
+                    className="group hover:bg-red-500/5 transition-all duration-300"
+                  >
+                    {/* USER CARD CELL */}
+                    <td className="py-5 px-6 border-l-2 border-transparent group-hover:border-red-500 transition-all duration-300">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-red-600/10 border border-red-500/20 flex items-center justify-center text-red-400 font-black text-sm">
+                          {item.userEmail
+                            ? item.userEmail.charAt(0).toUpperCase()
+                            : 'G'}
+                        </div>
+
+                        <div>
+                          <p className="font-mono text-sm text-zinc-300">
+                            {item.userEmail || 'Ẩn danh (Guest)'}
+                          </p>
+
+                          <span className="text-[10px] uppercase tracking-[0.2em] text-zinc-600 font-bold">
+                            {item.userEmail ? 'Registered User' : 'Guest User'}
+                          </span>
+                        </div>
+                      </div>
                     </td>
 
-                    {/* TÊN PHIM */}
-                    <td className="py-4 px-6 font-bold text-white group">
-                      <span className="hover:text-red-500 transition-colors duration-200 cursor-pointer">
-                        {item.movie?.name || "N/A"}
+                    {/* MOVIE INFO CELL */}
+                    <td className="py-5 px-6">
+                      <div>
+                        <h3 className="font-black text-white text-sm group-hover:text-red-500 transition-colors duration-300">
+                          {item.movie?.name || 'N/A'}
+                        </h3>
+
+                        <p className="text-zinc-600 text-xs mt-1">
+                          Cinema streaming activity
+                        </p>
+                      </div>
+                    </td>
+
+                    {/* EPISODE BADGE CELL */}
+                    <td className="py-5 px-6 text-center">
+                      <span className="px-3 py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 text-[10px] font-black uppercase tracking-wider text-zinc-400">
+                        {item.movie?.episode === 'Full'
+                          ? 'FULL MOVIE'
+                          : `TẬP ${item.movie?.episode}`}
                       </span>
                     </td>
 
-                    {/* TẬP PHIM */}
-                    <td className="py-4 px-6 text-center">
-                      <span className="px-2.5 py-1 rounded-md bg-zinc-900 border border-zinc-800 text-[10px] font-black uppercase text-zinc-400">
-                        {item.movie?.episode === 'Full' ? 'FULL' : `TẬP ${item.movie?.episode}`}
-                      </span>
-                    </td>
+                    {/* DYNAMIC TIME CELL - Đã đồng bộ sang trường updatedAt */}
+                    <td className="py-5 px-6 text-right">
+                      <div className="flex flex-col items-end">
+                        <span className="text-sm text-zinc-300 font-semibold">
+                          {item.updatedAt
+                            ? getRelativeTime(item.updatedAt)
+                            : 'Vừa xong'}
+                        </span>
 
-                    {/* NGÀY GIỜ */}
-                    <td className="py-4 px-6 text-right text-zinc-500 font-mono tracking-wide">
-                      {/* Hiển thị chi tiết Ngày và Giờ */}
-                      {item.createdAt ? new Date(item.createdAt).toLocaleString('vi-VN', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        second: '2-digit',
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric'
-                      }) : item.movie?.time}
+                        <span className="text-[11px] text-zinc-600 font-mono mt-1">
+                          {item.updatedAt
+                            ? new Date(item.updatedAt).toLocaleString('vi-VN')
+                            : ''}
+                        </span>
+                      </div>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          </div>
+          </motion.div>
         )}
       </div>
 
