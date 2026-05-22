@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -28,7 +27,8 @@ export default function LoginPage() {
         setError("Email hoặc mật khẩu không đúng yêu ơi! ❌");
         setLoading(false);
       } else {
-        router.push("/");
+        // ĐÃ ĐỔI: Chuyển hướng thẳng vào trang danh sách phim /home
+        router.push("/home");
         router.refresh();
       }
     } catch (err) {
@@ -38,7 +38,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-6 font-sans relative overflow-hidden">
+    <div className="min-h-screen bg-black flex items-center justify-center p-6 font-sans relative overflow-hidden select-none touch-manipulation">
       {/* Hiệu ứng ánh sáng đỏ mờ ảo ở góc trang */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-red-900/20 rounded-full blur-[120px] pointer-events-none"></div>
       
@@ -72,7 +72,7 @@ export default function LoginPage() {
               type="email" 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-black/60 border border-zinc-800 rounded-2xl px-6 py-4 text-sm text-white focus:outline-none focus:border-red-600/50 focus:ring-1 focus:ring-red-600/20 transition-all placeholder:text-zinc-800 shadow-inner"
+              className="w-full bg-black/60 border border-zinc-800 rounded-2xl px-6 py-4 text-sm text-white focus:outline-none focus:border-red-600/50 focus:ring-1 focus:ring-red-600/20 transition-all placeholder:text-zinc-800 shadow-inner select-text"
               placeholder="xxx@gmail.com"
               required
             />
@@ -86,7 +86,7 @@ export default function LoginPage() {
               type="password" 
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-black/60 border border-zinc-800 rounded-2xl px-6 py-4 text-sm text-white focus:outline-none focus:border-red-600/50 focus:ring-1 focus:ring-red-600/20 transition-all placeholder:text-zinc-800 shadow-inner"
+              className="w-full bg-black/60 border border-zinc-800 rounded-2xl px-6 py-4 text-sm text-white focus:outline-none focus:border-red-600/50 focus:ring-1 focus:ring-red-600/20 transition-all placeholder:text-zinc-800 shadow-inner select-text"
               placeholder="••••••••"
               required
             />
@@ -95,7 +95,8 @@ export default function LoginPage() {
           <button 
             type="submit"
             disabled={loading}
-            className={`w-full bg-red-600 hover:bg-red-500 text-white font-black uppercase py-4 rounded-2xl shadow-[0_15px_35px_rgba(220,38,38,0.4)] active:scale-[0.98] transition-all mt-6 flex items-center justify-center gap-3 tracking-widest text-xs ${loading ? 'opacity-50 cursor-wait' : ''}`}
+            className={`w-full bg-red-600 hover:bg-red-500 text-white font-black uppercase py-4 rounded-2xl shadow-[0_15px_35px_rgba(220,38,38,0.4)] active:scale-[0.95] transition-all mt-6 flex items-center justify-center gap-3 tracking-widest text-xs ${loading ? 'opacity-50 cursor-wait' : ''}`}
+            style={{ WebkitTapHighlightColor: 'transparent' }}
           >
             {loading ? (
               <span className="flex items-center gap-2">
@@ -107,15 +108,23 @@ export default function LoginPage() {
         </form>
 
         <footer className="mt-12 text-center border-t border-zinc-800/30 pt-8 space-y-4">
-          {/* Nút Đăng ký mới cho Thu Uyên */}
+          {/* Nút Đăng ký mới */}
           <p className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.2em]">
             Chưa có tài khoản? 
-            <Link href="/register" className="text-red-600 ml-2 hover:underline transition-all">
+            <Link 
+              href="/register" 
+              className="text-red-600 ml-2 hover:underline transition-all active:opacity-70"
+              style={{ WebkitTapHighlightColor: 'transparent' }}
+            >
               Đăng ký ngay ❤️
             </Link>
           </p>
 
-          <Link href="/home" className="text-zinc-700 text-[9px] font-black uppercase hover:text-red-600 transition-all tracking-[0.3em] inline-flex items-center gap-2 group">
+          <Link 
+            href="/home" 
+            className="text-zinc-700 text-[9px] font-black uppercase hover:text-red-600 transition-all tracking-[0.3em] inline-flex items-center gap-2 group active:opacity-70"
+            style={{ WebkitTapHighlightColor: 'transparent' }}
+          >
             <span className="group-hover:-translate-x-1 transition-transform">←</span> Quay lại trang chủ
           </Link>
         </footer>

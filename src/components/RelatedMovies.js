@@ -12,7 +12,6 @@ export default function RelatedMovies({ allCategories, isEpo = false, actor = ''
       try {
         let url = '';
         if (isEpo) {
-          // Gửi thêm actor để API Route xử lý
           url = `/api/related?isEpo=true&actor=${encodeURIComponent(actor)}&_t=${Date.now()}`;
         } else {
           const getSafeSlug = () => {
@@ -39,7 +38,6 @@ export default function RelatedMovies({ allCategories, isEpo = false, actor = ''
         const data = await res.json();
         
         if (data?.items) {
-          // Chuẩn hóa dữ liệu EPO để MovieCard đọc được
           const formatted = data.items
             .filter(v => (v.id || v.slug) !== currentId)
             .map(v => ({
@@ -50,7 +48,9 @@ export default function RelatedMovies({ allCategories, isEpo = false, actor = ''
               quality: isEpo ? '4K' : v.quality
             }));
 
-          setRelated(formatted.sort(() => Math.random() - 0.5).slice(0, 8));
+          // LOGIC PHÂN TÁCH SỐ LƯỢNG: EPO lấy 8 phim, Phim thường lấy 6 phim
+          const limitCount = isEpo ? 8 : 6;
+          setRelated(formatted.sort(() => Math.random() - 0.5).slice(0, limitCount));
         }
       } catch (err) {
         console.error("Lỗi đề xuất:", err);
@@ -62,25 +62,35 @@ export default function RelatedMovies({ allCategories, isEpo = false, actor = ''
   }, [isEpo, actor, allCategories, currentId]);
 
   return (
-    <div className="mt-24 border-t border-zinc-900/30 pt-16 pb-24">
-      <div className="flex items-center gap-4 mb-12">
+    // Đồng bộ khoảng cách đệm nhẹ nhàng hơn cho trang Watch
+    <div className="mt-16 border-t border-zinc-900/30 pt-10 pb-16 w-full">
+      <div className="flex items-center gap-4 mb-8 px-1">
         {/* Thanh dọc đổi màu theo loại phim */}
-        <div className={`w-1.5 h-8 ${isEpo ? 'bg-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.5)]' : 'bg-red-600 shadow-[0_0_20px_rgba(220,38,38,0.5)]'} rounded-full`}></div>
-        <h2 className="text-xl md:text-2xl font-black uppercase tracking-tighter italic text-white">
+        <div className={`w-1.5 h-6 ${isEpo ? 'bg-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.5)]' : 'bg-red-600 shadow-[0_0_20px_rgba(220,38,38,0.5)]'} rounded-full`}></div>
+        <h2 className="text-base md:text-lg font-black uppercase tracking-widest text-zinc-400 italic">
           {isEpo && actor ? `PHIM CỦA DIỄN VIÊN: ${actor}` : "CHẮC LÀ EM THÍCH"}
         </h2>
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-10 px-2">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="aspect-[2/3] bg-zinc-900/40 rounded-[2.5rem] animate-pulse border border-zinc-800"></div>
+        <div className={`grid gap-5 px-1 ${
+          isEpo 
+            ? 'grid-cols-2 md:grid-cols-4' 
+            : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'
+        }`}>
+          {[...Array(isEpo ? 4 : 6)].map((_, i) => (
+            <div key={i} className="aspect-[2/3] bg-zinc-900/40 rounded-[2rem] animate-pulse border border-zinc-800"></div>
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-6 md:gap-10 px-2">
+        // LOGIC PHÂN TÁCH GRID COLUMN: EPO giữ 4 cột lớn, Phim thường dàn đều thành 6 cột nhỏ tinh tế
+        <div className={`grid gap-5 px-1 ${
+          isEpo 
+            ? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4' 
+            : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'
+        }`}>
           {related.length > 0 && related.map((item) => (
-            <div key={item.id || item.slug} className="hover:translate-y-[-8px] transition-all duration-500">
+            <div key={item.id || item.slug} className="hover:translate-y-[-6px] transition-all duration-500">
               <MovieCard movie={item} />
             </div>
           ))}
