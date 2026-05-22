@@ -42,9 +42,9 @@ export default function UserMenu({ isMobile = false }) {
         </>
       )}
 
-      {/* 3. PHẦN TIỆN ÍCH (Love Gallery nằm ở đây - Luôn hiển thị) */}
+      {/* 3. PHẦN TIỆN ÍCH (Love Gallery, Lịch sử, Yêu thích và Phân quyền Giám sát) */}
       <nav className="flex flex-col gap-1">
-        {/* Love Gallery - Ưu tiên lên đầu hoặc vị trí anh muốn */}
+        {/* Love Gallery - Luôn hiển thị */}
         <Link 
           href="/love-gallery" 
           className={`flex items-center gap-3 px-3 ${isMobile ? 'py-2' : 'py-3'} text-zinc-500 hover:text-white hover:bg-zinc-900/50 rounded-xl transition-all group`}
@@ -61,7 +61,7 @@ export default function UserMenu({ isMobile = false }) {
           <span className={`${isMobile ? 'text-[9px]' : 'text-[10px]'} font-black uppercase tracking-[0.2em]`}>Love Gallery</span>
         </Link>
 
-        {/* Các mục khác chỉ hiện khi đã đăng nhập */}
+        {/* Các mục chỉ hiển thị khi đã đăng nhập */}
         {session && (
           <>
             <Link 
@@ -87,6 +87,26 @@ export default function UserMenu({ isMobile = false }) {
               </div>
               <span className={`${isMobile ? 'text-[9px]' : 'text-[10px]'} font-black uppercase tracking-[0.2em]`}>Phim yêu thích</span>
             </Link>
+
+            {/* ── ĐÃ TÍCH HỢP: Phân quyền hiển thị lối tắt Giám Sát Rạp độc quyền ── */}
+            {session.user.email === 'hb.tungg@gmail.com' && (
+              <Link 
+                href="/admin/history" 
+                className={`flex items-center gap-3 px-3 ${isMobile ? 'py-2' : 'py-3'} text-red-500 hover:text-red-400 hover:bg-red-500/5 rounded-xl transition-all group border border-dashed border-red-950/20`}
+              >
+                <div className={`${isMobile ? 'w-7 h-7' : 'w-8 h-8'} flex items-center justify-center bg-red-950/20 border border-red-900/30 rounded-lg group-hover:bg-red-600 group-hover:text-white transition-colors`}>
+                  {/* Radar/Eye Icon */}
+                  <svg xmlns="http://www.w3.org/2000/svg" width={isMobile ? "14" : "16"} height={isMobile ? "14" : "16"} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="3" />
+                    <path d="M3 12c4-8 14-8 18 0-4 8-14 8-18 0z" />
+                  </svg>
+                </div>
+                <span className={`${isMobile ? 'text-[9px]' : 'text-[10px]'} font-black uppercase tracking-[0.2em] flex items-center gap-1.5`}>
+                  Giám sát rạp
+                  <span className="w-1 h-1 rounded-full bg-red-500 animate-pulse" />
+                </span>
+              </Link>
+            )}
           </>
         )}
       </nav>
