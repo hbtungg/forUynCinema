@@ -24,22 +24,45 @@ export default function RightPanel({ continueItems, genres, topRated }) {
                 {session ? (
                     // TRẠNG THÁI A: ĐÃ ĐĂNG NHẬP -> Hiện danh sách phim đang xem nguyên bản của anh
                     <div className="space-y-1">
-                        {continueItems && continueItems.map((movie, i) => {
-                            const prog = [65, 72, 45][i] || 50; // Dự phòng progress
-                            const ep = ['2h 55m', 'S5:E14 • Ozymandias', 'S3:E7 • Paris'][i] || 'Đang xem';
+                        {continueItems && continueItems.map((item) => {
+                            // 🚀 ĐÃ ĐỒNG BỘ: Đọc trực tiếp dữ liệu thực từ API lịch sử của anh
+                            const epLabel = item.episode ? `Tập ${item.episode}` : 'Đang xem';
+
                             return (
-                                <a key={movie.slug} href={`/watch/${movie.slug}`}
-                                    className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/[0.04] transition-all group">
+                                <a
+                                    key={item.slug}
+                                    href={`/watch/${item.slug}?ep=${item.episode || 1}`} // Khớp y hệt luồng truyền query tập phim của anh
+                                    className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/[0.04] transition-all group"
+                                >
+                                    {/* Khung Poster thu nhỏ */}
                                     <div className="w-16 h-10 flex-shrink-0 rounded-lg overflow-hidden bg-zinc-900 relative">
-                                        <img src={movie.thumb_url} alt={movie.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                                        <div className="absolute bottom-0 left-0 h-[3px] bg-red-600 transition-all" style={{ width: `${prog}%` }} />
+                                        <img
+                                            src={item.thumb_url}
+                                            alt={item.name}
+                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                        />
+                                        {/* Thanh tiến trình (Tạm thời để 50% theo vạch đỏ cũ hoặc dùng item.progress nếu DB có lưu) */}
+                                        <div
+                                            className="absolute bottom-0 left-0 h-[3px] bg-red-600 transition-all"
+                                            style={{ width: `${item.progress || 50}%` }}
+                                        />
                                     </div>
+
+                                    {/* Thông tin văn bản */}
                                     <div className="flex-1 min-w-0">
-                                        <p className="text-[11px] font-bold text-zinc-200 truncate leading-none">{movie.name}</p>
-                                        <p className="text-[9px] text-zinc-600 truncate mt-1.5 font-medium">{ep}</p>
+                                        <p className="text-[11px] font-bold text-zinc-200 truncate leading-none">
+                                            {item.name}
+                                        </p>
+                                        <p className="text-[9px] text-zinc-600 truncate mt-1.5 font-medium">
+                                            ● {epLabel}
+                                        </p>
                                     </div>
+
+                                    {/* Nút Play nhanh */}
                                     <button className="w-6 h-6 flex flex-shrink-0 items-center justify-center rounded-lg bg-zinc-900 text-zinc-600 group-hover:text-white group-hover:bg-red-600 transition-all">
-                                        <svg width="10" height="10" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                                        <svg width="10" height="10" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M8 5v14l11-7z" />
+                                        </svg>
                                     </button>
                                 </a>
                             );

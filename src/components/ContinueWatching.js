@@ -8,6 +8,7 @@ export default function ContinueWatching() {
   const [history, setHistory] = useState([]);
   const scrollRef = useRef(null);
 
+  // Hàm load dữ liệu từ API
   const loadHistory = async () => {
     if (status === "authenticated" && session?.user?.email) {
       try {
@@ -19,17 +20,29 @@ export default function ContinueWatching() {
       } catch (error) {
         console.error("Lỗi lấy lịch sử từ mây:", error);
       }
-    } else {
+    } else if (status === "unauthenticated") {
       setHistory([]);
     }
   };
 
+  // 🚀 LUỒNG 1: Chỉ tự động gọi API chạy khi trạng thái đăng nhập thực sự ĐÃ XÁC THỰC XONG
   useEffect(() => {
-    loadHistory();
+    if (status === "authenticated") {
+      loadHistory();
+    } else if (status === "unauthenticated") {
+      setHistory([]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status]); // Chỉ chạy lại khi status thay đổi (loading -> authenticated)
+
+  // 🚀 LUỒNG 2: Lắng nghe sự kiện cập nhật lịch sử toàn cục (Tách biệt hoàn toàn để tránh vòng lặp)
+  useEffect(() => {
     window.addEventListener('historyUpdated', loadHistory);
     return () => window.removeEventListener('historyUpdated', loadHistory);
-  }, [status, session]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status, session]); // Chỉ đăng ký lại sự kiện khi session thay đổi
 
+  // Hàm xóa lịch sử phim đang xem
   const removeHistory = async (slug) => {
     if (!session?.user?.email) return;
     const updatedHistory = history.filter(item => item.slug !== slug);
@@ -79,12 +92,11 @@ export default function ContinueWatching() {
                 }}
                 className="absolute top-3 right-3 w-8 h-8 bg-black/80 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center text-zinc-400 hover:bg-red-600 hover:text-white transition-all z-50 md:opacity-0 md:group-hover/card:opacity-100 shadow-2xl active:scale-75"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"></path></svg>
               </button>
 
-              {/* FIX TẠI ĐÂY: Thêm query ?ep= để truyền số tập */}
               <Link 
-                href={`/watch/${item.slug}?ep=${item.episode}`} 
+                href={`/watch/${item.slug}?ep=${item.episode || 1}`} 
                 className="block relative aspect-video rounded-[1.8rem] overflow-hidden border border-zinc-800 shadow-2xl bg-[#0a0a0a] transition-all duration-500 group-hover/card:border-red-600/50"
               >
                 <img src={item.thumb_url} alt={item.name} className="w-full h-full object-cover opacity-60 group-hover/card:opacity-100 transition-opacity duration-700" />
