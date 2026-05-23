@@ -1,60 +1,108 @@
 'use client';
+
 import Link from 'next/link';
 
 export default function Footer() {
   return (
-    <footer className="mt-20 pt-16 pb-12 text-center border-t border-zinc-900/50 bg-black relative overflow-hidden">
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full md:w-2/3 h-24 bg-red-600/5 blur-[100px] pointer-events-none"></div>
+    <footer className="relative mt-24 overflow-hidden border-t border-white/[0.05] bg-[#0a0a0c]">
+      
+      {/* Ambient Glow */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -bottom-20 left-1/2 h-52 w-[70%] -translate-x-1/2 bg-red-600/10 blur-[140px]" />
+        <div className="absolute top-0 left-0 h-40 w-40 bg-white/[0.02] blur-3xl" />
+      </div>
 
-      <div className="max-w-7xl mx-auto px-6 relative z-10">
+      <div className="relative z-10 mx-auto max-w-7xl px-6 py-16 md:py-20">
         
-        {/* LOGO: Trên mobile cho hiện màu đỏ nhẹ luôn, không đợi hover */}
-        <div className="mb-10 group">
-          <Link href="/home">
-            <h2 className="text-lg md:text-2xl font-black text-zinc-500 md:text-white/30 md:group-hover:text-white uppercase italic tracking-tighter transition-all duration-700">
-              FOR<span className="text-red-600/80 md:text-zinc-500 md:group-hover:text-red-600">UYN</span> CINEMA
-            </h2>
-          </Link>
-          <div className="mt-2 text-[6px] md:text-[7px] text-zinc-800 uppercase tracking-[0.6em] font-black">
-            Private Collection
-          </div>
-        </div>
-
-        <nav className="flex flex-row justify-center items-center gap-x-6 md:gap-x-12 mb-10">
-          {['Giới thiệu', 'Điều khoản', 'Miễn trừ'].map((label, index) => (
-            <Link 
-              key={index}
-              href="#" 
-              className="text-zinc-500 md:text-zinc-600 md:hover:text-red-600 text-[8px] md:text-[9px] font-black uppercase tracking-[0.2em] py-2"
-            >
-              {label}
+        {/* TOP */}
+        <div className="flex flex-col items-center justify-between gap-12 md:flex-row md:items-start">
+          
+          {/* BRAND */}
+          <div className="text-center md:text-left">
+            <Link href="/home" className="group inline-block">
+              <h2 className="text-2xl md:text-3xl font-black uppercase italic tracking-[-0.08em] text-white/80 transition-all duration-500 group-hover:text-white">
+                FOR
+                <span className="text-red-600 drop-shadow-[0_0_12px_rgba(220,38,38,0.45)]">
+                  UYN
+                </span>
+                <span className="ml-2 text-white/30 group-hover:text-white/60">
+                  CINEMA
+                </span>
+              </h2>
             </Link>
-          ))}
-        </nav>
 
-        <div className="space-y-4 mb-8">
-          <div className="flex flex-col md:flex-row justify-center items-center gap-2 md:gap-4 text-zinc-600 text-[8px] md:text-[10px] uppercase tracking-[0.3em] font-black">
-            <span>&copy; {new Date().getFullYear()}</span>
-            <p>
-              Designed by <span className="text-zinc-500">ThTung</span> 
-              <span className="text-red-900/40 mx-2">for</span> 
-              <span className="text-zinc-500">ThuUyn</span>
+            <p className="mt-3 text-[10px] font-black uppercase tracking-[0.45em] text-zinc-600">
+              Private Streaming Collection
+            </p>
+
+            <p className="mt-6 max-w-sm text-xs leading-relaxed text-zinc-500">
+              A modern cinematic streaming experience crafted with elegance,
+              emotion and obsession for visual perfection.
             </p>
           </div>
-          
-          {/* LỜI NHẮN: Trên mobile cho hiện mờ mờ sẵn (opacity-40) để chị Uyên vẫn đọc được */}
-          <p className="text-zinc-700 md:text-zinc-900 md:hover:text-red-600/40 text-[7px] md:text-[8px] italic tracking-[0.15em] font-bold uppercase transition-all duration-1000 px-4 leading-relaxed">
-            Premium Streaming Experience • Created with love - for em ❤️
-          </p>
+
+          {/* NAVIGATION */}
+          <div className="flex flex-col items-center gap-5 md:items-end">
+            <nav className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
+              {[
+                { label: 'Giới thiệu', href: '/about' },
+                { label: 'Điều khoản',  href: '/terms' },
+                { label: 'Miễn trừ',   href: '/disclaimer' },
+                { label: 'Liên hệ',    href: '/contact' }, // Anh có thể đổi '/contact' thành link tùy ý
+              ].map((item, index) => (
+                <Link
+                  key={index}
+                  href={item.href}
+                  className="group relative text-[9px] md:text-[10px] font-black uppercase tracking-[0.25em] text-zinc-500 transition-all duration-300 hover:text-red-500 py-1"
+                >
+                  {item.label}
+
+                  {/* Thanh chỉ đỏ chạy từ giữa sang hai bên cực kỳ cân xứng */}
+                  <span className="absolute bottom-0 left-1/2 h-px w-0 bg-red-600 transition-all duration-300 -translate-x-1/2 group-hover:w-full" />
+                </Link>
+              ))}
+            </nav>
+
+            {/* QUOTE */}
+            <p className="max-w-md text-center md:text-right text-[10px] italic leading-relaxed tracking-[0.18em] text-zinc-700 transition-all duration-700 hover:text-red-500/60">
+              Premium Streaming Experience • Created with love — for em ❤️
+            </p>
+          </div>
         </div>
 
-        {/* CÁI KẾT: Cho chấm đỏ nháy nhẹ (pulse) để thu hút ánh nhìn thay vì đợi hover */}
-        <div className="mt-8 flex justify-center">
-            <div className="flex items-center gap-4">
-              <div className="w-8 md:w-16 h-px bg-gradient-to-r from-transparent via-zinc-900 to-transparent"></div>
-              <div className="w-1.5 h-1.5 rounded-full bg-red-600/30 animate-pulse shadow-[0_0_10px_rgba(220,38,38,0.5)]"></div>
-              <div className="w-8 md:w-16 h-px bg-gradient-to-r from-transparent via-zinc-900 to-transparent"></div>
+        {/* DIVIDER */}
+        <div className="my-10 h-px w-full bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
+
+        {/* BOTTOM */}
+        <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
+          
+          {/* COPYRIGHT */}
+          <div className="flex flex-col items-center gap-2 text-center md:items-start md:text-left">
+            <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-[0.28em] text-zinc-600">
+              <span>&copy; {new Date().getFullYear()}</span>
+              <span className="text-zinc-800">•</span>
+              <span>All Rights Reserved</span>
             </div>
+
+            <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-700">
+              Designed by{' '}
+              <span className="text-zinc-400">ThTung</span>
+              <span className="mx-2 text-red-900/50">for</span>
+              <span className="text-zinc-400">ThuUyn</span>
+            </p>
+          </div>
+
+          {/* END DOT */}
+          <div className="flex items-center gap-4">
+            <div className="h-px w-12 bg-gradient-to-r from-transparent to-zinc-800" />
+
+            <div className="relative flex items-center justify-center">
+              <div className="absolute h-4 w-4 animate-ping rounded-full bg-red-600/20" />
+              <div className="h-1.5 w-1.5 rounded-full bg-red-500 shadow-[0_0_12px_rgba(239,68,68,0.9)]" />
+            </div>
+
+            <div className="h-px w-12 bg-gradient-to-l from-transparent to-zinc-800" />
+          </div>
         </div>
       </div>
     </footer>

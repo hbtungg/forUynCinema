@@ -1,21 +1,23 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
-import { useSearchParams } from 'next/navigation';
-import { useRouter } from 'next/navigation';
-
+import { useSearchParams, useRouter } from 'next/navigation';
+import Sidebar from '@/components/Sidebar';
 import Header from '@/components/Header';
-import Footer from '@/components/Footer';
 import RelatedMovies from '@/components/RelatedMovies';
+import Footer from '@/components/Footer';
 
-// Helper: nhóm tập thành từng chunk (VD: 1-20, 21-40...)
-function chunkEpisodes(episodes, size = 20) {
-  const chunks = [];
-  for (let i = 0; i < episodes.length; i += size) {
-    chunks.push(episodes.slice(i, i + size));
-  }
-  return chunks;
+// 🚀 SỬ DỤNG TRIỆT ĐỂ: Gọi các linh kiện con anh đã bóc tách ra dùng
+import WatchPlayer from '@/components/watch/WatchPlayer';
+import WatchMetadata from '@/components/watch/WatchMetadata';
+import WatchTabs from '@/components/watch/WatchTabs';
+import MiniPlayerDock from '@/components/watch/MiniPlayerDock';
+
+function chunkEpisodes(eps, size = 20) {
+  const out = [];
+  for (let i = 0; i < eps.length; i += size) out.push(eps.slice(i, i + size));
+  return out;
 }
 
 export default function WatchClient({ initialMovie, slug }) {
@@ -24,347 +26,235 @@ export default function WatchClient({ initialMovie, slug }) {
   const router = useRouter();
 
   const [movie] = useState(initialMovie);
+  const [activeTab, setActiveTab] = useState('episodes'); 
+  const [isDescExpanded, setIsDescExpanded] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [iframeError, setIframeError] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const servers = movie?.episodes || [];
   const epFromUrl = searchParams.get('ep');
 
-  // ── GIẢI PHÁP VÀNG: Khởi tạo State thông minh ngay từ đầu để loại bỏ hoàn toàn Effect 1 ──
   const [selectedServer, setSelectedServer] = useState(0);
-
   const [selectedEpisode, setSelectedEpisode] = useState(() => {
-    const currentEpisodes = servers[0]?.items || [];
-    if (epFromUrl && currentEpisodes.length > 0) {
-      const index = currentEpisodes.findIndex((e) => e.name === epFromUrl);
-      return index !== -1 ? index : 0;
+    const eps = servers[0]?.items || [];
+    if (epFromUrl && eps.length > 0) {
+      const idx = eps.findIndex(e => e.name === epFromUrl);
+      return idx !== -1 ? idx : 0;
     }
     return 0;
   });
-
+  
   const [activeChunk, setActiveChunk] = useState(() => {
-    const currentEpisodes = servers[0]?.items || [];
-    if (epFromUrl && currentEpisodes.length > 0) {
-      const index = currentEpisodes.findIndex((e) => e.name === epFromUrl);
-      return index !== -1 ? Math.floor(index / 20) : 0;
+    const eps = servers[0]?.items || [];
+    if (epFromUrl && eps.length > 0) {
+      const idx = eps.findIndex(e => e.name === epFromUrl);
+      return idx !== -1 ? Math.floor(idx / 20) : 0;
     }
     return 0;
   });
-
-  const [isLoading, setIsLoading] = useState(true);
-  const [cinemaMode, setCinemaMode] = useState(false);
 
   const playerRef = useRef(null);
+  const historyTimerRef = useRef(null);
+  const loadingTimerRef = useRef(null);
 
   const currentEpisodes = servers[selectedServer]?.items || [];
   const episodeChunks = chunkEpisodes(currentEpisodes, 20);
+  const currentEp = currentEpisodes[selectedEpisode];
 
-  // ── Effect 1: ĐÃ XÓA HOÀN TOÀN (Triệt tiêu tận gốc lỗi Cascading Renders) ──
-
-  // ── Effect 2: Ghi lịch sử và Sync DB ──
+  // ── Spinner fallback timeout ──
   useEffect(() => {
-    if (!movie || currentEpisodes.length === 0) return;
+    clearTimeout(loadingTimerRef.current);
+    loadingTimerRef.current = setTimeout(() => setIsLoading(false), 12000);
+    return () => clearTimeout(loadingTimerRef.current);
+  }, [selectedEpisode, selectedServer]);
 
-    const syncHistory = async () => {
-      const currentItem = {
+  // ── Ghi history sau 30s ──
+  useEffect(() => {
+    if (!movie || !currentEp) return;
+    clearTimeout(historyTimerRef.current);
+    historyTimerRef.current = setTimeout(async () => {
+      const item = {
         slug,
         name: movie.name,
         thumb_url: movie.thumb_url,
         time: new Date().toLocaleDateString('vi-VN'),
-        episode: currentEpisodes[selectedEpisode]?.name || '1',
+        episode: currentEp.name || '1'
       };
+      try {
+        const h = JSON.parse(localStorage.getItem('watchHistory') || '[]');
+        localStorage.setItem('watchHistory', JSON.stringify([item, ...h.filter(x => x.slug !== slug)].slice(0, 10)));
+        window.dispatchEvent(new Event('storage'));
+        window.dispatchEvent(new Event('historyUpdated'));
+      } catch (_) {}
 
-      // LocalStorage
-      const history = JSON.parse(localStorage.getItem('watchHistory') || '[]');
-      const newHistory = [
-        currentItem,
-        ...history.filter((item) => item.slug !== slug),
-      ].slice(0, 10);
-      localStorage.setItem('watchHistory', JSON.stringify(newHistory));
-      window.dispatchEvent(new Event('storage'));
-      window.dispatchEvent(new Event('historyUpdated'));
-
-      // Sync DB
       if (session?.user?.email) {
         try {
           await fetch('/api/history', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ movie: currentItem, userEmail: session.user.email }),
+            body: JSON.stringify({ movie: item, userEmail: session.user.email })
           });
-        } catch (err) {
-          console.error("Lỗi sync history DB:", err);
-        }
+        } catch (_) {}
       }
-    };
+    }, 30000);
+    return () => clearTimeout(historyTimerRef.current);
+  }, [movie, slug, selectedEpisode, selectedServer, currentEp, session]);
 
-    syncHistory();
-  }, [selectedEpisode, selectedServer, session, movie, slug, currentEpisodes]);
-
-  // ── Effect 3: Tự động cuộn đưa Player lên đỉnh tầm mắt khi bật Chế độ rạp ──
-  useEffect(() => {
-    if (cinemaMode && playerRef.current) {
-      const timer = setTimeout(() => {
-        playerRef.current.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start',
-        });
-      }, 50);
-      return () => clearTimeout(timer);
-    }
-  }, [cinemaMode]);
-
-  const getCleanEmbedUrl = () => {
-    const url = currentEpisodes[selectedEpisode]?.embed;
+  // 🚀 ĐÃ SỬA: Hàm thường tinh gọn cho mục tiêu tối ưu tự động của React Compiler
+  const getEmbedUrl = () => {
+    const url = currentEp?.embed;
     if (!url) return '';
-    const separator = url.includes('?') ? '&' : '?';
-    return `${url}${separator}t=0&autoplay=1`;
+    return `${url}${url.includes('?') ? '&' : '?'}t=0&autoplay=1`;
   };
 
-  const handleEpisodeChange = (index, epName) => {
+  const handleEpisodeChange = useCallback((index, epName) => {
+    if (index === selectedEpisode) return;
+    
+    // Bật hiệu ứng loading ngay khoảnh khắc click chuột
     setIsLoading(true);
-    setSelectedEpisode(index);
-    const newUrl = `/watch/${slug}?ep=${epName}`;
-    window.history.pushState({ path: newUrl }, '', newUrl);
-  };
+    setIframeError(false);
 
-  const handleServerChange = (index) => {
+    setSelectedEpisode(index);
+    router.replace(`/watch/${slug}?ep=${epName}`, { scroll: false });
+    playerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [selectedEpisode, router, slug]);
+
+  const handleServerChange = useCallback((index) => {
+    if (index === selectedServer) return;
+
+    // Bật hiệu ứng loading ngay khoảnh khắc đổi Server nguồn phát
+    setIsLoading(true);
+    setIframeError(false);
+
     setSelectedServer(index);
     setSelectedEpisode(0);
     setActiveChunk(0);
-    setIsLoading(true);
-  };
+  }, [selectedServer]);
 
   if (!movie) return null;
 
-  const currentEp = currentEpisodes[selectedEpisode];
-  const genre = movie.category?.['3']?.list[0]?.name || 'Đang cập nhật';
+  const genre = movie.category?.['3']?.list?.[0]?.name || '';
+  const country = movie.category?.['4']?.list?.[0]?.name || '';
+  const epName = currentEp?.name || '1';
+  const totalEps = currentEpisodes.length;
 
-  // ── Render Functions ──
-  const renderServerSelector = (compact = false) => {
-    if (servers.length <= 1) return null;
-    return (
-      <div className={compact ? '' : 'p-4 rounded-2xl border border-zinc-900 bg-zinc-950/70'}>
-        <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 mb-3">
-          Server
-        </h2>
-        <div className="flex flex-wrap gap-2">
-          {servers.map((server, index) => (
-            <button
-              key={index}
-              onClick={() => handleServerChange(index)}
-              className={`px-3.5 py-1.5 rounded-lg text-[9px] font-black uppercase transition-all border ${selectedServer === index
-                  ? 'bg-red-600 border-red-500 text-white'
-                  : 'bg-zinc-950 border-zinc-900 text-zinc-500 hover:border-zinc-700 hover:text-zinc-300'
-                }`}
-            >
-              {server.server_name}
-            </button>
-          ))}
-        </div>
-      </div>
-    );
-  };
+return (
+    // 🚀 TẦNG ROOT TỐI CAO: Để chiều dọc, cuộn tự nhiên toàn trang
+    <div className="min-h-screen w-full bg-[#0a0a0c] text-white font-sans antialiased flex flex-col overflow-x-hidden select-none">
+      
+      {/* 1. HEADER (Luôn nằm trên đỉnh) */}
+      <Header 
+        onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)} 
+        sidebarCollapsed={sidebarCollapsed} 
+      />
 
-  const renderEpisodeSelector = (compact = false, maxHeight = '320px') => {
-    return (
-      <div className={compact ? '' : 'p-4 rounded-2xl border border-zinc-900 bg-zinc-950/70'}>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">
-            Danh sách tập ({currentEpisodes.length})
-          </h2>
-        </div>
+      {/* 2. TẦNG THÂN GIỮA CHỈ CHỨA SIDEBAR VÀ KHỐI PLAYER */}
+      <div className="flex flex-1 w-full relative">
+        
+        {/* SIDEBAR BÊN TRÁI CỦA ANH */}
+        <Sidebar collapsed={sidebarCollapsed} />
 
-        {episodeChunks.length > 1 && (
-          <div className="flex flex-wrap gap-1.5 mb-3">
-            {episodeChunks.map((chunk, i) => (
-              <button
-                key={i}
-                onClick={() => setActiveChunk(i)}
-                className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase transition-all border ${activeChunk === i
-                    ? 'bg-red-600 border-red-500 text-white'
-                    : 'bg-zinc-900 border-zinc-800 text-zinc-500 hover:text-zinc-300'
-                  }`}
-              >
-                {chunk[0].name}–{chunk[chunk.length - 1].name}
-              </button>
-            ))}
-          </div>
-        )}
-
-        <div
-          className="grid grid-cols-4 gap-2 overflow-y-auto pr-1 custom-scrollbar"
-          style={{ maxHeight }}
-        >
-          {(episodeChunks[activeChunk] || currentEpisodes).map((ep) => {
-            const index = currentEpisodes.indexOf(ep);
-            const isActive = selectedEpisode === index;
-            return (
-              <button
-                key={index}
-                onClick={() => handleEpisodeChange(index, ep.name)}
-                title={`Tập ${ep.name}`}
-                className={`px-2 py-1.5 rounded-lg text-[10px] font-black transition-all border ${isActive
-                    ? 'bg-white border-white text-black scale-105 shadow-md'
-                    : 'bg-zinc-950 border-zinc-900 text-zinc-500 hover:border-zinc-700 hover:text-zinc-200'
-                  }`}
-              >
-                {ep.name === 'Full' ? 'FULL' : ep.name}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-    );
-  };
-
-  const renderDescription = (compact = false) => {
-    return (
-      <div className={compact ? '' : 'p-4 rounded-2xl border border-zinc-900 bg-zinc-950/70'}>
-        <h3 className="text-[10px] font-black uppercase text-red-600 mb-3 tracking-[0.3em]">
-          Nội dung phim
-        </h3>
-        <div
-          className={`text-zinc-400 text-[12px] leading-relaxed overflow-y-auto pr-1 custom-scrollbar ${compact ? '' : 'max-h-[200px]'
-            }`}
-          dangerouslySetInnerHTML={{ __html: movie.description }}
-        />
-      </div>
-    );
-  };
-
-  return (
-    <main className="min-h-screen bg-black text-white overflow-x-hidden">
-      <Header />
-
-      <div className="px-4 md:px-6 pt-20 md:pt-24 pb-10">
-        <div className="max-w-[1600px] mx-auto">
-
-          {/* BACK */}
-          <button
-            onClick={() => router.push('/home')}
-            className="text-zinc-500 hover:text-red-600 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 mb-4 transition-all group w-fit"
-          >
-            <span className="group-hover:-translate-x-1 transition-transform duration-300">
-              ←
-            </span>
-            Quay lại trang chủ
-          </button>
-
-          {/* HEADER */}
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4">
-            <div>
-              <h1 className="text-2xl md:text-3xl font-black uppercase italic tracking-tight text-red-600">
-                {movie.name}
-              </h1>
-              <p className="text-zinc-500 text-[11px] font-bold uppercase tracking-widest mt-1">
-                {movie.original_name} • {genre}
-              </p>
+        {/* KHU VỰC RUỘT CHỨA NỘI DUNG CHÍNH (Xóa bỏ Footer ở trong này) */}
+        <div className="flex-1 min-w-0 w-full flex flex-col">
+          
+          {/* CONTAINER LẤP ĐẦY KHOẢNG TRỐNG KHI ĐÓNG SIDEBAR */}
+          <div className="w-full max-w-[1680px] mx-auto px-4 md:px-8 xl:px-10 py-6 grid grid-cols-1 xl:grid-cols-[1fr_290px] 2xl:grid-cols-[1fr_320px] gap-6 flex-1">
+            
+            {/* ── CỘT TRÁI (Player + Metadata + Tabs) ── */}
+            <div className="min-w-0 w-full space-y-5">
+              <WatchPlayer 
+                movie={movie} currentEp={currentEp} selectedServer={selectedServer} epName={epName}
+                isLoading={isLoading} iframeError={iframeError} getEmbedUrl={getEmbedUrl}
+                setIsLoading={setIsLoading} setIframeError={setIframeError}
+              />
+              <WatchMetadata 
+                movie={movie} genre={genre} country={country}
+                isDescExpanded={isDescExpanded} setIsDescExpanded={setIsDescExpanded}
+              />
+              <WatchTabs 
+                activeTab={activeTab} setActiveTab={setActiveTab} episodeChunks={episodeChunks}
+                activeChunk={activeChunk} setActiveChunk={setActiveChunk} servers={servers}
+                selectedServer={selectedServer} handleServerChange={handleServerChange}
+                currentEpisodes={currentEpisodes} selectedEpisode={selectedEpisode}
+                handleEpisodeChange={handleEpisodeChange} movie={movie}
+              />
             </div>
 
-            <div className="flex items-center gap-3 flex-wrap">
-              {/* INFO BADGES */}
-              <div className="flex items-center gap-3 text-[10px] font-black uppercase bg-zinc-900/70 border border-zinc-800 px-3 py-2 rounded-lg text-zinc-300">
-                <span>Tập {currentEp?.name || '1'}</span>
-                <span className="text-zinc-700">•</span>
-                <span>{movie.quality}</span>
-                <span className="text-zinc-700">•</span>
-                <span className="text-red-500">{movie.language}</span>
+            {/* ── CỘT PHẢI (Danh sách tập + Đề xuất) ── */}
+            <aside className="w-full space-y-5 min-w-0">
+              <div className="bg-[#111115] border border-white/5 p-4 rounded-2xl flex items-center justify-between">
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Máy chủ</span>
+                <span className="flex items-center gap-1.5 text-[10px] font-black text-red-400">
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                  {servers[selectedServer]?.server_name || 'Server 1'}
+                </span>
               </div>
 
-              {/* CINEMA BUTTON (chỉ PC) */}
-              <button
-                onClick={() => setCinemaMode(!cinemaMode)}
-                className={`hidden xl:inline-flex items-center gap-2 px-4 py-2 rounded-lg text-[10px] uppercase font-black border transition-all ${cinemaMode
-                    ? 'bg-white text-black border-white'
-                    : 'bg-zinc-900 border-zinc-800 text-zinc-300 hover:border-zinc-700'
-                  }`}
-              >
-                {cinemaMode ? (
-                  <><span>✕</span> Thoát chế độ rạp</>
-                ) : (
-                  <><span>⛶</span> Chế độ rạp</>
-                )}
-              </button>
-            </div>
-          </div>
-
-          {/* MAIN LAYOUT */}
-          <div
-            className={`grid gap-5 items-start ${cinemaMode ? 'grid-cols-1' : 'grid-cols-1 xl:grid-cols-[1fr_360px]'
-              }`}
-          >
-            {/* LEFT */}
-            <div className="space-y-5 scroll-mt-6" ref={playerRef}>
-              {/* PLAYER */}
-              <div
-                className={`relative overflow-hidden border border-zinc-900 bg-zinc-950 shadow-[0_0_60px_rgba(0,0,0,0.6)] w-full mx-auto aspect-video ${cinemaMode
-                    ? 'max-w-5xl max-h-[75vh] rounded-2xl'
-                    : 'max-h-[65vh] rounded-xl'
-                  }`}
-              >
-                {isLoading && (
-                  <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-                    <div className="flex flex-col items-center gap-3">
-                      <div className="w-10 h-10 rounded-full border-2 border-white/20 border-t-white animate-spin" />
-                      <span className="text-zinc-500 text-[10px] uppercase font-black tracking-widest">
-                        Đang tải...
-                      </span>
+              <div className="bg-[#111115] border border-white/5 rounded-2xl overflow-hidden">
+                <div className="flex items-center justify-between px-4 py-3.5 border-b border-white/5">
+                  <span className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Danh sách tập</span>
+                  {episodeChunks.length > 1 && (
+                    <div className="relative">
+                      <select value={activeChunk} onChange={e => setActiveChunk(Number(e.target.value))} className="appearance-none bg-transparent text-[10px] font-black text-zinc-600 outline-none pr-4 cursor-pointer">
+                        {episodeChunks.map((chunk, i) => <option key={i} value={i}>{chunk[0].name}–{chunk[chunk.length - 1].name}</option>)}
+                      </select>
+                      <span className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 text-zinc-700 text-[10px]">▾</span>
                     </div>
-                  </div>
-                )}
-
-                {currentEp?.embed ? (
-                  <iframe
-                    key={`${slug}-${selectedServer}-${selectedEpisode}`}
-                    src={getCleanEmbedUrl()}
-                    className="w-full h-full"
-                    allowFullScreen
-                    title={`${movie.name} - Tập ${currentEp.name}`}
-                    onLoad={() => setIsLoading(false)}
-                    onError={() => setIsLoading(false)}
-                  />
-                ) : (
-                  <div className="flex flex-col items-center justify-center h-full gap-3 text-zinc-700 text-sm text-center px-10">
-                    <span className="text-3xl">📡</span>
-                    <p className="italic">Nguồn phim đang gặp sự cố...</p>
-                    <button
-                      onClick={() => setIsLoading(true)}
-                      className="text-[10px] font-black uppercase tracking-widest text-zinc-600 hover:text-zinc-400 border border-zinc-800 px-3 py-1.5 rounded-lg transition-all"
-                    >
-                      Thử lại
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* CINEMA MODE: controls bên dưới player */}
-              {cinemaMode && (
-                <div className="space-y-5 max-w-5xl mx-auto">
-                  {renderServerSelector(true)}
-                  {renderEpisodeSelector(true, '240px')}
-                  {renderDescription(true)}
+                  )}
                 </div>
-              )}
-            </div>
 
-            {/* RIGHT SIDEBAR */}
-            {!cinemaMode && (
-              <div className="space-y-5 xl:sticky xl:top-24">
-                {renderServerSelector()}
-                {renderEpisodeSelector()}
-                {renderDescription()}
+                <div className="overflow-y-auto max-h-[320px] px-2 py-2 space-y-0.5 custom-scrollbar">
+                  {currentEpisodes.map((ep, idx) => {
+                    const isActive = selectedEpisode === idx;
+                    const globalChunkIdx = Math.floor(idx / 20);
+                    if (episodeChunks.length > 1 && globalChunkIdx !== activeChunk) return null;
+
+                    return (
+                      <button key={idx} onClick={() => handleEpisodeChange(idx, ep.name)} className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all group ${isActive ? 'bg-red-600/10 text-white' : 'text-zinc-500 hover:bg-white/[0.02]'}`}>
+                        <div className="flex items-center gap-3">
+                          <span className="shrink-0 w-5 h-5 flex items-center justify-center">
+                            {isActive ? (
+                              <span className="flex items-end gap-[2px] h-3 shrink-0">
+                                <span className="w-[2px] rounded-full bg-red-500 animate-[sb_0.8s_ease-in-out_infinite]" style={{ height: '100%' }} />
+                                <span className="w-[2px] rounded-full bg-red-500 animate-[sb_0.8s_ease-in-out_0.2s_infinite]" style={{ height: '60%' }} />
+                                <span className="w-[2px] rounded-full bg-red-500 animate-[sb_0.8s_ease-in-out_0.4s_infinite]" style={{ height: '80%' }} />
+                              </span>
+                            ) : <span className="text-[9px] text-zinc-700 group-hover:text-zinc-400">▶</span>}
+                          </span>
+                          <span className="text-[12px] font-black tracking-wide">{ep.name === 'Full' ? 'FULL' : `Tập ${ep.name}`}</span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            )}
-          </div>
 
-          {/* RELATED MOVIES */}
-          <div className="w-full max-w-[1600px] mx-auto mt-10">
-            {movie && <RelatedMovies key={slug} allCategories={movie.category} />}
-          </div>
+              <div className="bg-[#111115] border border-white/5 rounded-2xl overflow-hidden p-2">
+                <span className="block text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 px-2 py-2.5 mb-1">Có thể bạn thích</span>
+                {movie && <RelatedMovies key={`sb-${slug}`} allCategories={movie.category} isSidebarMode={true} />}
+              </div>
+            </aside>
 
+          </div>
         </div>
-      </div>
+      </div> {/* 🚀 ĐÓNG KHỐI FLEX NGANG TẠI ĐÂY */}
 
-      <Footer />
-    </main>
+      {/* 3. 🚀 ĐƯA FOOTER RA ĐÂY: Nằm độc lập ngoài khối ngang, bám đáy tràn viền 100% màn hình phẳng luôn! */}
+      <Footer className="w-full shrink-0" />
+
+      {/* 4. BOTTOM MINI PLAYER DOCK */}
+      {/* <MiniPlayerDock 
+        movie={movie} epName={epName} selectedEpisode={selectedEpisode} totalEps={totalEps}
+        currentEpisodes={currentEpisodes} handleEpisodeChange={handleEpisodeChange} playerRef={playerRef}
+      /> */}
+
+      <style jsx global>{`
+        @keyframes sb {
+          0%, 100% { transform: scaleY(1); }
+          50%       { transform: scaleY(0.35); }
+        }
+      `}</style>
+    </div>
   );
 }

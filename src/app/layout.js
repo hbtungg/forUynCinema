@@ -17,18 +17,22 @@ export default function RootLayout({ children }) {
   return (
     <html lang="vi">
       <head>
-        {/* Import font trực tiếp để trị dứt điểm lỗi chữ Ơ, Â, Ư */}
+        {/* ĐÃ KHÔI PHỤC: Import font trực tiếp để trị dứt điểm lỗi chữ Ơ, Â, Ư của anh */}
         <link
           href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,100;0,400;0,700;0,900;1,100;1,400;1,700;1,900&display=swap"
           rel="stylesheet"
         />
       </head>
-      <body className="bg-black text-white antialiased"
-        suppressHydrationWarning>
+      {/* Ép cứng font chữ Be Vietnam Pro lên body toàn cục để không trang nào bị nhảy chữ */}
+      <body 
+        className="bg-black text-white antialiased"
+        style={{ fontFamily: "'Be Vietnam Pro', sans-serif" }}
+        suppressHydrationWarning
+      >
+        {/* Trả lại Providers gốc quyền lực chứa trọn bộ cấu trúc ban đầu của anh */}
         <Providers>
           {children}
         </Providers>
-
       </body>
     </html>
   );

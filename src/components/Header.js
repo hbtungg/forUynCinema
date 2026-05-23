@@ -1,169 +1,291 @@
 'use client';
+
 import { useState, useRef, useEffect } from 'react';
+import { useSession } from "next-auth/react"; // 🚀 ĐẢM BẢO ĐÃ CÓ: Import hook NextAuth để lấy dữ liệu tài khoản
 import Link from 'next/link';
 import SearchBox from './SearchBox';
 import UserMenu from './UserMenu';
-import CategoryMenu from './CategoryMenu';
 
-export default function Header() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false); // Mobile Drawer
-  const [isSearchOpen, setIsSearchOpen] = useState(false); // Mobile Search Overlay
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false); // Desktop User Popup
-  const [isScrolled, setIsScrolled] = useState(false); // Trạng thái cuộn trang
-  const [isVisible, setIsVisible] = useState(true); // Trạng thái ẩn/hiện header
-  const lastScrollY = useRef(0);
-  const menuRef = useRef(null);
+import Hamburger from './header/Hamburger';
+import HeaderLogo from './header/HeaderLogo';
+import MobileDrawer from './header/MobileDrawer';
 
-  // 1. Logic ẩn/hiện Header thông minh & Đổi màu khi cuộn
+export default function Header({ onToggleSidebar, sidebarCollapsed }) {
+  // 🚀 KHAI BÁO CỐT LÕI: Lấy thông tin session và status đăng nhập từ Provider tổng
+  const { data: session, status } = useSession();
+
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const userMenuRef = useRef(null);
+  const [isNotifyOpen, setIsNotifyOpen] = useState(false);
+  const notifyRef = useRef(null);
+  const searchRefPC = useRef(null); // Ref bẫy click ra ngoài để tự đóng ô tìm kiếm PC
+
+  // 1. Tự động đóng User Popup và thu gọn ô tìm kiếm PC khi nhấn chuột ra ngoài rìa
   useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      
-      // Đổi trạng thái nền khi cuộn khỏi đầu trang (> 20px)
-      setIsScrolled(currentScrollY > 20);
-
-      // Ẩn khi cuộn xuống, hiện khi cuộn lên (ngưỡng 100px để tránh nhạy quá)
-      if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
-        setIsVisible(false);
-      } else {
-        setIsVisible(true);
-      }
-      lastScrollY.current = currentScrollY;
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  // 2. Khóa cuộn trang khi mở Drawer Mobile
-  useEffect(() => {
-    document.body.style.overflow = isMenuOpen ? 'hidden' : 'unset';
-  }, [isMenuOpen]);
-
-  // 3. Đóng Desktop User Menu khi bấm ra ngoài
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
+    const handler = (e) => {
+      // Đóng user menu
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
         setIsUserMenuOpen(false);
       }
+      // Đóng ô tìm kiếm PC nếu click ra ngoài khi chưa có từ khóa
+      if (searchRefPC.current && !searchRefPC.current.contains(e.target)) {
+        const input = searchRefPC.current.querySelector('input');
+        if (!input || !input.value) {
+          setIsSearchOpen(false);
+        }
+      }
+      // Đóng quả chuông thông báo nếu click ra ngoài
+      if (notifyRef.current && !notifyRef.current.contains(e.target)) {
+        setIsNotifyOpen(false);
+      }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
   }, []);
 
+  // 2. Khóa cứng dòng cuộn trang khi đang mở Mobile Menu Drawer
+  useEffect(() => {
+    document.body.style.overflow = isMobileMenuOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [isMobileMenuOpen]);
+
+  const handleMenuClick = () => {
+    if (window.innerWidth >= 768) {
+      onToggleSidebar?.();
+      return;
+    }
+    setIsMobileMenuOpen((v) => !v);
+  };
+
   return (
-    <header 
-      ref={menuRef}
-      className={`fixed top-0 left-0 w-full z-[100] px-4 md:px-10 h-16 md:h-20 transition-transform duration-500 ease-in-out transform
-        ${isVisible ? 'translate-y-0' : '-translate-y-full'}
-      `}
-    >
-      {/* LỚP NỀN THÔNG MINH: Thay đổi opacity thay vì thay đổi Padding để tránh giật */}
-      <div className={`absolute inset-0 transition-all duration-700 ease-in-out
-        ${isScrolled ? 'bg-black/80 backdrop-blur-xl opacity-100' : 'bg-transparent opacity-0'}
-      `}></div>
+    <>
+      {/* Khung Header tổng bọc giáp tầng hiển thị z-50 đè phẳng RightPanel */}
+      <header className="flex-shrink-0 h-14 md:h-16 border-b border-white/[0.04] bg-[#0c0c0f] w-full relative z-50 overflow-hidden md:overflow-visible">
+        <div className="w-full h-full relative">
 
-      {/* ĐƯỜNG KẺ DƯỚI: Tách biệt để mờ dần mượt mà */}
-      <div className={`absolute inset-x-0 bottom-0 h-[1px] transition-opacity duration-700 ${isScrolled ? 'bg-white/5 opacity-100' : 'bg-transparent opacity-0'}`}></div>
-
-      <div className="max-w-[1600px] mx-auto flex items-center justify-between h-full relative z-10">
-        
-        {/* --- 1. THANH 3 GẠCH (Mobile Left) --- */}
-        <div className={`md:hidden z-[130] transition-all duration-300 ${isSearchOpen ? 'opacity-0 invisible' : 'opacity-100 visible'}`}>
-          <button 
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="w-10 h-10 flex items-center justify-center text-white active:scale-90 transition-transform"
+          {/* ── CHẾ ĐỘ 1: THANH TÌM KIẾM TRÀN VIỀN MOBILE (Animation lướt mượt mà từ dưới lên) ── */}
+          <div
+            className={`absolute inset-0 md:hidden flex items-center w-full gap-3 px-4 bg-[#0c0c0f] transition-all duration-300 ease-in-out z-50
+              ${isSearchOpen ? 'translate-y-0 opacity-100 visible' : 'translate-y-full opacity-0 invisible'}
+            `}
           >
-            <div className="w-6 h-5 relative">
-              <span className={`absolute block h-0.5 w-full bg-white transition-all duration-500 ${isMenuOpen ? 'rotate-45 top-2' : 'top-0'}`}></span>
-              <span className={`absolute block h-0.5 w-full bg-white transition-all duration-500 top-2 ${isMenuOpen ? 'opacity-0 translate-x-2' : 'opacity-100'}`}></span>
-              <span className={`absolute block h-0.5 w-full bg-white transition-all duration-500 ${isMenuOpen ? '-rotate-45 top-2' : 'top-4'}`}></span>
+            <div className="flex-1">
+              <SearchBox />
             </div>
-          </button>
-        </div>
-
-        {/* --- 2. LOGO --- */}
-        <div className={`absolute left-1/2 -translate-x-1/2 md:static md:translate-x-0 transition-all duration-500 ${isSearchOpen ? 'opacity-0 invisible' : 'opacity-100 visible'}`}>
-          <Link href="/home" onClick={() => setIsMenuOpen(false)}>
-            <h1 className="text-xl md:text-3xl font-black tracking-tighter italic leading-none group">
-              <span className="text-white group-hover:text-red-600 transition-colors">for</span>
-              <span className="text-red-600 group-hover:text-white transition-colors">Uyn</span>
-              <span className="text-white ml-1">Cinema</span>
-            </h1>
-          </Link>
-        </div>
-
-        {/* --- 3. TÌM KIẾM --- */}
-        <div className="hidden md:block flex-1 max-w-[400px] lg:max-w-[500px] mx-10">
-          <SearchBox />
-        </div>
-
-        {/* Bản Mobile Search Overlay */}
-        <div className={`fixed inset-0 bg-[#0a0a0a] z-[140] flex items-center px-4 transition-all duration-500 md:hidden ${isSearchOpen ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'}`}>
-          <div className="flex-1">
-            <SearchBox />
-          </div>
-          <button 
-            onClick={() => setIsSearchOpen(false)}
-            className="ml-4 w-10 h-10 flex items-center justify-center text-red-600 transition-transform active:scale-75"
-          >
-            <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
-          </button>
-        </div>
-
-        {/* --- 4. PHẢI: KÍNH LÚP & DESKTOP MENU --- */}
-        <div className="flex items-center gap-2 z-[130]">
-          <button 
-            onClick={() => setIsSearchOpen(true)}
-            className={`md:hidden w-10 h-10 flex items-center justify-center text-white transition-all duration-300 ${isSearchOpen ? 'opacity-0 scale-0' : 'opacity-100 scale-100'}`}
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-          </button>
-
-          <nav className="hidden lg:block">
-            <CategoryMenu />
-          </nav>
-
-          <div className="hidden md:block relative ml-4">
-            <button 
-              onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-              className={`w-11 h-11 flex items-center justify-center bg-zinc-900/50 backdrop-blur-md border rounded-full transition-all duration-500 ${isUserMenuOpen ? 'border-red-600 rotate-180 shadow-[0_0_15px_rgba(220,38,38,0.3)]' : 'border-zinc-800 rotate-0'}`}
+            <button
+              onClick={() => setIsSearchOpen(false)}
+              className="text-[11px] font-black uppercase tracking-wider text-zinc-400 hover:text-red-500 active:scale-95 px-2 h-9 flex items-center justify-center transition-all duration-200"
             >
-              <svg className={`w-6 h-6 transition-colors ${isUserMenuOpen ? 'text-red-600' : 'text-zinc-400'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              Hủy
             </button>
-            {isUserMenuOpen && (
-              <div className="absolute top-[calc(100%+15px)] right-0 w-72 bg-black border border-white/5 rounded-[2.5rem] p-5 z-[150] shadow-2xl animate-in fade-in zoom-in-95 origin-top-right backdrop-blur-2xl">
-                <UserMenu />
+          </div>
+
+
+          {/* ── CHẾ ĐỘ 2: GIAO DIỆN HEADER NGUYÊN BẢN (PC / TABLET ĐIỀU PHỐI KHÔNG GIAN) ── */}
+          <div className="w-full h-full flex items-center justify-between px-4 md:px-6 relative transition-all duration-300 ease-in-out">
+
+            {/* CỤM TRÁI: Hamburger + Logo */}
+            <div className="flex items-center gap-3">
+              <Hamburger
+                onClick={handleMenuClick}
+                sidebarCollapsed={typeof window !== 'undefined' && window.location.pathname === '/home' ? sidebarCollapsed : true}
+                isMobileMenuOpen={isMobileMenuOpen}
+              />
+              <HeaderLogo isSearchOpen={false} />
+            </div>
+
+            {/* CỤM PHẢI: HỆ THỐNG NÚT BẤM CHỨC NĂNG LIÊN KẾT ĐỒNG BỘ */}
+            <div className="flex items-center gap-1.5 ml-auto flex-shrink-0 relative z-20" ref={searchRefPC}>
+
+              {/* 🛠️ Ô TÌM KIẾM PC/TABLET: Co giãn mượt mà */}
+              <div
+                className={`hidden md:block transition-all duration-300 ease-in-out mr-1
+                  ${isSearchOpen
+                    ? 'w-64 lg:w-80 opacity-100 translate-x-0'
+                    : 'w-0 opacity-0 translate-x-4 pointer-events-none'
+                  }
+                `}
+              >
+                <SearchBox />
               </div>
-            )}
+
+              {/* NÚT KÍNH LÚP TÌM KIẾM KÍCH HOẠT */}
+              <button
+                onClick={() => setIsSearchOpen((v) => !v)}
+                className={`w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-200 active:scale-90
+                  ${isSearchOpen && typeof window !== 'undefined' && window.innerWidth >= 768
+                    ? 'text-red-500 bg-white/[0.05]'
+                    : 'text-zinc-500 hover:text-white hover:bg-white/[0.05]'
+                  }
+                `}
+                aria-label="Toggle search"
+              >
+                <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </button>
+
+              {/* 🔔 NOTIFICATION BELL */}
+              <div className="relative" ref={notifyRef}>
+
+                {/* Nút chuông */}
+                <button
+                  onClick={() => setIsNotifyOpen(v => !v)}
+                  aria-label="Notifications"
+                  className={`relative w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-200 ${isNotifyOpen
+                      ? 'text-red-400 bg-red-500/10'
+                      : 'text-zinc-500 hover:text-white hover:bg-white/5'
+                    }`}
+                >
+                  <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                    <path strokeLinecap="round" strokeLinejoin="round"
+                      d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                    />
+                  </svg>
+                  {/* Chấm đỏ */}
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-[#0a0a0c] animate-pulse" />
+                </button>
+
+                {/* Dropdown */}
+                {isNotifyOpen && (
+                  <div className="absolute top-[calc(100%+8px)] right-0 w-64 bg-[#111115] border border-white/[0.06] rounded-2xl overflow-hidden z-[100] shadow-[0_8px_32px_rgba(0,0,0,0.5)] origin-top-right animate-in fade-in zoom-in-95 duration-200 ease-out">
+
+                    {/* Header dropdown */}
+                    <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.06] bg-white/[0.02]">
+                      <span className="text-red-400 text-sm">🔔</span>
+                      <p className="text-[9px] font-black text-zinc-400 uppercase tracking-[0.25em]">
+                        hb.tungg nhắn nhủ
+                      </p>
+                    </div>
+
+                    {/* Nội dung theo trạng thái */}
+                    <div className="px-4 py-3.5">
+                      {!session ? (
+                        // TRẠNG THÁI 1: Khách chưa đăng nhập
+                        <div className="flex flex-col gap-2">
+                          <p className="text-[11px] font-medium text-zinc-400 leading-relaxed">
+                            Tạo tài khoản đăng nhập nhanh lên 😤
+                          </p>
+                          <p className="text-[9px] text-zinc-600 tracking-wide">đừng để anh phải chờ lâu nha</p>
+                        </div>
+
+                      ) : session.user.email === 'thuuyen009900@gmail.com' || session.user.email === 'hb.tungg@gmail.com' ? (
+                        // TRẠNG THÁI 2: Người nhà ❤️
+                        <div className="flex flex-col gap-2.5">
+                          <div className="flex items-start gap-2">
+                            <span className="text-base leading-none mt-0.5">💕</span>
+                            <p className="text-[12px] font-bold text-red-300 leading-relaxed">
+                              vk ơi anh iu vk nhấttt
+                            </p>
+                          </div>
+                          <div className="flex items-center justify-end gap-1.5 pt-1 border-t border-white/[0.05]">
+                            <span className="w-3 h-[1px] bg-zinc-700" />
+                            <span className="text-[8px] font-black text-zinc-600 uppercase tracking-[0.2em]">
+                              from hb.tungg with love
+                            </span>
+                          </div>
+                        </div>
+
+                      ) : (
+                        // TRẠNG THÁI 3: User thường
+                        <div className="flex items-start gap-2">
+                          <span className="text-base leading-none mt-0.5">🎬</span>
+                          <p className="text-[11px] font-medium text-zinc-400 leading-relaxed">
+                            Chúc bạn xem phim vui vẻ!
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Lịch sử xem nhanh PC */}
+              <button className="w-9 h-9 hidden sm:flex items-center justify-center rounded-xl text-zinc-500 hover:text-white hover:bg-white/[0.05] transition-all">
+                <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </button>
+
+              {/* Khối Profile User Đăng Nhập ĐỘNG HOÀN TOÀN THEO TÀI KHOẢN */}
+              {/* Khối Profile User Đăng Nhập ĐỘNG HOÀN TOÀN THEO TÀI KHOẢN */}
+              <div className="relative hidden md:block" ref={userMenuRef}>
+                {status === "loading" ? (
+                  // 1. TRẠNG THÁI LOADING: Hiện khung xương mờ ảo tránh bị giật lag giao diện
+                  <div className="w-28 h-9 bg-zinc-900/50 border border-white/[0.04] rounded-xl animate-pulse" />
+                ) : session ? (
+                  // 2. TRẠNG THÁI ĐÃ ĐĂNG NHẬP: Hiện Avatar tròn + Tên thật + Badge Premium/VIP
+                  <>
+                    <button
+                      onClick={() => setIsUserMenuOpen((v) => !v)}
+                      className="flex items-center gap-2 pl-1.5 pr-3 py-1.5 rounded-xl border border-white/[0.06] hover:border-white/[0.12] bg-white/[0.03] hover:bg-white/[0.05] transition-all"
+                    >
+                      {/* Avatar động: Lấy chữ cái đầu tiên của tên User */}
+                      <div className="w-7 h-7 rounded-full bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center text-[11px] font-black text-white flex-shrink-0 uppercase">
+                        {session.user.name?.charAt(0) || "U"}
+                      </div>
+
+                      {/* Tên hiển thị động: Tự co giãn theo độ dài tên thực tế */}
+                      <span className="text-[11px] font-black text-white hidden lg:block uppercase tracking-tight max-w-[100px] truncate">
+                        {session.user.name}
+                      </span>
+
+                      {/* Badge Quyền Lực: Tự động cấp Premium cho anh, các tài khoản khác hiện VIP */}
+                      <span className="text-[7px] font-black bg-red-600 text-white px-1.5 py-0.5 rounded uppercase tracking-wide hidden lg:block">
+                        {session.user.email === 'hb.tungg@gmail.com' ? 'Premium' : 'VIP'}
+                      </span>
+
+                      {/* Mũi tên xoay lật trạng thái khi đóng/mở */}
+                      <svg width="11" height="11" className={`text-zinc-600 transition-transform duration-200 ${isUserMenuOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+
+                    {/* Dropdown Menu Popup PC chứa Animation mượt mà */}
+                    {isUserMenuOpen && (
+                      <div className="absolute top-[calc(100%+6px)] right-0 w-64 bg-[#111114] border border-white/[0.07] rounded-2xl p-4 z-[100] shadow-2xl origin-top-right animate-in fade-in zoom-in-95 duration-200 ease-out">
+                        <UserMenu />
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  // 3. TRẠNG THÁI CHƯA ĐĂNG NHẬP: Hiện Icon hình người 👤 tối giản, bấm mở UserMenu
+                  <>
+                    <button
+                      onClick={() => setIsUserMenuOpen((v) => !v)}
+                      className="w-9 h-9 flex items-center justify-center rounded-xl border border-white/[0.06] hover:border-white/[0.15] bg-white/[0.02] hover:bg-white/[0.06] text-zinc-400 hover:text-white transition-all duration-200 active:scale-95"
+                      aria-label="User menu"
+                    >
+                      {/* SVG Icon Hình Người Tối Giản Sang Trọng */}
+                      <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                    </button>
+
+                    {/* Khách bấm vào Icon vẫn hiện UserMenu (để thấy giao diện Đăng ký / Đăng nhập bên trong) */}
+                    {isUserMenuOpen && (
+                      <div className="absolute top-[calc(100%+6px)] right-0 w-64 bg-[#111114] border border-white/[0.07] rounded-2xl p-4 z-[100] shadow-2xl origin-top-right animate-in fade-in zoom-in-95 duration-200 ease-out">
+                        <UserMenu />
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+
+            </div>
           </div>
+
         </div>
-      </div>
+      </header>
 
-      {/* --- MOBILE DRAWER MENU --- */}
-      <div 
-        className={`fixed inset-0 bg-black/80 backdrop-blur-md z-[150] transition-opacity duration-500 md:hidden ${isMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible'}`}
-        onClick={() => setIsMenuOpen(false)}
-      ></div>
-
-      <div className={`fixed top-0 left-0 w-[85%] max-w-[340px] h-screen bg-[#050505] z-[160] transition-transform duration-700 ease-out md:hidden flex flex-col shadow-[20px_0_60px_rgba(0,0,0,1)] border-r border-white/5 ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="flex justify-end p-6">
-           <button onClick={() => setIsMenuOpen(false)} className="text-zinc-500 hover:text-white">
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
-           </button>
-        </div>
-
-        <div className="px-6 pb-20 flex-1 overflow-y-auto space-y-12 scrollbar-hide">
-          <div className="bg-zinc-900/50 p-6 rounded-[2.5rem] border border-white/5 shadow-xl">
-            <UserMenu isMobile={true} />
-          </div>
-
-          <div className="px-2 pb-10">
-            <p className="text-red-600 font-black uppercase text-[10px] tracking-[0.4em] mb-6 pl-1">Mời em nhé</p>
-            <CategoryMenu isMobile={true} closeMobileMenu={() => setIsMenuOpen(false)} />
-          </div>
-        </div>
-      </div>
-    </header>
+      {/* 5. KHAY MOBILE DRAWER MENU */}
+      <MobileDrawer
+        isOpen={isMobileMenuOpen}
+        onClose={() => setIsMobileMenuOpen(false)}
+      />
+    </>
   );
 }

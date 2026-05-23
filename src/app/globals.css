@@ -31,3 +31,58 @@ body {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* src/app/globals.css — thêm vào file hiện có, không xóa phần cũ */
+
+/* ── Ẩn scrollbar toàn site — giữ chức năng cuộn ── */
+* {
+  scrollbar-width: none;          /* Firefox */
+  -ms-overflow-style: none;       /* IE / Edge legacy */
+}
+*::-webkit-scrollbar {
+  display: none;                  /* Chrome / Safari / Opera */
+}
+
+/* ── Utility class phòng khi cần dùng riêng lẻ ── */
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* ==========================================================================
+   ── 🚀 TÂN TRANG THANH CUỘN SIÊU MẢNH CHO KHAY TẬP PHIM CUỘN NGANG ──
+   ========================================================================== */
+
+/* Thiết lập độ mỏng và màu sắc cho trình duyệt Firefox */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.08) transparent !important;
+}
+
+/* Định dạng độ dày cho Chrome, Safari, Edge... (Ép hiển thị đè lên lệnh ẩn toàn cục) */
+.custom-scrollbar::-webkit-scrollbar {
+  display: block !important; /* Buộc phải hiển thị riêng cho khay này */
+  height: 4px !important;    /* Thanh cuộn ngang siêu mảnh chỉ 4px cực tinh tế */
+  width: 4px !important;
+}
+
+/* Đường ray chạy ngầm dưới gầm - Để suốt đời trong suốt cho sạch layout */
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+/* Cục con cuộn di chuyển (Thumb) - Bo góc tròn xịn mịn, kính mờ sang trọng */
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-radius: 99px !important;
+  border: none !important;
+  transition: background 0.3s ease-in-out !important;
+}
+
+/* Hiệu ứng nẩy ánh đỏ mờ ma mị khi người dùng di chuột vào tương tác */
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(220, 38, 38, 0.4) !important; /* Ánh đỏ mờ chuẩn tông rạp phim */
+}
