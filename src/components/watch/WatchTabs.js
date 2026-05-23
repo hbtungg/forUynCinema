@@ -86,16 +86,14 @@ export default function WatchTabs({
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`relative flex items-center gap-1.5 px-4 pb-3 pt-1 text-[11px] font-black uppercase tracking-widest transition-all duration-300 ${
-              activeTab === tab.id ? 'text-white' : 'text-zinc-600 hover:text-zinc-400'
-            }`}
+            className={`relative flex items-center gap-1.5 px-4 pb-3 pt-1 text-[11px] font-black uppercase tracking-widest transition-all duration-300 ${activeTab === tab.id ? 'text-white' : 'text-zinc-600 hover:text-zinc-400'
+              }`}
           >
             <span className="text-xs">{tab.icon}</span>
             <span>{tab.label}</span>
             {tab.badge && (
-              <span className={`px-1.5 py-0.5 rounded-md text-[8px] font-black ${
-                activeTab === tab.id ? 'bg-red-600 text-white' : 'bg-white/5 text-zinc-600'
-              }`}>{tab.badge}</span>
+              <span className={`px-1.5 py-0.5 rounded-md text-[8px] font-black ${activeTab === tab.id ? 'bg-red-600 text-white' : 'bg-white/5 text-zinc-600'
+                }`}>{tab.badge}</span>
             )}
             {activeTab === tab.id && (
               <span className="absolute bottom-0 inset-x-3 h-[2px] bg-red-500 rounded-full shadow-[0_-2px_10px_rgba(220,38,38,0.5)]" />
@@ -105,37 +103,60 @@ export default function WatchTabs({
       </div>
 
       {/* ══════════════════════════════════════════
-          TAB: TẬP PHIM (GIAO DIỆN THẺ THUMBNAIL CUỘN NGANG)
-      ══════════════════════════════════════════ */}
+    TAB: TẬP PHIM (GIAO DIỆN THẺ THUMBNAIL CUỘN NGANG)
+    ══════════════════════════════════════════ */}
       {activeTab === 'episodes' && (
         <div className="space-y-4 w-full">
-          
+
           {/* Top Toolbar gọn gàng căn góc trái */}
           <div className="flex flex-wrap items-center gap-3 w-full border-b border-white/[0.02] pb-3">
+
+            {/* 🚀 ĐÃ NÂNG CẤP: Thay select mặc định bằng Dropdown kính mờ Hover siêu sang chảnh */}
             {servers.length > 1 && (
-              <div className="relative shrink-0">
-                <select
-                  value={selectedServer}
-                  onChange={e => handleServerChange(Number(e.target.value))}
-                  className="appearance-none bg-[#141417] border border-white/5 hover:border-white/10 pl-3 pr-8 py-1.5 rounded-xl text-[10px] font-black text-zinc-400 outline-none cursor-pointer transition-all"
-                >
-                  {servers.map((s, i) => <option key={i} value={i}>{s.server_name || `Mùa ${i + 1}`}</option>)}
-                </select>
-                <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-zinc-600 text-[9px]">▾</span>
+              <div className="relative shrink-0 group/srv">
+                {/* Nút hiển thị Server hiện tại */}
+                <div className="bg-[#141417] border border-white/5 hover:border-white/10 px-3.5 py-1.5 rounded-xl text-[10px] font-black text-zinc-400 flex items-center gap-1.5 cursor-pointer transition-all duration-300 group-hover/srv:text-red-400 group-hover/srv:border-white/10">
+                  <span className="w-1 h-1 rounded-full bg-red-500 animate-pulse" />
+                  <span>{servers[selectedServer]?.server_name || `Mùa ${selectedServer + 1}`}</span>
+                  <span className="text-zinc-600 text-[8px] ml-0.5 tracking-none transition-transform duration-300 group-hover/srv:rotate-180 group-hover/srv:text-red-400">▼</span>
+                </div>
+
+                {/* Khay Menu nẩy ra mượt mà khi hover */}
+                <div className="absolute left-0 top-full mt-1.5 w-40 bg-[#111114]/95 backdrop-blur-xl border border-white/5 rounded-2xl p-1 shadow-2xl opacity-0 invisible group-hover/srv:opacity-100 group-hover/srv:visible transition-all duration-200 z-50 origin-top scale-95 group-hover/srv:scale-100">
+                  <div className="max-h-48 overflow-y-auto custom-scrollbar space-y-0.5">
+                    {servers.map((s, i) => {
+                      const isSelected = selectedServer === i;
+                      return (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => handleServerChange(i)} // Giữ nguyên hàm logic đổi server gốc của anh
+                          className={`w-full text-left px-3 py-2 rounded-xl text-[10px] font-bold transition-all flex items-center justify-between ${isSelected
+                              ? 'bg-red-600 text-white font-black shadow-[0_4px_12px_rgba(220,38,38,0.2)]'
+                              : 'text-zinc-400 hover:bg-white/[0.04] hover:text-white'
+                            }`}
+                        >
+                          <span>{s.server_name || `Mùa ${i + 1}`}</span>
+                          {isSelected && <span className="text-[8px]">●</span>}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             )}
 
+            {/* Cụm nút chọn nhóm tập (GIỮ NGUYÊN BẢN GỐC HOẠT ĐỘNG TỐT CỦA ANH) */}
             {episodeChunks.length > 1 && (
               <div className="flex flex-wrap gap-1.5">
                 {episodeChunks.map((chunk, i) => (
                   <button
                     key={i}
                     onClick={() => setActiveChunk(i)}
-                    className={`px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all border ${
-                      activeChunk === i
+                    className={`px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all border ${activeChunk === i
                         ? 'bg-red-600 border-red-600 text-white shadow-lg shadow-red-600/10'
                         : 'bg-white/[0.01] border-white/[0.04] text-zinc-500 hover:text-zinc-300'
-                    }`}
+                      }`}
                   >
                     {chunk[0].name}–{chunk[chunk.length - 1].name}
                   </button>
@@ -144,9 +165,9 @@ export default function WatchTabs({
             )}
           </div>
 
-          {/* 🚀 LƯU TRÚ DẠNG THẺ CUỘN NGANG CỰC ĐẲNG CẤP */}
+          {/* KHO LƯU TRÚ DẠNG THẺ CUỘN NGANG (GIỮ NGUYÊN VẸN 100% TOÀN BỘ CODE DƯỚI CỦA ANH) */}
           <div className="w-full relative">
-            <div 
+            <div
               className="w-full overflow-x-auto flex items-center gap-3 pb-4 pt-1 custom-scrollbar scroll-smooth"
               style={{ scrollbarWidth: 'thin' }}
             >
@@ -159,34 +180,23 @@ export default function WatchTabs({
                   <button
                     key={idx}
                     onClick={() => handleEpisodeChange(idx, ep.name)}
-                    className={`shrink-0 w-[150px] sm:w-[170px] aspect-[16/10] rounded-xl overflow-hidden relative border transition-all duration-300 group flex flex-col justify-end text-left ${
-                      isActive
+                    className={`shrink-0 w-[150px] sm:w-[170px] aspect-[16/10] rounded-xl overflow-hidden relative border transition-all duration-300 group flex flex-col justify-end text-left ${isActive
                         ? 'border-red-500 shadow-[0_4px_24px_rgba(220,38,38,0.25)] ring-1 ring-red-500'
                         : 'border-white/[0.05] hover:border-white/20'
-                    }`}
+                      }`}
                   >
-                    {/* Ảnh nền Thumbnail phim làm background cho thẻ */}
-                    <img 
-                      src={movie?.thumb_url} 
-                      alt="" 
-                      className="absolute inset-0 w-full h-full object-cover opacity-35 group-hover:opacity-50 group-hover:scale-105 transition-all duration-500 pointer-events-none" 
+                    <img
+                      src={movie?.thumb_url}
+                      alt=""
+                      className="absolute inset-0 w-full h-full object-cover opacity-35 group-hover:opacity-50 group-hover:scale-105 transition-all duration-500 pointer-events-none"
                     />
-                    
-                    {/* Lớp phủ tối chuyển màu để hiện text chân thực */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-0" />
 
-                    {/* Nút Play / Sóng nhạc nổi bật ở trung tâm khi hover hoặc active */}
-                    <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/60 backdrop-blur-md border border-white/10 flex items-center justify-center transition-all duration-300 z-10 ${
-                      isActive ? 'opacity-100 scale-100 bg-red-600/20 border-red-500/30' : 'opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100'
-                    }`}>
-                      {isActive ? (
-                        <PlaybackIndicator />
-                      ) : (
-                        <span className="text-[10px] text-white pl-[2px]">▶</span>
-                      )}
+                    <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/60 backdrop-blur-md border border-white/10 flex items-center justify-center transition-all duration-300 z-10 ${isActive ? 'opacity-100 scale-100 bg-red-600/20 border-red-500/30' : 'opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100'
+                      }`}>
+                      {isActive ? <PlaybackIndicator /> : <span className="text-[10px] text-white pl-[2px]">▶</span>}
                     </div>
 
-                    {/* Nội dung thông tin chữ ở đáy thẻ */}
                     <div className="relative z-10 p-3 w-full bg-gradient-to-t from-black/90 to-transparent">
                       <p className={`text-[12px] font-black tracking-wide leading-none ${isActive ? 'text-red-400' : 'text-white'}`}>
                         {ep.name === 'Full' ? 'FULL' : ep.name}
@@ -201,7 +211,7 @@ export default function WatchTabs({
             </div>
           </div>
 
-          {/* Ghi chú trạng thái tinh tế dưới khay thẻ */}
+          {/* Ghi chú trạng thái tinh tế dưới khay thẻ (GIỮ NGUYÊN CỦA ANH) */}
           {selectedEpisode !== null && currentEpisodes[selectedEpisode] && (
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-red-500/5 border border-red-500/10 w-fit">
               <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse shrink-0" />
