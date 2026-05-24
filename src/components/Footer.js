@@ -15,40 +15,34 @@ export default function Footer() {
       <div className="relative z-10 mx-auto max-w-7xl px-6 py-16 md:py-20">
         
         {/* TOP */}
-        <div className="flex flex-col items-center justify-between gap-12 md:flex-row md:items-start">
+        <div className="flex flex-col gap-8 w-full">
           
-          {/* BRAND */}
+          {/* ── KHỐI 1: LOGO CHÍNH (Đứng độc lập kiêu sa ở trên) ── */}
           <div className="text-center md:text-left">
-            <Link href="/home" className="group inline-block">
-              <h2 className="text-2xl md:text-3xl font-black uppercase italic tracking-[-0.08em] text-white/80 transition-all duration-500 group-hover:text-white">
-                FOR
-                <span className="text-red-600 drop-shadow-[0_0_12px_rgba(220,38,38,0.45)]">
-                  UYN
-                </span>
-                <span className="ml-2 text-white/30 group-hover:text-white/60">
-                  CINEMA
-                </span>
-              </h2>
+            <Link href="/home" className="group inline-block overflow-visible">
+              <img 
+                src="/logo1.png" 
+                alt="forUynCinema Logo" 
+                className="h-20 md:h-24 w-auto object-contain object-left mx-auto md:mx-0 select-none transition-all duration-300 group-hover:scale-[1.02] group-hover:brightness-110 filter drop-shadow-[0_0_20px_rgba(220,38,38,0.2)]" 
+              />
             </Link>
+          </div>
 
-            <p className="mt-3 text-[10px] font-black uppercase tracking-[0.45em] text-zinc-600">
+          {/* ── KHỐI 2: 🚀 ĐÃ SỬA CHÍNH — DÀN HÀNG NGANG ĐỐI XỨNG TUYỆT ĐỐI ── */}
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6 pb-2 border-b border-white/[0.02]">
+            
+            {/* BÊN TRÁI: Dòng chữ phụ hệ thống */}
+            <p className="text-[10px] font-black uppercase tracking-[0.45em] text-zinc-600 text-center md:text-left">
               Private Streaming Collection
             </p>
 
-            <p className="mt-6 max-w-sm text-xs leading-relaxed text-zinc-500">
-              A modern cinematic streaming experience crafted with elegance,
-              emotion and obsession for visual perfection.
-            </p>
-          </div>
-
-          {/* NAVIGATION */}
-          <div className="flex flex-col items-center gap-5 md:items-end">
+            {/* BÊN PHẢI: Hệ thống Menu điều hướng (Đã nhảy lên nằm ngang hàng chuẩn chỉ với chữ phụ) */}
             <nav className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
               {[
                 { label: 'Giới thiệu', href: '/about' },
                 { label: 'Điều khoản',  href: '/terms' },
                 { label: 'Miễn trừ',   href: '/disclaimer' },
-                { label: 'Liên hệ',    href: '/contact' }, // Anh có thể đổi '/contact' thành link tùy ý
+                { label: 'Liên hệ',    href: '/contact' },
               ].map((item, index) => (
                 <Link
                   key={index}
@@ -56,21 +50,29 @@ export default function Footer() {
                   className="group relative text-[9px] md:text-[10px] font-black uppercase tracking-[0.25em] text-zinc-500 transition-all duration-300 hover:text-red-500 py-1"
                 >
                   {item.label}
-
                   {/* Thanh chỉ đỏ chạy từ giữa sang hai bên cực kỳ cân xứng */}
                   <span className="absolute bottom-0 left-1/2 h-px w-0 bg-red-600 transition-all duration-300 -translate-x-1/2 group-hover:w-full" />
                 </Link>
               ))}
             </nav>
 
-            {/* QUOTE */}
-            <p className="max-w-md text-center md:text-right text-[10px] italic leading-relaxed tracking-[0.18em] text-zinc-700 transition-all duration-700 hover:text-red-500/60">
+          </div>
+
+          {/* ── KHỐI 3: MÔ TẢ & QUOTE (Nằm dưới khay ngang hàng) ── */}
+          <div className="flex flex-col gap-6 md:flex-row items-center justify-between mt-2">
+            <p className="max-w-xl text-xs leading-relaxed text-zinc-500 text-center md:text-left">
+              A modern cinematic streaming experience crafted with elegance,
+              emotion and obsession for visual perfection.
+            </p>
+            
+            <p className="max-w-md text-center md:text-right text-[10px] italic leading-relaxed tracking-[0.18em] text-zinc-700 transition-all duration-700 hover:text-red-500/60 flex-shrink-0">
               Premium Streaming Experience • Created with love — for em ❤️
             </p>
           </div>
+
         </div>
 
-        {/* DIVIDER */}
+        {/* DIVIDER TRUNG TÂM */}
         <div className="my-10 h-px w-full bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
 
         {/* BOTTOM */}

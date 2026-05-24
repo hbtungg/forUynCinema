@@ -1,141 +1,180 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import NewMoviesGrid from '@/components/NewMoviesGrid';
 
-// 1. BẢNG TRA CỨU CÁC LOẠI TYPE CHỦ CHỐT (Chuẩn Tiếng Việt)
-const listTypeMap = {
-  'han-quoc': 'Phim Hàn Quốc',
-  'phim-moi-cap-nhat': 'Phim Mới Cập Nhật',
-  'hanh-dong': 'Phim Hành Động',
-  'hoat-hinh': 'Phim Hoạt Hình',
-  'trung-quoc': 'Phim Trung Quốc',
-  // Dự phòng các type khác nếu có phát sinh
-  'phim-bo': 'Phim Bộ Mới',
-  'phim-le': 'Phim Lẻ Mới',
-};
+export default function DanhSachPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
-// 2. CẬP NHẬT METADATA
-export async function generateMetadata({ searchParams }) {
-  const sParams = await searchParams;
-  const type = sParams?.type || 'phim-moi-cap-nhat';
-  const typeName = listTypeMap[type] || type.replace(/-/g, ' ');
+  // 🚀 ĐÃ ĐỒNG BỘ: Lấy danh mục từ tham số URL, mặc định ban đầu là 'phim-moi-cap-nhat'
+  const currentCategory = searchParams.get('type') || 'phim-moi-cap-nhat';
+  const currentPage = Number(searchParams.get('page')) || 1;
 
-  return {
-    title: typeName, 
-  };
-}
+  const [movies, setMovies] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState({ currentPage: 1, totalPages: 1 });
 
-async function getMoviesByList(type, page) {
+  // 🚀 ĐÃ CẬP NHẬT: Định nghĩa các danh mục chuẩn chỉnh khớp với hệ thống slug của API Nguồn C
+  const categories = [
+    { id: 'phim-moi-cap-nhat', label: 'Mới cập nhật', isStatic: true },
+    { id: 'phim-le', label: 'Phim Lẻ', isStatic: false },
+    { id: 'phim-bo', label: 'Phim Bộ', isStatic: false },
+    { id: 'hoat-hinh', label: 'Hoạt Hình', isStatic: false },
+    { id: 'phim-dang-chieu', label: 'Phim Đang Chiếu', isStatic: false },
+  ];
+
+  // Hàm gọi API động dựa theo cấu trúc anh cung cấp
+  const fetchMoviesData = async (category, page = 1) => {
+    setLoading(true);
     try {
-        const url = type === 'phim-moi-cap-nhat' 
-          ? `https://phim.nguonc.com/api/films/phim-moi-cap-nhat?page=${page}`
-          : `https://phim.nguonc.com/api/films/danh-sach/${type}?page=${page}`;
-          
-        const res = await fetch(url, { next: { revalidate: 3600 } });
-        if (!res.ok) return null;
-        return res.json();
+      let apiUrl = '';
+      
+      // 🚀 CHÈN ĐÚNG URL API THỰC TẾ CỦA ANH
+      if (category === 'phim-moi-cap-nhat') {
+        apiUrl = `https://phim.nguonc.com/api/films/phim-moi-cap-nhat?page=${page}`;
+      } else {
+        apiUrl = `https://phim.nguonc.com/api/films/danh-sach/${category}?page=${page}`;
+      }
+
+      const res = await fetch(apiUrl);
+      if (res.ok) {
+        const data = await res.json();
+        
+        // Cấu trúc trả về của Nguồn C thường nằm trong data.items hoặc items trực tiếp
+        const items = data.items || data.data?.items || [];
+        setMovies(items);
+        
+        // Đọc thông tin phân trang từ API Nguồn C để tính toán số trang
+        const metaParams = data.paginate || data.pagination || {};
+        setPagination({
+          currentPage: metaParams.current_page || page,
+          totalPages: metaParams.total_page || 1,
+        });
+      }
     } catch (error) {
-        console.error("Lỗi fetch:", error);
-        return null;
+      console.error('Lỗi kết nối API Nguồn C:', error);
+    } finally {
+      setLoading(false);
     }
-}
+  };
 
-export default async function ListPage({ searchParams }) {
-  const sParams = (await searchParams) || {};
-  const type = sParams?.type || 'phim-moi-cap-nhat';
-  const page = parseInt(sParams?.page) || 1;
+  // Tự động kích hoạt gọi API tải phim mỗi khi URL thay đổi tham số
+  useEffect(() => {
+    fetchMoviesData(currentCategory, currentPage);
+  }, [currentCategory, currentPage]);
 
-  const data = await getMoviesByList(type, page);
-  const totalPages = data?.paginate?.total_page || 1;
-  const totalItems = data?.paginate?.total_items || 0;
-  
-  // Lấy tên hiển thị từ bảng tra cứu
-  const displayName = listTypeMap[type] || type.replace(/-/g, ' ');
+  // Điều hướng mượt mà khi người dùng nhấn chọn Tab danh mục khác
+  const handleCategoryChange = (categoryId) => {
+    router.push(`/danh-sach?type=${categoryId}&page=1`);
+  };
 
   return (
-    <main className="min-h-screen bg-black text-white font-sans overflow-x-hidden">
-      <Header />
+    <div className="min-h-screen w-full bg-[#0a0a0c] text-white px-6 py-8 md:px-12 select-none antialiased">
       
-      <div className="px-6 md:px-12 pt-24 md:pt-32 pb-10">
-        
-        <Link 
-          href="/home" 
-          className="text-zinc-500 hover:text-red-600 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 mb-8 transition-all group w-fit"
-        >
-          <span className="group-hover:-translate-x-1 transition-transform">←</span> Quay lại trang chủ
-        </Link>
-
-        {/* TIÊU ĐỀ DANH MỤC CÓ DẤU */}
-        <div className="mb-16 border-l-[6px] border-red-600 pl-8 transition-all">
-            <h1 className="text-5xl md:text-7xl font-black italic uppercase tracking-tighter leading-none">
-                {displayName}
-            </h1>
-            <div className="flex items-center gap-4 mt-4">
-                <p className="text-zinc-500 text-[10px] md:text-xs font-black uppercase tracking-[0.4em] opacity-80">
-                    Trang {page} <span className="text-zinc-800 mx-2">/</span> Tổng {totalPages} trang
-                </p>
-                <span className="h-1 w-1 rounded-full bg-zinc-800"></span>
-                <p className="text-red-600/50 text-[9px] font-black uppercase tracking-widest">
-                    {totalItems.toLocaleString()} Kết quả
-                </p>
-            </div>
+      {/* ── TIÊU ĐỀ & THANH ĐIỀU HƯỚNG TÙY CHỌN ── */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b border-white/[0.03] pb-6 mb-8">
+        <div>
+          <h1 className="text-xl font-black uppercase tracking-widest text-white italic">
+            Danh Mục Điện Ảnh
+          </h1>
+          <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider mt-1">
+            Hệ thống rạp phim thông minh • forUynCinema
+          </p>
         </div>
 
-        <div className="min-h-[60vh]">
-           {data?.items ? (
-             <NewMoviesGrid data={data} page={page} />
-           ) : (
-             <div className="py-20 text-center text-zinc-800 italic font-medium tracking-widest">
-                Đang mở kho lưu trữ phim...
-             </div>
-           )}
+        {/* Cụm Tabs chọn danh mục kính mờ Premium */}
+        <div className="flex flex-wrap gap-1.5 bg-[#111114]/90 p-1.5 rounded-2xl border border-white/5 backdrop-blur-xl">
+          {categories.map((cat) => {
+            const isSelected = currentCategory === cat.id;
+            return (
+              <button
+                key={cat.id}
+                onClick={() => handleCategoryChange(cat.id)}
+                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all duration-300 active:scale-95 ${
+                  isSelected
+                    ? 'bg-red-600 text-white shadow-[0_4px_15px_rgba(220,38,38,0.3)]'
+                    : 'text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.02]'
+                }`}
+              >
+                {cat.label}
+              </button>
+            );
+          })}
         </div>
-
-        {/* PHÂN TRANG (Giữ nguyên logic của anh) */}
-        {totalPages > 1 && (
-            <div className="flex flex-wrap justify-center items-center mt-28 gap-3 pb-10">
-                {page > 1 && (
-                    <Link 
-                        href={`/danh-sach?type=${type}&page=${page - 1}`} 
-                        className="px-6 py-3.5 bg-zinc-900/50 text-zinc-500 rounded-2xl font-black hover:text-white border border-zinc-800/50 uppercase text-[10px] tracking-widest transition-all active:scale-90"
-                    >
-                        ← Trước
-                    </Link>
-                )}
-
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                    let pageNum = totalPages <= 5 
-                        ? i + 1 
-                        : Math.max(1, Math.min(page - 2, totalPages - 4)) + i;
-                    
-                    return (
-                        <Link
-                            key={pageNum}
-                            href={`/danh-sach?type=${type}&page=${pageNum}`}
-                            className={`w-12 h-12 md:w-14 md:h-14 flex items-center justify-center rounded-2xl font-black text-xs transition-all border ${
-                            page === pageNum 
-                                ? 'bg-red-600 border-red-500 text-white shadow-[0_15px_35px_rgba(220,38,38,0.4)] scale-110 z-10' 
-                                : 'bg-zinc-900/30 border-zinc-800/50 text-zinc-600 hover:border-zinc-500 hover:text-white'
-                            }`}
-                        >
-                            {pageNum}
-                        </Link>
-                    );
-                })}
-
-                {page < totalPages && (
-                    <Link 
-                        href={`/danh-sach?type=${type}&page=${page + 1}`} 
-                        className="px-6 py-3.5 bg-zinc-900/50 text-zinc-500 rounded-2xl font-black hover:text-white border border-zinc-800/50 uppercase text-[10px] tracking-widest transition-all active:scale-90"
-                    >
-                        Sau →
-                    </Link>
-                )}
-            </div>
-        )}
       </div>
+
+      {/* ── LƯỚI KHUNG HIỂN THỊ POSTER PHIM ── */}
+      {loading ? (
+        <div className="flex flex-col items-center justify-center py-32 gap-3">
+          <div className="w-8 h-8 rounded-full border-2 border-zinc-800 border-t-red-600 animate-spin" />
+          <span className="text-[9px] uppercase tracking-widest text-zinc-600 font-black tracking-widest">Đang đồng bộ dữ liệu...</span>
+        </div>
+      ) : movies.length > 0 ? (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5">
+          {movies.map((movie) => (
+            <Link
+              key={movie.slug}
+              href={`/watch/${movie.slug}`}
+              className="group flex flex-col bg-[#111114]/20 border border-white/[0.02] hover:border-white/10 rounded-2xl overflow-hidden transition-all duration-300"
+            >
+              {/* Tỷ lệ ảnh chân dung chuẩn rạp phim */}
+              <div className="aspect-[2/3] w-full bg-zinc-950 relative overflow-hidden">
+                <img
+                  src={movie.thumb_url || movie.poster_url}
+                  alt={movie.name}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0c] via-transparent to-transparent opacity-90" />
+              </div>
+              
+              {/* Chân chữ thông tin phim bên dưới ảnh */}
+              <div className="p-3 flex-1 flex flex-col justify-between gap-1">
+                <h3 className="text-[11px] font-bold text-zinc-200 group-hover:text-red-400 transition-colors leading-snug line-clamp-2">
+                  {movie.name}
+                </h3>
+                <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-wider">
+                  {movie.year || '2026'} • {movie.current_episode || movie.episode_current || 'Full'}
+                </p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-24 text-[11px] text-zinc-500 font-medium">
+          Không tìm thấy nội dung nào trong danh mục này. 🎬
+        </div>
+      )}
+
+      {/* ── THANH ĐIỀU HƯỚNG PHÂN TRANG (PAGINATION) ── */}
+      {!loading && pagination.totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 mt-16 pt-6 border-t border-white/[0.02]">
+          <button
+            disabled={currentPage <= 1}
+            onClick={() => router.push(`/danh-sach?type=${currentCategory}&page=${currentPage - 1}`)}
+            className="px-4 py-2 rounded-xl border border-white/5 bg-zinc-900/40 text-[10px] font-black text-zinc-400 disabled:opacity-20 disabled:pointer-events-none hover:text-white transition-all active:scale-95"
+          >
+            Trước
+          </button>
+          
+          <span className="text-[10px] font-black tabular-nums text-zinc-500 px-3 py-1.5 bg-[#111114] border border-white/5 rounded-xl">
+            {currentPage} / {pagination.totalPages}
+          </span>
+          
+          <button
+            disabled={currentPage >= pagination.totalPages}
+            onClick={() => router.push(`/danh-sach?type=${currentCategory}&page=${currentPage + 1}`)}
+            className="px-4 py-2 rounded-xl border border-white/5 bg-zinc-900/40 text-[10px] font-black text-zinc-400 disabled:opacity-20 disabled:pointer-events-none hover:text-white transition-all active:scale-95"
+          >
+            Sau
+          </button>
+        </div>
+      )}
       <Footer />
-    </main>
+    </div>
   );
 }

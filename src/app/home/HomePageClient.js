@@ -48,7 +48,7 @@ export default function HomePageClient({
             <HeroSlider movies={allMovies} />
 
             <div className="px-5 xl:px-8 py-6 space-y-8">
-              <MovieSection title="Đang Thịnh Hành"   movies={allMovies.slice(0, 12)}    viewAllLink="/danh-sach?type=phim-moi-cap-nhat" showBadge />
+              {/* <MovieSection title="Đang Thịnh Hành"   movies={allMovies.slice(0, 12)}    viewAllLink="/danh-sach?type=phim-moi-cap-nhat" showBadge /> */}
               <MovieSection title="Phim Mới Cập Nhật" movies={allMovies.slice(0, 12)}    viewAllLink="/danh-sach?type=phim-moi-cap-nhat" showViewAll />
               <MovieSection title="Phim Hàn Quốc"     movies={koreaMovies.slice(0, 12)}  viewAllLink="/danh-sach?type=han-quoc" />
               <MovieSection title="Phim Hành Động"    movies={actionMovies.slice(0, 12)} viewAllLink="/danh-sach?type=hanh-dong" />
@@ -57,7 +57,7 @@ export default function HomePageClient({
 
               <div className="pt-4">
                 <HistoryPopup />
-                <SecretChat />
+                {/* <SecretChat /> */}
                 <Footer />
               </div>
             </div>

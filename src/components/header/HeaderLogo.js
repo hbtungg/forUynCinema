@@ -5,26 +5,30 @@ import Link from 'next/link';
 export default function HeaderLogo({ isSearchOpen }) {
   return (
     <>
-      {/* Logo phiên bản Desktop */}
-      <Link href="/home" className="hidden md:flex items-end gap-1 flex-shrink-0 group">
-        <span className="text-xl font-black tracking-tighter leading-none select-none">
-          <span className="text-white group-hover:text-red-600 transition-colors duration-200">for</span>
-          <span className="text-red-600 group-hover:text-white transition-colors duration-200">Uyn</span>
-          <span className="text-white"> Cinema</span>
-        </span>
+      {/* ── 💻 LOGO PHIÊN BẢN DESKTOP (To rõ kịch trần, áp sát lề trái) ── */}
+      <Link href="/home" className="hidden md:flex items-center h-15 flex-shrink-0 group">
+        <img 
+          src="/logo1.png" 
+          alt="forUynCinema Logo" 
+          className="h-14 w-auto object-contain object-left select-none transition-all duration-300 group-hover:scale-[1.03] group-hover:brightness-110" 
+        />
       </Link>
 
-      {/* Logo phiên bản Mobile — SỬA LỖI: Tự động biến mất khi mở ô tìm kiếm để chống đè chữ */}
+      {/* ── 📱 LOGO PHIÊN BẢN MOBILE (ĐÃ SỬA: Khóa cứng vị trí CHÍNH GIỮA màn hình) ── */}
       <Link
         href="/home"
-        className={`md:hidden absolute left-1/2 -translate-x-1/2 transition-all duration-300 ${
+        // 🚀 GIẢI PHÁP TỐI THƯỢNG CHO MOBILE:
+        // - absolute: Đưa logo ra khỏi luồng flex tự nhiên để không bị nút Hamburger chèn ép.
+        // - left-1/2 -translate-x-1/2: Bộ đôi tọa độ vàng ép tâm logo nằm CHÍNH GIỮA màn hình 100%.
+        className={`md:hidden absolute left-1/2 -translate-x-1/2 h-12 flex items-center justify-center transition-all duration-300 ${
           isSearchOpen ? 'opacity-0 scale-90 pointer-events-none' : 'opacity-100 scale-100'
         }`}
       >
-        <span className="text-xl font-black tracking-tighter select-none">
-          <span className="text-white">for</span>
-          <span className="text-red-600">Uyn</span>
-        </span>
+        <img 
+          src="/logo1.png" 
+          alt="forUynCinema Logo" 
+          className="h-12 w-auto object-contain select-none block" 
+        />
       </Link>
     </>
   );
