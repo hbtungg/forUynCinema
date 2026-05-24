@@ -23,17 +23,27 @@ export default function Header({ onToggleSidebar, sidebarCollapsed }) {
   const notifyRef = useRef(null);
   const searchRefPC = useRef(null);
 
-  // Đóng dropdown khi click ra ngoài
+  // 1. Tự động đóng Popup khi nhấn chuột ra ngoài rìa (ĐÃ SỬA: Chống sập ô tìm kiếm Mobile)
   useEffect(() => {
     const handler = (e) => {
-      if (userMenuRef.current && !userMenuRef.current.contains(e.target))
+      // Đóng user menu
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
         setIsUserMenuOpen(false);
-      if (searchRefPC.current && !searchRefPC.current.contains(e.target)) {
-        const input = searchRefPC.current.querySelector('input');
-        if (!input || !input.value) setIsSearchOpen(false);
       }
-      if (notifyRef.current && !notifyRef.current.contains(e.target))
+
+      // 🚀 SỬA TẠI ĐÂY: Chỉ kích hoạt bẫy đóng tìm kiếm khi đang ở màn hình PC (innerWidth >= 768)
+      // Nếu ở màn hình Mobile, mình có nút "Hủy" riêng rồi, không cho click ra ngoài tự đóng nữa!
+      if (window.innerWidth >= 768 && searchRefPC.current && !searchRefPC.current.contains(e.target)) {
+        const input = searchRefPC.current.querySelector('input');
+        if (!input || !input.value) {
+          setIsSearchOpen(false);
+        }
+      }
+
+      // Đóng quả chuông thông báo nếu click ra ngoài
+      if (notifyRef.current && !notifyRef.current.contains(e.target)) {
         setIsNotifyOpen(false);
+      }
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
@@ -135,11 +145,10 @@ export default function Header({ onToggleSidebar, sidebarCollapsed }) {
                 <button
                   onClick={() => setIsNotifyOpen(v => !v)}
                   aria-label="Notifications"
-                  className={`relative w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-200 ${
-                    isNotifyOpen
+                  className={`relative w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-200 ${isNotifyOpen
                       ? 'text-red-400 bg-red-500/10'
                       : 'text-zinc-500 hover:text-white hover:bg-white/5'
-                  }`}
+                    }`}
                 >
                   <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                     <path strokeLinecap="round" strokeLinejoin="round"
