@@ -12,16 +12,20 @@ export default function WatchPlayer({
   iframeError, 
   getEmbedUrl, 
   setIsLoading, 
-  setIframeError 
+  setIframeError,
+  collapsed
 }) {
   const { data: session, status } = useSession(); // Lấy trạng thái đăng nhập
 
-  // ── 🚀 VÒNG CHỜ CHUYỂN TRẠNG THÁI HỆ THỐNG (Đã bo góc nhẹ) ──
+  // 🚀 ĐÃ SỬA ĐỒNG BỘ: Ép cứng chiều cao cố định (ví dụ h-[68vh]) cho cả 2 trạng thái
+  // Anh có thể tăng giảm h-[68vh] thành h-[65vh] hoặc h-[70vh] tùy ý, chiều cao sẽ giữ nguyên khi đóng/mở sidebar!
+  const playerLayoutClass = 'w-full h-[68vh]'; 
+
+  // ── 🚀 VÒNG CHỜ CHUYỂN TRẠNG THÁI HỆ THỐNG ──
   if (status === 'loading') {
     return (
       <div 
-        className="relative w-full bg-black border border-white/5 rounded-2xl overflow-hidden flex flex-col items-center justify-center gap-3 shadow-2xl" 
-        style={{ aspectRatio: '16/9' }}
+        className={`relative bg-black border border-white/5 rounded-2xl overflow-hidden flex flex-col items-center justify-center gap-3 shadow-2xl transition-all duration-300 ${playerLayoutClass}`}
       >
         <div className="w-10 h-10 rounded-full border-2 border-zinc-800 border-t-zinc-600 animate-spin" />
         <span className="text-[10px] uppercase tracking-widest text-zinc-600 font-black">Đang kiểm tra quyền...</span>
@@ -29,12 +33,11 @@ export default function WatchPlayer({
     );
   }
 
-  // ── 🚀 CHỐT CHẶN BẢO VỆ: KHÓA CỨNG KHUNG PHÁT PHIM NẾU CHƯA ĐĂNG NHẬP (Đã bo góc nhẹ) ──
+  // ── 🚀 CHỐT CHẶN BẢO VỆ: KHÓA CỨNG KHUNG PHÁT PHIM NẾU CHƯA ĐĂNG NHẬP ──
   if (!session) {
     return (
       <div 
-        className="relative w-full bg-[#0d0d11] border border-white/5 rounded-2xl overflow-hidden flex flex-col items-center justify-center gap-4 px-6 text-center select-none shadow-2xl" 
-        style={{ aspectRatio: '16/9' }}
+        className={`relative bg-[#0d0d11] border border-white/5 rounded-2xl overflow-hidden flex flex-col items-center justify-center gap-4 px-6 text-center select-none shadow-2xl transition-all duration-300 ${playerLayoutClass}`}
       >
         <div className="w-12 h-12 rounded-full bg-red-600/10 border border-red-500/20 flex items-center justify-center text-red-500 text-lg font-black animate-pulse">
           🔒
@@ -56,11 +59,10 @@ export default function WatchPlayer({
     );
   }
 
-  // ── 🚀 ĐÃ ĐĂNG NHẬP CHUẨN CHỈ: TRẢ VỀ GIAO DIỆN PHÁT PHIM NGUYÊN BẢN HỖ TRỢ POSTER BAN ĐẦU ──
+  // ── 🚀 GIAO DIỆN PHÁT PHIM CHÍNH NGUYÊN BẢN ──
   return (
     <div 
-      className="relative w-full bg-black border border-white/5 rounded-2xl overflow-hidden shadow-2xl" 
-      style={{ aspectRatio: '16/9' }}
+      className={`relative bg-black border border-white/5 rounded-2xl overflow-hidden shadow-2xl transition-all duration-300 ${playerLayoutClass}`}
     >
       {/* Title overlay */}
       <div className="absolute top-0 left-0 right-0 z-10 px-5 pt-4 pb-10 bg-gradient-to-b from-black/80 to-transparent pointer-events-none">
@@ -71,7 +73,7 @@ export default function WatchPlayer({
         </p>
       </div>
 
-      {/* 🚀 ĐÃ SỬA: Lớp phủ Ảnh Poster đại diện phủ bóng mờ thay thế cho màn hình đen xì khi chưa phát phim */}
+      {/* Lớp phủ Ảnh Poster đại diện phủ bóng mờ thay thế cho màn hình đen xì khi chưa phát phim */}
       {isLoading && !iframeError && (
         <div 
           className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-cover bg-center transition-all duration-700"

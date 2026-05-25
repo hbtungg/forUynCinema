@@ -21,7 +21,7 @@ export default function HomePageClient({
   genres,
 }) {
   // Trạng thái thu gọn Sidebar (Mặc định mở rộng = false)
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
 
   return (
     // KHÓA CỨNG HỘP CHỨA GỐC: Chia cột Flex dọc toàn trang

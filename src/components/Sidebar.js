@@ -107,7 +107,7 @@ export default function Sidebar({ collapsed }) {
         </nav>
 
         {/* Premium card — pinned bottom */}
-        <div className="mx-3 mb-4 flex-shrink-0">
+        {/* <div className="mx-3 mb-4 flex-shrink-0">
           <div className="p-4 rounded-2xl bg-gradient-to-br from-red-950/50 to-[#0c0c0f] border border-red-900/25">
             <div className="flex items-center gap-1.5 mb-2">
               <span className="text-red-500 text-[13px] leading-none select-none">♛</span>
@@ -122,7 +122,7 @@ export default function Sidebar({ collapsed }) {
               Nâng cấp ngay
             </Link>
           </div>
-        </div>
+        </div> */}
 
       </div>
     </aside>

@@ -2,6 +2,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,100;0,300;0,400;0,500;0,700;0,800;0,900&display=swap');
 @import "tailwindcss";
 
+/* 🚀 1. ĐÃ CHÈN THÊM CẤU HÌNH VIP CHO TAILWIND v4: 
+   Báo hiệu hệ thống bẫy lớp class từ thẻ <html> để đảo màu */
+@variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #000000;
   --foreground: #ffffff;
@@ -31,8 +35,6 @@ body {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
-
-/* src/app/globals.css — thêm vào file hiện có, không xóa phần cũ */
 
 /* ── Ẩn scrollbar toàn site — giữ chức năng cuộn ── */
 * {
