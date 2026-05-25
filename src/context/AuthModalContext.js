@@ -15,7 +15,7 @@ export function AuthModalProvider({ children }) {
 
   const openAuthModal = (name = '') => {
     setMovieName(name);
-    setIsOpen(true);
+    setIsOpen(false); //tạm để code
   };
 
   // Bấm X hoặc click nền mờ sẽ giữ nguyên isOpen = true và ép nhảy về trang chủ

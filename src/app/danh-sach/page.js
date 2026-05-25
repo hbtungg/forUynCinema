@@ -5,10 +5,10 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 // Import hệ thống linh kiện điều hướng của anh
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
+import Header from '../../components/Header';
+import Footer from '../../components/Footer';
 
-// 🚀 1. LINH KIỆN CON: Chứa toàn bộ logic xử lý dữ liệu danh sách phim (Bốc từ file cũ sang)
+// 1. LINH KIỆN CON: Chứa toàn bộ logic xử lý dữ liệu danh sách phim
 function DanhSachContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -64,12 +64,45 @@ function DanhSachContent() {
 
   const handleCategoryChange = (categoryId) => {
     router.push(`/danh-sach?type=${categoryId}&page=1`);
+    fetchMoviesData(categoryId, 1);
+  };
+
+  // Hàm điều phối phân trang chủ động
+  const handlePageChange = (newPage) => {
+    if (newPage < 1 || newPage > pagination.totalPages) return;
+    router.push(`/danh-sach?type=${currentCategory}&page=${newPage}`);
+    fetchMoviesData(currentCategory, newPage);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // 🚀 LOGIC TÍNH TOÁN DÃY SỐ PHÂN TRANG THÔNG MINH (Chỉ hiển thị tối đa 5 nút số xung quanh trang hiện tại)
+  const renderPageNumbers = () => {
+    const total = pagination.totalPages;
+    const current = currentPage;
+    const pages = [];
+
+    let startPage = Math.max(1, current - 2);
+    let endPage = Math.min(total, current + 2);
+
+    // Bù trừ khoảng cách nếu ở đầu hoặc cuối danh sách số
+    if (current <= 3) {
+      endPage = Math.min(total, 5);
+    }
+    if (current > total - 2) {
+      startPage = Math.max(1, total - 4);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    return pages;
   };
 
   return (
-    <main className="flex-1 w-full px-6 py-8 md:px-12 max-w-7xl mx-auto">
-      {/* ── TIÊU ĐỀ & THANH ĐIỀU HƯỚNG TÙY CHỌN ── */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b border-white/[0.03] pb-6 mb-8">
+    <main className="flex-1 w-full px-6 py-8 md:px-12 max-w-7xl mx-auto flex flex-col items-center">
+      
+      {/* ── TIÊU ĐỀ & THANH ĐIỀU HƯỚNG TÙY CHỌN (W-full để bám biên rộng rãi) ── */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b border-white/[0.03] pb-6 mb-8 w-full">
         <div className="flex flex-col sm:flex-row sm:items-end gap-4">
           <div>
             <h1 className="text-xl font-black uppercase tracking-widest text-white italic">
@@ -79,11 +112,17 @@ function DanhSachContent() {
               Hệ thống rạp phim thông minh • forUynCinema
             </p>
           </div>
-
           
+          <Link 
+            href="/home" 
+            className="group relative text-[9px] md:text-[10px] font-black uppercase tracking-[0.25em] text-zinc-500 hover:text-white transition-colors duration-300 py-1 sm:ml-4"
+          >
+            ← Quay về trang chủ
+            <span className="absolute bottom-0 left-0 h-px w-0 bg-red-600 transition-all duration-300 group-hover:w-full" />
+          </Link>
         </div>
 
-        {/* Cụm Tabs chọn danh mục kính mờ Premium */}
+        {/* Cụm Tabs chọn danh mục */}
         <div className="flex flex-wrap gap-1.5 bg-[#111114]/90 p-1.5 rounded-2xl border border-white/5 backdrop-blur-xl">
           {categories.map((cat) => {
             const isSelected = currentCategory === cat.id;
@@ -104,14 +143,6 @@ function DanhSachContent() {
         </div>
       </div>
 
-      {/* <Link 
-            href="/home" 
-            className="group relative text-[9px] md:text-[10px] font-black uppercase tracking-[0.25em] text-zinc-500 hover:text-white transition-colors duration-300 py-1 sm:ml-4"
-          >
-            ← Quay về trang chủ
-            <span className="absolute bottom-0 left-0 h-px w-0 bg-red-600 transition-all duration-300 group-hover:w-full" />
-          </Link> */}
-
       {/* ── LƯỚI KHUNG HIỂN THỊ POSTER PHIM ── */}
       {loading ? (
         <div className="flex flex-col items-center justify-center py-32 gap-3">
@@ -119,7 +150,10 @@ function DanhSachContent() {
           <span className="text-[9px] uppercase tracking-widest text-zinc-600 font-black">Đang đồng bộ dữ liệu...</span>
         </div>
       ) : movies.length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5">
+        // 🚀 ĐÃ SỬA CHÍNH XÁC THEO Ý ANH: 
+        // - xl:grid-cols-5: Khóa cứng hiển thị đúng 5 phim trên một hàng (10 phim chia đều tăm tắp thành 2 hàng).
+        // - max-w-[1020px]: Ép độ rộng tối đa của lưới phim nhỏ lại, khiến kích cỡ từng card phim co bé xinh xắn y hệt bản 6 hàng cũ!
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 gap-5 w-full max-w-[1020px] mx-auto">
           {movies.map((movie) => (
             <Link
               key={movie.slug}
@@ -153,43 +187,70 @@ function DanhSachContent() {
         </div>
       )}
 
-      {/* ── THANH ĐIỀU HƯỚNG PHÂN TRANG (PAGINATION) ── */}
+      {/* ── 🚀 HỆ THỐNG PHÂN TRANG SỐ PREMIUM (PAGINATION) ── */}
       {!loading && pagination.totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 mt-16 pt-6 border-t border-white/[0.02]">
+        <div className="flex items-center justify-center gap-2 mt-16 pt-6 border-t border-white/[0.02] w-full">
+          
+          {/* Nút Trước */}
           <button
             disabled={currentPage <= 1}
-            onClick={() => router.push(`/danh-sach?type=${currentCategory}&page=${currentPage - 1}`)}
-            className="px-4 py-2 rounded-xl border border-white/5 bg-zinc-900/40 text-[10px] font-black text-zinc-400 disabled:opacity-20 disabled:pointer-events-none hover:text-white transition-all active:scale-95"
+            onClick={() => handlePageChange(currentPage - 1)}
+            className="px-3.5 py-2 rounded-xl border border-white/5 bg-zinc-900/40 text-[10px] font-black text-zinc-400 disabled:opacity-10 disabled:pointer-events-none hover:text-white transition-all active:scale-95 whitespace-nowrap"
           >
-            Trước
+            ← Trước
           </button>
           
-          <span className="text-[10px] font-black tabular-nums text-zinc-500 px-3 py-1.5 bg-[#111114] border border-white/5 rounded-xl">
-            {currentPage} / {pagination.totalPages}
-          </span>
+          {/* 🚀 ĐÃ BỔ SUNG: Dãy nút bấm số động chọn trang trực tiếp */}
+          <div className="flex items-center gap-1.5">
+            {/* Hiện dấu ba chấm đầu nếu trang hiện tại quá xa số 1 */}
+            {currentPage > 3 && pagination.totalPages > 5 && (
+              <span className="text-[10px] text-zinc-600 font-bold px-1">...</span>
+            )}
+
+            {renderPageNumbers().map((num) => {
+              const isActive = num === currentPage;
+              return (
+                <button
+                  key={num}
+                  onClick={() => handlePageChange(num)}
+                  className={`w-8 h-8 rounded-xl text-[10px] font-black tabular-nums transition-all duration-200 active:scale-90 ${
+                    isActive
+                      ? 'bg-red-600 text-white shadow-[0_4px_12px_rgba(220,38,38,0.25)]'
+                      : 'border border-white/5 bg-zinc-900/20 text-zinc-400 hover:text-white hover:bg-white/[0.02]'
+                  }`}
+                >
+                  {num}
+                </button>
+              );
+            })}
+
+            {/* Hiện dấu ba chấm cuối nếu còn cách xa trang cuối cùng */}
+            {currentPage < pagination.totalPages - 2 && pagination.totalPages > 5 && (
+              <span className="text-[10px] text-zinc-600 font-bold px-1">...</span>
+            )}
+          </div>
           
+          {/* Nút Sau */}
           <button
             disabled={currentPage >= pagination.totalPages}
-            onClick={() => router.push(`/danh-sach?type=${currentCategory}&page=${currentPage + 1}`)}
-            className="px-4 py-2 rounded-xl border border-white/5 bg-zinc-900/40 text-[10px] font-black text-zinc-400 disabled:opacity-20 disabled:pointer-events-none hover:text-white transition-all active:scale-95"
+            onClick={() => handlePageChange(currentPage + 1)}
+            className="px-3.5 py-2 rounded-xl border border-white/5 bg-zinc-900/40 text-[10px] font-black text-zinc-400 disabled:opacity-10 disabled:pointer-events-none hover:text-white transition-all active:scale-95 whitespace-nowrap"
           >
-            Sau
+            Sau →
           </button>
+
         </div>
       )}
     </main>
   );
 }
 
-// 🚀 2. COMPONENT CHA: Giữ nguyên cấu trúc giao diện và bọc linh kiện con bằng <Suspense>
+// 2. COMPONENT CHA
 export default function DanhSachPage() {
   return (
     <div className="min-h-screen w-full bg-[#0a0a0c] text-white flex flex-col justify-between select-none antialiased">
-      {/* Nhúng Header hệ thống lên đỉnh đầu */}
       <Header sidebarCollapsed={true} onToggleSidebar={() => {}} />
 
-      {/* ĐÃ SỬA CHÍNH: Bọc linh kiện con trong thẻ Suspense kèm bộ xương Loading tối giản 
-          để xóa sổ lỗi Prerender Error khi chạy lệnh npm run build */}
       <Suspense fallback={
         <div className="flex-1 flex flex-col items-center justify-center py-32 gap-3">
           <div className="w-8 h-8 rounded-full border-2 border-zinc-800 border-t-red-600 animate-spin" />
@@ -199,7 +260,6 @@ export default function DanhSachPage() {
         <DanhSachContent />
       </Suspense>
 
-      {/* Nhúng Footer hệ thống xuống chân trang */}
       <Footer />
     </div>
   );

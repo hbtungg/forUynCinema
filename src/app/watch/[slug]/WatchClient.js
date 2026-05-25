@@ -26,11 +26,54 @@ export default function WatchClient({ initialMovie, slug }) {
   const router = useRouter();
 
   const [movie] = useState(initialMovie);
-  const [activeTab, setActiveTab] = useState('episodes'); 
+  const [activeTab, setActiveTab] = useState('episodes');
   const [isDescExpanded, setIsDescExpanded] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [iframeError, setIframeError] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  // 🚀 CHÈN THÊM VÀO ĐÂY: Quản lý trạng thái yêu thích kết nối MongoDB
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [favLoading, setFavLoading] = useState(false);
+
+  // Tự động kiểm tra trạng thái yêu thích từ DB khi vừa nạp phim
+  useEffect(() => {
+    const checkFavoriteStatus = async () => {
+      try {
+        const res = await fetch(`/api/favorites/check?slug=${slug}`);
+        if (res.ok) {
+          const data = await res.json();
+          setIsFavorite(data.isFavorite);
+        }
+      } catch (err) {
+        console.error("Lỗi kiểm tra trạng thái yêu thích:", err);
+      }
+    };
+    if (slug) checkFavoriteStatus();
+  }, [slug]);
+
+  // Hàm xử lý khi bấm nút Yêu thích
+  const handleToggleFavorite = async () => {
+    if (favLoading) return;
+    setFavLoading(true);
+    try {
+      const res = await fetch('/api/favorites', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          slug: slug,
+          name: movie.name,
+          thumb_url: movie.thumb_url || movie.poster_url,
+        }),
+      });
+      if (res.ok) {
+        setIsFavorite(prev => !prev);
+      }
+    } catch (err) {
+      console.error("Lỗi xử lý yêu thích:", err);
+    } finally {
+      setFavLoading(false);
+    }
+  };
 
   const servers = movie?.episodes || [];
   const epFromUrl = searchParams.get('ep');
@@ -44,7 +87,7 @@ export default function WatchClient({ initialMovie, slug }) {
     }
     return 0;
   });
-  
+
   const [activeChunk, setActiveChunk] = useState(() => {
     const eps = servers[0]?.items || [];
     if (epFromUrl && eps.length > 0) {
@@ -86,7 +129,7 @@ export default function WatchClient({ initialMovie, slug }) {
         localStorage.setItem('watchHistory', JSON.stringify([item, ...h.filter(x => x.slug !== slug)].slice(0, 10)));
         window.dispatchEvent(new Event('storage'));
         window.dispatchEvent(new Event('historyUpdated'));
-      } catch (_) {}
+      } catch (_) { }
 
       if (session?.user?.email) {
         try {
@@ -95,7 +138,7 @@ export default function WatchClient({ initialMovie, slug }) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ movie: item, userEmail: session.user.email })
           });
-        } catch (_) {}
+        } catch (_) { }
       }
     }, 30000);
     return () => clearTimeout(historyTimerRef.current);
@@ -110,7 +153,7 @@ export default function WatchClient({ initialMovie, slug }) {
 
   const handleEpisodeChange = useCallback((index, epName) => {
     if (index === selectedEpisode) return;
-    
+
     // Bật hiệu ứng loading ngay khoảnh khắc click chuột
     setIsLoading(true);
     setIframeError(false);
@@ -139,40 +182,43 @@ export default function WatchClient({ initialMovie, slug }) {
   const epName = currentEp?.name || '1';
   const totalEps = currentEpisodes.length;
 
-return (
+  return (
     // 🚀 TẦNG ROOT TỐI CAO: Để chiều dọc, cuộn tự nhiên toàn trang
     <div className="min-h-screen w-full bg-[#0a0a0c] text-white font-sans antialiased flex flex-col overflow-x-hidden select-none">
-      
+
       {/* 1. HEADER (Luôn nằm trên đỉnh) */}
-      <Header 
-        onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)} 
-        sidebarCollapsed={sidebarCollapsed} 
+      <Header
+        onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
+        sidebarCollapsed={sidebarCollapsed}
       />
 
       {/* 2. TẦNG THÂN GIỮA CHỈ CHỨA SIDEBAR VÀ KHỐI PLAYER */}
       <div className="flex flex-1 w-full relative">
-        
+
         {/* SIDEBAR BÊN TRÁI CỦA ANH */}
         <Sidebar collapsed={sidebarCollapsed} />
 
         {/* KHU VỰC RUỘT CHỨA NỘI DUNG CHÍNH (Xóa bỏ Footer ở trong này) */}
         <div className="flex-1 min-w-0 w-full flex flex-col">
-          
+
           {/* CONTAINER LẤP ĐẦY KHOẢNG TRỐNG KHI ĐÓNG SIDEBAR */}
           <div className="w-full max-w-[1680px] mx-auto px-4 md:px-8 xl:px-10 py-6 grid grid-cols-1 xl:grid-cols-[1fr_290px] 2xl:grid-cols-[1fr_320px] gap-6 flex-1">
-            
+
             {/* ── CỘT TRÁI (Player + Metadata + Tabs) ── */}
             <div className="min-w-0 w-full space-y-5">
-              <WatchPlayer 
+              <WatchPlayer
                 movie={movie} currentEp={currentEp} selectedServer={selectedServer} epName={epName}
                 isLoading={isLoading} iframeError={iframeError} getEmbedUrl={getEmbedUrl}
                 setIsLoading={setIsLoading} setIframeError={setIframeError}
               />
-              <WatchMetadata 
+              <WatchMetadata
                 movie={movie} genre={genre} country={country}
                 isDescExpanded={isDescExpanded} setIsDescExpanded={setIsDescExpanded}
+                isFavorite={isFavorite}
+                favLoading={favLoading}
+                onToggleFavorite={handleToggleFavorite}
               />
-              <WatchTabs 
+              <WatchTabs
                 activeTab={activeTab} setActiveTab={setActiveTab} episodeChunks={episodeChunks}
                 activeChunk={activeChunk} setActiveChunk={setActiveChunk} servers={servers}
                 selectedServer={selectedServer} handleServerChange={handleServerChange}
@@ -184,47 +230,46 @@ return (
             {/* ── CỘT PHẢI (Danh sách tập + Đề xuất) ── */}
             <aside className="w-full space-y-5 min-w-0">
               {/* ── 🚀 ĐÃ TỐI ƯU: Cụm Dropdown chọn Máy chủ tinh tế ── */}
-<div className="relative group">
-  <div className="bg-[#111115] border border-white/5 p-4 rounded-2xl flex items-center justify-between cursor-pointer hover:border-white/10 active:scale-[0.99] transition-all">
-    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Máy chủ</span>
-    <span className="flex items-center gap-1.5 text-[10px] font-black text-red-400">
-      <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-      {servers[selectedServer]?.server_name || 'Server 1'}
-      {/* Mũi tên chỉ xuống báo hiệu có menu */}
-      <svg className="w-3 height-3 text-zinc-500 ml-1 group-hover:text-red-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-      </svg>
-    </span>
-  </div>
+              <div className="relative group">
+                <div className="bg-[#111115] border border-white/5 p-4 rounded-2xl flex items-center justify-between cursor-pointer hover:border-white/10 active:scale-[0.99] transition-all">
+                  <span className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Máy chủ</span>
+                  <span className="flex items-center gap-1.5 text-[10px] font-black text-red-400">
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                    {servers[selectedServer]?.server_name || 'Server 1'}
+                    {/* Mũi tên chỉ xuống báo hiệu có menu */}
+                    <svg className="w-3 height-3 text-zinc-500 ml-1 group-hover:text-red-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </span>
+                </div>
 
-  {/* Danh sách các Server ẩn hiện khi hover hoặc click vào cụm */}
-  <div className="absolute right-0 top-full mt-2 w-48 bg-[#111115]/95 backdrop-blur-xl border border-white/5 rounded-2xl p-1.5 shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-    <div className="px-3 py-2 text-[9px] font-black uppercase tracking-widest text-zinc-600 border-b border-white/[0.02] mb-1">
-      Chọn nguồn phát
-    </div>
-    <div className="max-h-48 overflow-y-auto custom-scrollbar space-y-0.5">
-      {servers && servers.map((srv, idx) => (
-        <button
-          key={idx}
-          onClick={() => {
-            if (typeof setSelectedServer === 'function') {
-              setSelectedServer(idx); // Kích hoạt hàm đổi Server của anh
-              if (typeof setIsLoading === 'function') setIsLoading(true); // Bật hiệu ứng loading cho player
-            }
-          }}
-          className={`w-full text-left px-3 py-2 rounded-xl text-[10px] font-bold transition-all flex items-center justify-between ${
-            selectedServer === idx 
-              ? 'bg-red-600 text-white font-black' 
-              : 'text-zinc-400 hover:bg-white/[0.04] hover:text-white'
-          }`}
-        >
-          <span>{srv?.server_name || `Server ${idx + 1}`}</span>
-          {selectedServer === idx && <span className="text-[9px]">●</span>}
-        </button>
-      ))}
-    </div>
-  </div>
-</div>
+                {/* Danh sách các Server ẩn hiện khi hover hoặc click vào cụm */}
+                <div className="absolute right-0 top-full mt-2 w-48 bg-[#111115]/95 backdrop-blur-xl border border-white/5 rounded-2xl p-1.5 shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                  <div className="px-3 py-2 text-[9px] font-black uppercase tracking-widest text-zinc-600 border-b border-white/[0.02] mb-1">
+                    Chọn nguồn phát
+                  </div>
+                  <div className="max-h-48 overflow-y-auto custom-scrollbar space-y-0.5">
+                    {servers && servers.map((srv, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => {
+                          if (typeof setSelectedServer === 'function') {
+                            setSelectedServer(idx); // Kích hoạt hàm đổi Server của anh
+                            if (typeof setIsLoading === 'function') setIsLoading(true); // Bật hiệu ứng loading cho player
+                          }
+                        }}
+                        className={`w-full text-left px-3 py-2 rounded-xl text-[10px] font-bold transition-all flex items-center justify-between ${selectedServer === idx
+                            ? 'bg-red-600 text-white font-black'
+                            : 'text-zinc-400 hover:bg-white/[0.04] hover:text-white'
+                          }`}
+                      >
+                        <span>{srv?.server_name || `Server ${idx + 1}`}</span>
+                        {selectedServer === idx && <span className="text-[9px]">●</span>}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
 
               <div className="bg-[#111115] border border-white/5 rounded-2xl overflow-hidden">
                 <div className="flex items-center justify-between px-4 py-3.5 border-b border-white/5">

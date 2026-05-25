@@ -186,7 +186,7 @@ export default function WatchTabs({
                       }`}
                   >
                     <img
-                      src={movie?.thumb_url}
+                      src={movie?.poster_url || movie?.thumb_url}
                       alt=""
                       className="absolute inset-0 w-full h-full object-cover opacity-35 group-hover:opacity-50 group-hover:scale-105 transition-all duration-500 pointer-events-none"
                     />
