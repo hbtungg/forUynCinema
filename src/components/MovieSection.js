@@ -69,12 +69,20 @@ export default function MovieSection({ title, movies, viewAllLink }) {
           ))}
         </Swiper>
 
-        {/* NÚT MŨI TÊN ĐIỀU HƯỚNG CỦA ANH (GIỮ NGUYÊN TRẠNG THÁI) */}
-        <button className={`prev-${sectionId} absolute left-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-black/70 border border-zinc-800 rounded-full flex items-center justify-center text-white opacity-0 group-hover/slider:opacity-100 transition-opacity hover:bg-red-600 hover:border-red-600 shadow-lg active:scale-95`}>
-          ‹
+        {/* ── 🚀 NÚT MŨI TÊN ĐIỀU HƯỚNG TRÁI (ĐÃ FIX CHỐNG BÔI ĐEN & POPUP MENU) ── */}
+        <button 
+          className={`prev-${sectionId} absolute left-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-black/70 border border-zinc-800 rounded-full flex items-center justify-center text-white opacity-0 group-hover/slider:opacity-100 transition-opacity hover:bg-red-600 hover:border-red-600 shadow-lg active:scale-95 select-none cursor-pointer`}
+          onMouseDown={(e) => e.preventDefault()} // Chặn đứng hành vi quét text mặc định của trình duyệt
+        >
+          <span className="select-none pointer-events-none text-xl leading-none font-light">‹</span>
         </button>
-        <button className={`next-${sectionId} absolute right-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-black/70 border border-zinc-800 rounded-full flex items-center justify-center text-white opacity-0 group-hover/slider:opacity-100 transition-opacity hover:bg-red-600 hover:border-red-600 shadow-lg active:scale-95`}>
-          ›
+
+        {/* ── 🚀 NÚT MŨI TÊN ĐIỀU HƯỚNG PHẢI (ĐÃ FIX CHỐNG BÔI ĐEN & POPUP MENU) ── */}
+        <button 
+          className={`next-${sectionId} absolute right-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-black/70 border border-zinc-800 rounded-full flex items-center justify-center text-white opacity-0 group-hover/slider:opacity-100 transition-opacity hover:bg-red-600 hover:border-red-600 shadow-lg active:scale-95 select-none cursor-pointer`}
+          onMouseDown={(e) => e.preventDefault()} // Chặn đứng hành vi quét text mặc định của trình duyệt
+        >
+          <span className="select-none pointer-events-none text-xl leading-none font-light">›</span>
         </button>
       </div>
 
