@@ -5,159 +5,118 @@ import Link from "next/link";
 export default function UserMenu({ isMobile = false }) {
   const { data: session, status } = useSession();
 
-  // 1. TRẠNG THÁI ĐANG TẢI (LOADING) - Giữ nguyên khung xương mờ nịnh mắt của anh
   if (status === "loading") {
     return (
-      <div className="flex items-center gap-4 animate-pulse">
-        <div className={`${isMobile ? 'w-10 h-10' : 'w-12 h-12'} bg-zinc-900 rounded-full`}></div>
-        <div className="space-y-2">
-          <div className="w-20 h-3 bg-zinc-900 rounded-full"></div>
-          <div className="w-12 h-2 bg-zinc-900 rounded-full"></div>
+      <div className="flex items-center gap-3 animate-pulse">
+        <div className={`${isMobile ? 'w-9 h-9' : 'w-10 h-10'} bg-white/5 rounded-full`} />
+        <div className="flex flex-col gap-1.5">
+          <div className="w-20 h-2.5 bg-white/5 rounded-full" />
+          <div className="w-12 h-2 bg-white/5 rounded-full" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className={`flex flex-col ${isMobile ? 'gap-3' : 'gap-4'}`}>
-      
-      {/* 2. KHỐI THÔNG TIN ĐẦU MENU (ĐỘNG THEO TÀI KHOẢN) */}
+    <div className={`flex flex-col ${isMobile ? 'gap-1.5' : 'gap-2'}`}>
+
+      {/* — Header block — */}
       {session ? (
-        // TRẠNG THÁI A: Đã đăng nhập -> Hiện profile rực rỡ
-        <>
-          <div className="flex items-center gap-3 px-1">
-            <div className={`${isMobile ? 'w-11 h-11 text-base' : 'w-14 h-14 text-xl'} rounded-full bg-red-600 flex items-center justify-center font-black text-white shadow-lg border-2 border-red-500/30 flex-shrink-0 transition-transform hover:scale-105 cursor-default`}>
-              {session.user.name?.charAt(0).toUpperCase() || "U"}
+        <div className={`flex items-center gap-2.5 ${isMobile ? 'px-2 pb-2' : 'px-2 pb-2.5'}`}>
+          <div className="relative flex-shrink-0">
+            <div className={`${isMobile ? 'w-9 h-9 text-sm' : 'w-10 h-10 text-[15px]'} rounded-full bg-red-600 flex items-center justify-center font-semibold text-white`}>
+              {session.user.name?.charAt(0).toUpperCase() ?? "U"}
             </div>
-            
-            <div className="flex flex-col overflow-hidden">
-              <span className={`${isMobile ? 'text-xs' : 'text-sm'} font-black text-white uppercase tracking-tighter leading-tight truncate`}>
-                {session.user.name} <span className="text-[10px]">❤️</span>
-              </span>
-              <span className="text-[8px] font-black text-zinc-600 uppercase tracking-[0.3em] mt-0.5 italic">
-                Member VIP
-              </span>
-            </div>
+            <span className="absolute bottom-0.5 right-0.5 w-2 h-2 rounded-full bg-green-500 border-[1.5px] border-[#111]" />
           </div>
-          <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-zinc-800 to-transparent"></div>
-        </>
+          <div className="flex flex-col overflow-hidden">
+            <span className={`${isMobile ? 'text-[13px]' : 'text-sm'} font-semibold text-zinc-100 tracking-tight leading-tight truncate`}>
+              {session.user.name}
+            </span>
+            <span className="text-[10px] text-zinc-600 font-medium tracking-widest mt-0.5">
+              Member
+            </span>
+          </div>
+        </div>
       ) : (
-        // TRẠNG THÁI B: Chưa đăng nhập -> Hiện lời chào tối giản sang trọng
-        <>
-          <div className="flex flex-col px-1 py-0.5">
-            <span className={`${isMobile ? 'text-xs' : 'text-sm'} font-black text-zinc-400 uppercase tracking-tight`}>
-              Khách ẩn danh 👤
-            </span>
-            <span className="text-[8px] font-black text-zinc-600 uppercase tracking-[0.2em] mt-1">
-              Vui lòng đăng nhập để xem tiếp
-            </span>
-          </div>
-          <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-zinc-800 to-transparent"></div>
-        </>
+        <div className="flex flex-col px-2 pb-2">
+          <span className="text-[13px] font-medium text-zinc-500">Khách ẩn danh</span>
+          <span className="text-[10px] text-zinc-700 font-medium tracking-widest mt-1">
+            Đăng nhập để xem thêm
+          </span>
+        </div>
       )}
 
-      {/* 3. PHẦN TIỆN ÍCH DÒNG CHẢY NAVIGATE */}
-      <nav className="flex flex-col gap-1">
-        {/* Love Gallery - Luôn luôn hiển thị chào đón mọi người */}
-        <Link 
-          href="/love-gallery" 
-          className={`flex items-center gap-3 px-3 ${isMobile ? 'py-2' : 'py-3'} text-zinc-500 hover:text-white hover:bg-white/[0.04] rounded-xl transition-all group`}
-        >
-          <div className={`${isMobile ? 'w-7 h-7' : 'w-8 h-8'} flex items-center justify-center bg-zinc-900 rounded-lg group-hover:bg-red-600/10 group-hover:text-red-600 transition-colors`}>
-            <svg xmlns="http://www.w3.org/2000/svg" width={isMobile ? "14" : "16"} height={isMobile ? "14" : "16"} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
-              <line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line>
-              <line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line>
-              <line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line>
-              <line x1="17" y1="7" x2="22" y2="7"></line>
-            </svg>
-          </div>
-          <span className={`${isMobile ? 'text-[9px]' : 'text-[10px]'} font-black uppercase tracking-[0.2em]`}>Love Gallery</span>
-        </Link>
+      {/* — Nav — */}
+      {session && (
+        <p className="text-[9px] text-zinc-700 font-medium tracking-[0.12em] uppercase px-2.5 pt-2 pb-0.5">
+          Thư viện
+        </p>
+      )}
 
-        {/* Các danh mục phim cá nhân chỉ xuất hiện khi đã đăng nhập thành công */}
+      <nav className="flex flex-col gap-0.5">
         {session && (
           <>
-            {/* Phim đang xem */}
-            <Link 
-              href="/history" 
-              className={`flex items-center gap-3 px-3 ${isMobile ? 'py-2' : 'py-3'} text-zinc-500 hover:text-white hover:bg-white/[0.04] rounded-xl transition-all group`}
-            >
-              <div className={`${isMobile ? 'w-7 h-7' : 'w-8 h-8'} flex items-center justify-center bg-zinc-900 rounded-lg group-hover:bg-red-600/10 group-hover:text-red-600 transition-colors`}>
-                <svg xmlns="http://www.w3.org/2000/svg" width={isMobile ? "14" : "16"} height={isMobile ? "14" : "16"} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <span className={`${isMobile ? 'text-[9px]' : 'text-[10px]'} font-black uppercase tracking-[0.2em]`}>Phim đang xem</span>
-            </Link>
+            <NavItem href="/history" icon={<ClockIcon />} label="Đang xem" isMobile={isMobile} />
+            <NavItem href="/favorites" icon={<HeartIcon />} label="Yêu thích" isMobile={isMobile} />
 
-            {/* Phim yêu thích */}
-            <Link 
-              href="/favorites" 
-              className={`flex items-center gap-3 px-3 ${isMobile ? 'py-2' : 'py-3'} text-zinc-500 hover:text-white hover:bg-white/[0.04] rounded-xl transition-all group`}
-            >
-              <div className={`${isMobile ? 'w-7 h-7' : 'w-8 h-8'} flex items-center justify-center bg-zinc-900 rounded-lg group-hover:bg-red-600/10 group-hover:text-red-600 transition-colors`}>
-                <svg xmlns="http://www.w3.org/2000/svg" width={isMobile ? "14" : "16"} height={isMobile ? "14" : "16"} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78v0z" />
-                </svg>
-              </div>
-              <span className={`${isMobile ? 'text-[9px]' : 'text-[10px]'} font-black uppercase tracking-[0.2em]`}>Phim yêu thích</span>
-            </Link>
-
-            {/* Phân quyền Giám sát rạp độc quyền cho tài khoản của anh */}
             {session.user.email === 'hb.tungg@gmail.com' && (
-              <Link 
-                href="/admin/history" 
-                className={`flex items-center gap-3 px-3 ${isMobile ? 'py-2' : 'py-3'} text-red-500 hover:text-red-400 hover:bg-red-500/5 rounded-xl transition-all group border border-dashed border-red-950/20`}
-              >
-                <div className={`${isMobile ? 'w-7 h-7' : 'w-8 h-8'} flex items-center justify-center bg-red-950/20 border border-red-900/30 rounded-lg group-hover:bg-red-600 group-hover:text-white transition-colors`}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width={isMobile ? "14" : "16"} height={isMobile ? "14" : "16"} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="3" />
-                    <path d="M3 12c4-8 14-8 18 0-4 8-14 8-18 0z" />
-                  </svg>
-                </div>
-                <span className={`${isMobile ? 'text-[9px]' : 'text-[10px]'} font-black uppercase tracking-[0.2em] flex items-center gap-1.5`}>
-                  Giám sát rạp
-                  <span className="w-1 h-1 rounded-full bg-red-500 animate-pulse" />
-                </span>
-              </Link>
+              <NavItem href="/admin/history" icon={<EyeIcon />} label="Giám sát rạp" isMobile={isMobile} admin pulse />
             )}
           </>
         )}
       </nav>
 
-      {/* 4. PHẦN FOOTER ĐÁY MENU: ĐĂNG XUẤT ĐỘNG HOẶC ĐĂNG NHẬP / ĐĂNG KÝ */}
-      <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-zinc-800 to-transparent"></div>
-
+      {/* — Footer — */}
       {session ? (
-        // ĐÃ ĐĂNG NHẬP -> Hiện nút Đăng xuất nguyên bản của anh
-        <button 
+        <button
           onClick={() => signOut({ callbackUrl: '/home' })}
-          className={`w-full ${isMobile ? 'py-2.5' : 'py-3.5'} bg-zinc-900/50 hover:bg-red-600/10 border border-zinc-800 hover:border-red-600/40 rounded-2xl text-zinc-500 hover:text-red-500 text-[10px] font-black uppercase tracking-[0.4em] transition-all duration-300 flex items-center justify-center gap-2 group`}
+          className={`w-full ${isMobile ? 'py-2.5' : 'py-3'} mt-1 flex items-center justify-center gap-2 rounded-xl border border-white/[0.07] text-zinc-600 hover:text-red-400 hover:border-red-500/25 hover:bg-red-500/5 text-[11px] font-medium tracking-widest uppercase transition-all duration-200`}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" className="group-hover:-translate-x-1 transition-transform">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
-          </svg>
+          <LogoutIcon />
           Đăng xuất
         </button>
       ) : (
-        // CHƯA ĐĂNG NHẬP -> Hiện cụm nút Đăng nhập & Đăng ký vuông vắn đồng bộ lộng lẫy
-        <div className={`flex flex-col ${isMobile ? 'gap-2' : 'gap-3'}`}>
-          <Link 
-            href="/login" 
-            className={`w-full ${isMobile ? 'py-2.5' : 'py-3'} text-center text-[10px] font-black uppercase text-zinc-500 hover:text-white border border-zinc-800 hover:bg-white/[0.02] rounded-2xl transition-all tracking-[0.3em]`}
+        <div className="flex flex-col gap-2 pt-2">
+          <Link
+            href="/login"
+            className={`w-full ${isMobile ? 'py-2.5' : 'py-3'} text-center text-[11px] font-medium text-zinc-500 hover:text-zinc-200 border border-white/[0.07] hover:border-white/[0.15] rounded-xl transition-all tracking-widest`}
           >
             Đăng nhập
           </Link>
-          <Link 
-            href="/register" 
-            className={`group w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-500 text-white ${isMobile ? 'py-2.5' : 'py-3.5'} rounded-2xl transition-all active:scale-95 shadow-[0_10px_30px_rgba(220,38,38,0.15)]`}
+          <Link
+            href="/register"
+            className={`w-full flex items-center justify-center gap-1.5 bg-red-600 hover:bg-red-500 text-white ${isMobile ? 'py-2.5' : 'py-3'} rounded-xl transition-colors text-[11px] font-semibold tracking-widest`}
           >
-            <span className="text-[10px] font-black uppercase tracking-[0.3em]">Đăng ký</span>
-            <span className="text-[10px] group-hover:translate-x-1 transition-transform">→</span>
+            Đăng ký <span>→</span>
           </Link>
         </div>
       )}
     </div>
   );
 }
+
+// Sub-components
+function NavItem({ href, icon, label, isMobile, admin = false, pulse = false }) {
+  const base = `flex items-center gap-2.5 px-2.5 ${isMobile ? 'py-2' : 'py-2.5'} rounded-xl transition-all text-[12px] font-medium`;
+  const cls = admin
+    ? `${base} text-red-500 hover:text-red-400 hover:bg-red-500/[0.06] border border-dashed border-red-900/30`
+    : `${base} text-zinc-500 hover:text-zinc-100 hover:bg-white/[0.04]`;
+
+  return (
+    <Link href={href} className={cls}>
+      <div className={`${isMobile ? 'w-7 h-7' : 'w-[30px] h-[30px]'} flex items-center justify-center rounded-lg ${admin ? 'bg-red-950/30' : 'bg-white/[0.04]'} flex-shrink-0`}>
+        {icon}
+      </div>
+      <span className="tracking-[0.04em]">{label}</span>
+      {pulse && <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse ml-auto" />}
+    </Link>
+  );
+}
+
+// Icons (inline SVG, no external deps)
+const iconProps = { width: 15, height: 15, fill: "none", stroke: "currentColor", strokeWidth: "2", viewBox: "0 0 24 24", strokeLinecap: "round", strokeLinejoin: "round" };
+const ClockIcon = () => <svg {...iconProps}><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>;
+const HeartIcon = () => <svg {...iconProps}><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78v0z"/></svg>;
+const EyeIcon   = () => <svg {...iconProps}><path d="M3 12c4-8 14-8 18 0-4 8-14 8-18 0z"/><circle cx="12" cy="12" r="3"/></svg>;
+const LogoutIcon= () => <svg {...iconProps} width={14} height={14}><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>;
