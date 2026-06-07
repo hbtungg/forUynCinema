@@ -65,7 +65,7 @@ export default function WatchPlayer({
       className={`relative bg-black border border-white/5 rounded-2xl overflow-hidden shadow-2xl transition-all duration-300 ${playerLayoutClass}`}
     >
       {/* Title overlay */}
-      <div className="absolute top-0 left-0 right-0 z-10 px-5 pt-4 pb-10 bg-gradient-to-b from-black/80 to-transparent pointer-events-none">
+      <div className="absolute top-0 left-0 right-0 z-10 px-5 pt-4 pb-10 bg-gradient-to-b from-black/30 to-transparent pointer-events-none">
         <p className="text-[13px] font-black text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">{movie?.name}</p>
         <p className="text-[11px] text-zinc-400 mt-0.5 font-medium">
           S{selectedServer + 1}E{epName}
