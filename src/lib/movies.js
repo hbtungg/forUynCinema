@@ -1,20 +1,27 @@
-// --- FILE: src/lib/movies.js ---
 const BASE_URL = "https://phim.nguonc.com/api";
 
 /**
- * HÀM HELPER: Kiểm tra phản hồi có phải JSON sạch không
+ * HÀM HELPER: Kiểm tra phản hồi và bọc đầu vào chống HTML rác
  */
 async function safeFetch(url, options = {}) {
   try {
     const res = await fetch(url, {
       ...options,
-      headers: { 'Accept': 'application/json', ...options.headers }
+      headers: { 
+        'Accept': 'application/json',
+        // Thêm User-Agent giả lập trình duyệt để tránh bị tường lửa API chặn kết nối từ Server Vercel
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        ...options.headers 
+      }
     });
 
     if (!res.ok) return null;
 
     const contentType = res.headers.get("content-type");
-    if (!contentType || !contentType.includes("application/json")) return null;
+    if (!contentType || !contentType.includes("application/json")) {
+      console.warn(`Hệ thống phát hiện phản hồi không phải JSON sạch tại: ${url}`);
+      return null;
+    }
 
     return await res.json();
   } catch (error) {
@@ -29,9 +36,11 @@ export async function getMovies(page = 1) {
   return data || { items: [], paginate: { total_pages: 1 } };
 }
 
-// 2. Lấy chi tiết một bộ phim
+// 2. Lấy chi tiết một bộ phim (ĐÃ ĐƯỢC FIX BẢO VỆ CHỐNG SẬP VERCEL)
 export async function getMovieDetail(slug) {
-  return await safeFetch(`${BASE_URL}/film/${slug}`);
+  const data = await safeFetch(`${BASE_URL}/film/${slug}`);
+  // Nếu dính HTML lỗi khiến data bằng null, trả về cấu trúc mặc định thay vì trả về null làm sập trang watch
+  return data || { movie: null, episodes: [] };
 }
 
 // 3. Tìm kiếm phim
@@ -72,25 +81,16 @@ export async function getCountries() {
   return data?.items || [];
 }
 
-// --- HỆ THỐNG EPO (BẢN NÂNG CẤP PHÂN LOẠI THEO THỂ LOẠI) ---
+// HỆ THỐNG EPO (BẢN NÂNG CẤP PHÂN LOẠI THEO THỂ LOẠI)
 const EPO_BASE_URL = "https://www.eporner.com/api/v2/video";
-
-/**
- * Lấy danh sách video từ EPO
- * @param {number} page - Trang hiện tại
- * @param {string} category - Thể loại (ví dụ: 'asian', 'japanese', 'all')
- * @param {string} order - Sắp xếp (latest, top-rated, v.v.)
- */
-// --- TRONG FILE: src/lib/movies.js ---
 
 export async function getEpoVideos(page = 1, category = 'all', order = 'latest') {
   try {
-    // Ép searchQuery luôn có giá trị để API không trả về kết quả ngẫu nhiên
     const searchQuery = (category && category !== 'all') ? category : 'all';
 
     const params = new URLSearchParams({
       query: searchQuery,
-      per_page: '32', // Eporner hoạt động tốt nhất với số 30
+      per_page: '32',
       page: page.toString(),
       thumbsize: 'big',
       order: order,
@@ -98,32 +98,27 @@ export async function getEpoVideos(page = 1, category = 'all', order = 'latest')
     });
 
     const url = `${EPO_BASE_URL}/search/?${params.toString()}`;
-    // Tăng revalidate lên một chút để ổn định dữ liệu giữa các trang
     const res = await fetch(url, { next: { revalidate: 3600 } });
     
     if (!res.ok) return { videos: [], total_pages: 1 };
 
     const data = await res.json();
     
-    // Nếu API trả về "lèo tèo", có thể do từ khóa quá hẹp. 
-    // Ta bóc tách cẩn thận để tránh lỗi render
     const formattedVideos = (data.videos || []).map(v => ({
       id: v.id,
       title: v.title,
       thumb: v.default_thumb?.src || (Array.isArray(v.thumbs) ? v.thumbs[0]?.src : ''), 
       preview_url: v.preview_url || v.test_previews || "", 
-      quality: v.quality || 'HD', // Lấy thêm quality từ gốc
+      quality: v.quality || 'HD',
       duration: v.length_min,
       added: v.added, 
       views: v.views, 
       rate: v.rate
     }));
 
-    // CẬP NHẬT: Eporner trả về số lượng trang đôi khi bị "ảo", 
-    // ta lấy đúng số từ data.total_pages nhưng giới hạn tối đa để tránh lỗi phân trang vô tận
     return { 
       videos: formattedVideos, 
-      total_pages: Math.min(data.total_pages || 1, 500), // Giới hạn 500 trang cho ổn định
+      total_pages: Math.min(data.total_pages || 1, 500),
       current_category: category 
     };
   } catch (error) {
