@@ -1,18 +1,11 @@
 import { getMovies } from '@/lib/movies';
-import HomePageClient from './HomePageClient';
+import HomePageClient from './HomePageClient'; // Import Sub-Component Client vừa tạo
 
-// Hàm bốc dữ liệu có màng lọc chặn HTML rác từ Server Vercel
 async function getMoviesBySlug(path) {
   try {
     const res = await fetch(`https://phim.nguonc.com/api/films/${path}?page=1`, {
       next: { revalidate: 3600 },
     });
-    
-    const contentType = res.headers.get("content-type");
-    if (!res.ok || !contentType || !contentType.includes("application/json")) {
-      return []; // Trả về mảng rỗng nếu Server Vercel bị chặn nhận về HTML rác
-    }
-    
     const data = await res.json();
     return data.items || [];
   } catch {
@@ -24,7 +17,7 @@ export default async function HomePage() {
   // Dữ liệu cào song song cực nhanh từ API Máy Chủ gốc
   const [allMovies, koreaMovies, actionMovies, chinaMovies, animeMovies] =
     await Promise.all([
-      getMovies(1).then((d) => d?.items || []).catch(() => []),
+      getMovies(1).then((d) => d?.items || []),
       getMoviesBySlug('quoc-gia/han-quoc'),
       getMoviesBySlug('the-loai/hanh-dong'),
       getMoviesBySlug('quoc-gia/trung-quoc'),
@@ -39,16 +32,17 @@ export default async function HomePage() {
 
   const genres = [
     { label: 'Hành động', icon: '⚔️', href: '/danh-sach?type=hanh-dong' },
-    { label: 'Kinh dị',    icon: '👁️', href: '/danh-sach?type=kinh-di' },
+    { label: 'Kinh dị',   icon: '👁️', href: '/danh-sach?type=kinh-di' },
     { label: 'Tâm lý',    icon: '🧠', href: '/danh-sach?type=tam-ly' },
     { label: 'Viễn tưởng',icon: '🚀', href: '/danh-sach?type=vien-tuong' },
-    { label: 'Hình sự',   icon: '🔍', href: '/danh-sach?type=hinh-su' },
-    { label: 'Tình cảm',  icon: '💫', href: '/danh-sach?type=tinh-cam' },
+    { label: 'Hình sự',  icon: '🔍', href: '/danh-sach?type=hinh-su' },
+    { label: 'Tình cảm', icon: '💫', href: '/danh-sach?type=tinh-cam' },
     { label: 'Hoạt hình', icon: '🎨', href: '/danh-sach?type=hoat-hinh' },
-    { label: 'Tài liệu',  icon: '📽️', href: '/danh-sach?type=tai-lieu' },
+    { label: 'Tài liệu', icon: '📽️', href: '/danh-sach?type=tai-lieu' },
   ];
 
   return (
+    // Đẩy toàn bộ dữ liệu cào được từ Server đổ thẳng vào khay Layout Client để xử lý co giãn nút 3 gạch
     <HomePageClient
       allMovies={allMovies}
       koreaMovies={koreaMovies}
