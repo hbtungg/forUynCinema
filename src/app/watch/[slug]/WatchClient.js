@@ -28,8 +28,7 @@ export default function WatchClient({ initialMovie, slug }) {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  // 🚀 QUẢN LÝ TRẠNG THÁI DỮ LIỆU TẬP TRUNG: Cho phép cập nhật lại nếu Server truyền xuống bị null do chặn
-  const [movie, setMovie] = useState(initialMovie);
+  const [movie] = useState(initialMovie);
   const [activeTab, setActiveTab] = useState('episodes');
   const [isDescExpanded, setIsDescExpanded] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -39,29 +38,6 @@ export default function WatchClient({ initialMovie, slug }) {
   // Quản lý trạng thái yêu thích kết nối MongoDB Atlas
   const [isFavorite, setIsFavorite] = useState(false);
   const [favLoading, setFavLoading] = useState(false);
-
-  // 🚀 CƠ CHẾ CỨU TRỢ NGẦN: Kích hoạt khi Server Vercel bị dính lỗi chặn 429/HTML làm initialMovie bị null
-  useEffect(() => {
-    if (!initialMovie && slug) {
-      async function silentFetchMovieDetail() {
-        try {
-          // Bốc dữ liệu trực tiếp bằng IP Trình duyệt mạng nhà - Né sạch màng lọc chặn dải IP Vercel
-          const res = await fetch(`https://phim.nguonc.com/api/film/${slug}`);
-          if (!res.ok) return;
-          
-          const json = await res.json();
-          if (json && json.movie) {
-            setMovie(json.movie); // Hồi sinh nạp đầy phim lên toàn bộ giao diện
-          }
-        } catch (err) {
-          console.error("Lỗi Client-side Re-fetch trong WatchClient:", err);
-        }
-      }
-      silentFetchMovieDetail();
-    } else if (initialMovie) {
-      setMovie(initialMovie);
-    }
-  }, [initialMovie, slug]);
 
   // Tự động kiểm tra trạng thái yêu thích từ DB khi vừa nạp phim
   useEffect(() => {
@@ -81,7 +57,7 @@ export default function WatchClient({ initialMovie, slug }) {
 
   // Hàm xử lý khi bấm nút Yêu thích
   const handleToggleFavorite = async () => {
-    if (favLoading || !movie) return;
+    if (favLoading) return;
     setFavLoading(true);
     try {
       const res = await fetch('/api/favorites', {
@@ -124,21 +100,6 @@ export default function WatchClient({ initialMovie, slug }) {
     }
     return 0;
   });
-
-  // Khôi phục đồng bộ index khi dữ liệu movie ngầm được bốc về thành công từ Client-side
-  useEffect(() => {
-    if (servers.length > 0) {
-      const eps = servers[selectedServer]?.items || [];
-      if (epFromUrl && eps.length > 0) {
-        const idx = eps.findIndex(e => e.name === epFromUrl);
-        if (idx !== -1) {
-          setSelectedEpisode(idx);
-          setActiveChunk(Math.floor(idx / 20));
-          return;
-        }
-      }
-    }
-  }, [movie, epFromUrl, servers, selectedServer]);
 
   const playerRef = useRef(null);
   const historyTimerRef = useRef(null);
@@ -202,7 +163,7 @@ export default function WatchClient({ initialMovie, slug }) {
     playerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, [selectedEpisode, router, slug]);
 
-  const handleThemeServerChange = useCallback((index) => {
+  const handleServerChange = useCallback((index) => {
     if (index === selectedServer) return;
     setIsLoading(true);
     setIframeError(false);
@@ -211,22 +172,14 @@ export default function WatchClient({ initialMovie, slug }) {
     setActiveChunk(0);
   }, [selectedServer]);
 
-  // 🚀 MÀN HÌNH CHỜ TRONG KHI CHỜ ĐỢI HYDRATION TẢI PHIM (Nếu Server bị chặn đứng hoàn toàn)
-  if (!movie) {
-    return (
-      <div className="h-screen w-screen bg-[#0a0a0c] flex flex-col items-center justify-center font-sans text-white">
-        <div className="w-7 h-7 border-2 border-red-600 border-t-transparent rounded-full animate-spin mb-4" />
-        <p className="text-[9px] uppercase tracking-[0.3em] text-red-500 font-black animate-pulse">Đang nạp luồng phát...</p>
-      </div>
-    );
-  }
+  if (!movie) return null;
 
   const genre = movie.category?.['3']?.list?.[0]?.name || '';
   const country = movie.category?.['4']?.list?.[0]?.name || '';
   const epName = currentEp?.name || '1';
 
   return (
-    // KHÓA CỨNG KHUNG VIEW NGOÀI CÙNG
+    // 🚀 ĐÃ SỬA: Khóa chết khung view ngoài cùng bằng h-screen overflow-hidden y đúc trang chủ của anh
     <div className="h-screen w-screen bg-[#0a0a0c] text-white font-sans antialiased flex flex-col overflow-hidden select-none">
 
       {/* 1. HEADER (Đứng yên cố định trên đỉnh) */}
@@ -238,10 +191,10 @@ export default function WatchClient({ initialMovie, slug }) {
       {/* 2. TẦNG THÂN GIỮA (Trừ đi chiều cao Header để nhốt Sidebar khít màn hình) */}
       <div className="flex flex-1 w-full h-[calc(100vh-56px)] md:h-[calc(100vh-64px)] overflow-hidden relative">
         
-        {/* SIDEBAR BÊN TRÁI CỦA ANH */}
+        {/* SIDEBAR BÊN TRÁI CỦA ANH (Lúc này tự động đứng im bám theo khung cha) */}
         <Sidebar collapsed={sidebarCollapsed} />
 
-        {/* KHU VỰC RUỘT CUỘN ĐỘC LẬP (Chứa toàn bộ nội dung xem phim và Footer) */}
+        {/* 🚀 ĐÃ SỬA: KHU VỰC RUỘT CUỘN ĐỘC LẬP (Chứa toàn bộ nội dung xem phim và Footer) */}
         <div className="flex-1 min-w-0 h-full overflow-y-auto custom-scrollbar flex flex-col justify-between">
           
           {/* Grid Layout chứa Player + Cột Phải */}
@@ -263,7 +216,7 @@ export default function WatchClient({ initialMovie, slug }) {
               <WatchTabs
                 activeTab={activeTab} setActiveTab={setActiveTab} episodeChunks={episodeChunks}
                 activeChunk={activeChunk} setActiveChunk={setActiveChunk} servers={servers}
-                selectedServer={selectedServer} handleServerChange={handleThemeServerChange}
+                selectedServer={selectedServer} handleServerChange={handleServerChange}
                 currentEpisodes={currentEpisodes} selectedEpisode={selectedEpisode}
                 handleEpisodeChange={handleEpisodeChange} movie={movie}
               />
@@ -274,7 +227,7 @@ export default function WatchClient({ initialMovie, slug }) {
               <WatchServerDropdown 
                 servers={servers} 
                 selectedServer={selectedServer} 
-                handleServerChange={handleThemeServerChange} 
+                handleServerChange={handleServerChange} 
               />
               <WatchRightEpList 
                 currentEpisodes={currentEpisodes}
@@ -292,7 +245,7 @@ export default function WatchClient({ initialMovie, slug }) {
 
           </div>
 
-          {/* 3. FOOTER ĐÃ ĐƯỢC FIX CHIỀU CAO */}
+          {/* 🚀 3. FOOTER ĐÃ ĐƯỢC FIX CHIỀU CAO: Bọc trong khối block cố định chiều cao tự nhiên */}
           <div className="w-full block clear-both mt-auto pt-6 flex-shrink-0">
             <Footer className="w-full" />
           </div>

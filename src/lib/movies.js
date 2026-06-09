@@ -1,4 +1,7 @@
-const BASE_URL = "https://phim.nguonc.com/api";
+// 🚀 SỬA CHUẨN: Ở Server thì gọi thẳng NguồnC, ở Trình duyệt (Client) thì đi qua đường vòng Proxy nội bộ
+const BASE_URL = typeof window !== 'undefined'
+  ? `${window.location.origin}/api-nguonc`
+  : "https://phim.nguonc.com/api";
 
 /**
  * HÀM HELPER: Kiểm tra phản hồi và bọc đầu vào chống HTML rác
@@ -7,11 +10,11 @@ async function safeFetch(url, options = {}) {
   try {
     const res = await fetch(url, {
       ...options,
-      headers: { 
+      headers: {
         'Accept': 'application/json',
         // Thêm User-Agent giả lập trình duyệt để tránh bị tường lửa API chặn kết nối từ Server Vercel
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        ...options.headers 
+        ...options.headers
       }
     });
 
@@ -32,6 +35,7 @@ async function safeFetch(url, options = {}) {
 
 // 1. Lấy phim mới cập nhật (Trang chủ)
 export async function getMovies(page = 1) {
+  // Đồng bộ lại cấu trúc endpoint chuẩn đét của NguồnC cho danh mục phim mới
   const data = await safeFetch(`${BASE_URL}/films/phim-moi-cap-nhat?page=${page}`, { next: { revalidate: 3600 } });
   return data || { items: [], paginate: { total_pages: 1 } };
 }
@@ -99,27 +103,27 @@ export async function getEpoVideos(page = 1, category = 'all', order = 'latest')
 
     const url = `${EPO_BASE_URL}/search/?${params.toString()}`;
     const res = await fetch(url, { next: { revalidate: 3600 } });
-    
+
     if (!res.ok) return { videos: [], total_pages: 1 };
 
     const data = await res.json();
-    
+
     const formattedVideos = (data.videos || []).map(v => ({
       id: v.id,
       title: v.title,
-      thumb: v.default_thumb?.src || (Array.isArray(v.thumbs) ? v.thumbs[0]?.src : ''), 
-      preview_url: v.preview_url || v.test_previews || "", 
+      thumb: v.default_thumb?.src || (Array.isArray(v.thumbs) ? v.thumbs[0]?.src : ''),
+      preview_url: v.preview_url || v.test_previews || "",
       quality: v.quality || 'HD',
       duration: v.length_min,
-      added: v.added, 
-      views: v.views, 
+      added: v.added,
+      views: v.views,
       rate: v.rate
     }));
 
-    return { 
-      videos: formattedVideos, 
+    return {
+      videos: formattedVideos,
       total_pages: Math.min(data.total_pages || 1, 500),
-      current_category: category 
+      current_category: category
     };
   } catch (error) {
     console.error("EPO API Error:", error);
