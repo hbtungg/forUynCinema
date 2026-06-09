@@ -23,7 +23,7 @@ export default function HomePageClient({
   // Trạng thái thu gọn Sidebar (Mặc định mở rộng = false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
 
-  // 🚀 QUẢN LÝ TRẠNG THÁI DỮ LIỆU PHIM: Bọc dữ liệu thô để kích hoạt Fallback khi bị chặn
+  // Quản lý trạng thái dữ liệu phim tập trung
   const [movies, setMovies] = useState({
     allMovies: initialAllMovies || [],
     koreaMovies: initialKoreaMovies || [],
@@ -35,26 +35,47 @@ export default function HomePageClient({
   });
 
   useEffect(() => {
-    // 🚀 LUỒNG PHÒNG VỆ: Nếu mảng phim từ Server Vercel truyền xuống trống không (bị block IP)
+    // Kích hoạt luồng phòng vệ tuần tự nếu Server Vercel bị dính lỗi chặn 429 hoặc trả về mảng trống
     if (!initialAllMovies || initialAllMovies.length === 0) {
-      async function fallbackClientFetch() {
+      
+      // Hàm helper tạo khoảng trễ đóng băng hệ thống ngầm tạm thời
+      const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+      async function fallbackWithDelay() {
         try {
-          // Kéo dữ liệu bằng chính IP trình duyệt mạng dân dụng của người dùng - Né 100% tường lửa
           const clientFetch = async (path) => {
-            const res = await fetch(`https://phim.nguonc.com/api/films/${path}?page=1`);
-            if (!res.ok) return [];
-            const json = await res.json();
-            return json.items || [];
+            try {
+              const res = await fetch(`https://phim.nguonc.com/api/films/${path}?page=1`);
+              
+              // Nếu dính lỗi Rate Limit, log ra để theo dõi tiến trình
+              if (res.status === 429) {
+                console.warn(`[Rate Limit 429] Danh mục ${path} đang xếp hàng đợi giãn cách...`);
+              }
+              
+              if (!res.ok) return [];
+              const json = await res.json();
+              return json.items || [];
+            } catch {
+              return [];
+            }
           };
 
-          const [all, korea, action, china, anime] = await Promise.all([
-            clientFetch('phim-moi-cap-nhat'),
-            clientFetch('quoc-gia/han-quoc'),
-            clientFetch('the-loai/hanh-dong'),
-            clientFetch('quoc-gia/trung-quoc'),
-            clientFetch('the-loai/hoat-hinh'),
-          ]);
+          // 🚀 THIẾT LẬP LUỒNG KHỞI CHẠY TUẦN TỰ + ĐỆM DELAY (Né bộ đếm spam)
+          const all = await clientFetch('phim-moi-cap-nhat');
+          await delay(400); // Nghỉ 0.4 giây rồi mới gọi khay tiếp theo
+          
+          const korea = await clientFetch('quoc-gia/han-quoc');
+          await delay(400);
+          
+          const action = await clientFetch('the-loai/hanh-dong');
+          await delay(400);
+          
+          const china = await clientFetch('quoc-gia/trung-quoc');
+          await delay(400);
+          
+          const anime = await clientFetch('the-loai/hoat-hinh');
 
+          // Tính toán lại khay xếp hạng dựa trên mảng phim mới cào sạch về
           const top = all.slice(0, 5).map((m, i) => ({
             ...m,
             fakeRating: [9.3, 9.2, 9.0, 8.9, 8.8][i],
@@ -70,10 +91,11 @@ export default function HomePageClient({
             continueItems: all.slice(5, 8),
           });
         } catch (err) {
-          console.error("Lỗi Fallback Client-side Fetching:", err);
+          console.error("Lỗi luồng xử lý Client-side:", err);
         }
       }
-      fallbackClientFetch();
+      
+      fallbackWithDelay();
     }
   }, [initialAllMovies]);
 
@@ -81,7 +103,7 @@ export default function HomePageClient({
     // KHÓA CỨNG HỘP CHỨA GỐC: Chia cột Flex dọc toàn trang
     <div className="flex flex-col h-screen w-screen bg-[#0a0a0c] text-white overflow-hidden antialiased select-none">
 
-      {/* ── 1. HEADER ĐỘC TÔN TRÊN ĐỈNH (Nền đen đặc, kéo dài trọn vẹn 100% chiều ngang) ── */}
+      {/* ── 1. HEADER ĐỘC TÔN TRÊN ĐỈNH ── */}
       <Header
         onToggleSidebar={() => setSidebarCollapsed(v => !v)}
         sidebarCollapsed={sidebarCollapsed}
@@ -90,7 +112,7 @@ export default function HomePageClient({
       {/* ── 2. KHÔNG GIAN TẦNG DƯỚI (Nằm hoàn toàn dưới gầm Header) ── */}
       <div className="flex flex-1 w-full h-[calc(100vh-56px)] md:h-[calc(100vh-64px)] overflow-hidden relative">
         
-        {/* SIDEBAR DỌC: Tự động co giãn theo prop collapsed, đẩy khối nội dung sang bên phải tự nhiên */}
+        {/* SIDEBAR DỌC */}
         <Sidebar collapsed={sidebarCollapsed} />
 
         {/* ── 3. KHU VỰC HIỂN THỊ PHIM & CỘT PHẢI (Dual-Scroll Layout độc lập) ── */}
@@ -98,7 +120,7 @@ export default function HomePageClient({
 
           {/* KHỐI TRUNG TÂM: BANNER & CÁC KHAY PHIM (Cuộn độc lập mượt mà) */}
           <div className="flex-1 min-w-0 h-full overflow-y-auto custom-scrollbar pb-20">
-            {/* Đã đồng bộ sang mảng dữ liệu movies có cơ chế tự động lấp đầy */}
+            {/* Truyền dữ liệu từ state movies đã được lấp đầy và bảo vệ */}
             <HeroSlider movies={movies.allMovies} />
 
             <div className="px-5 xl:px-8 py-6 space-y-8">
@@ -116,7 +138,7 @@ export default function HomePageClient({
             </div>
           </div>
 
-          {/* KHỐI BÊN PHẢI: TIẾP TỤC XEM, THỂ LOẠI, TOP RATED (Đứng im phăng phắc, cuộn độc lập riêng) */}
+          {/* KHỐI BÊN PHẢI: TIẾP TỤC XEM, THỂ LOẠI, TOP RATED */}
           <RightPanel 
             continueItems={movies.continueItems} 
             genres={genres} 
