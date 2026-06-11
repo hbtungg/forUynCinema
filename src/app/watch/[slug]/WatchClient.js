@@ -28,41 +28,101 @@ export default function WatchClient({ initialMovie, slug }) {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const [movie] = useState(initialMovie);
+  // 🚀 ĐÃ SỬA: Nhận diện dữ liệu linh hoạt, cho phép cập nhật lại khi Client fetch bù thành công
+  const [movie, setMovie] = useState(initialMovie?.movie || null);
+  const [servers, setServers] = useState(initialMovie?.episodes || []);
+
   const [activeTab, setActiveTab] = useState("episodes");
   const [isDescExpanded, setIsDescExpanded] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [iframeError, setIframeError] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(true); // Trạng thái thu gọn Sidebar (Mặc định mở rộng = false)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
 
   // Quản lý trạng thái yêu thích kết nối MongoDB Atlas
   const [isFavorite, setIsFavorite] = useState(false);
   const [favLoading, setFavLoading] = useState(false);
 
-  // Tự động kiểm tra trạng thái yêu thích từ DB khi vừa nạp phim
-  useEffect(() => {
-    const checkFavoriteStatus = async () => {
-      // 🚀 ĐÃ SỬA: Chỉ gọi API kiểm tra khi người dùng đã đăng nhập và có email cụ thể
-      if (!session?.user?.email) return;
+  const epFromUrl = searchParams.get("ep");
+  const [selectedServer, setSelectedServer] = useState(0);
+  const [selectedEpisode, setSelectedEpisode] = useState(0);
+  const [activeChunk, setActiveChunk] = useState(0);
 
-      try {
-        const res = await fetch(
-          `/api/favorites/check?slug=${slug}&userEmail=${session.user.email}`,
-        );
-        if (res.ok) {
-          const data = await res.json();
-          setIsFavorite(data.isFavorite);
+  const playerRef = useRef(null);
+  const historyTimerRef = useRef(null);
+  const loadingTimerRef = useRef(null);
+
+  const currentEpisodes = servers[selectedServer]?.items || [];
+  const episodeChunks = chunkEpisodes(currentEpisodes, 20);
+  const currentEp = currentEpisodes[selectedEpisode];
+
+  // 🚀 LUỒNG BẤT TỬ: Đập tan màn hình đen - Tự động bốc phim bù qua Proxy Browser nếu Server bị chặn
+  useEffect(() => {
+    const checkAndFetchMovie = async () => {
+      // 1. Kiểm tra trạng thái yêu thích từ DB
+      if (session?.user?.email) {
+        try {
+          const resFav = await fetch(
+            `/api/favorites/check?slug=${slug}&userEmail=${session.user.email}`,
+          );
+          if (resFav.ok) {
+            const favData = await resFav.json();
+            setIsFavorite(favData.isFavorite);
+          }
+        } catch (err) {
+          console.error("Lỗi kiểm tra trạng thái yêu thích:", err);
         }
-      } catch (err) {
-        console.error("Lỗi kiểm tra trạng thái yêu thích:", err);
+      }
+
+      // 2. Nếu Server bị chặn (initialMovie rỗng), Trình duyệt tự gọi bù qua Proxy ngầm /api-nguonc
+      if (!initialMovie?.movie) {
+        try {
+          const { getMovieDetail } = await import("@/lib/movies");
+          const resDetail = await getMovieDetail(slug);
+          
+          if (resDetail && resDetail.movie) {
+            setMovie(resDetail.movie);
+            const eps = resDetail.episodes || [];
+            setServers(eps);
+
+            // Tự động định vị tập phim từ URL sau khi nạp dữ liệu Client thành công
+            const currentEps = eps[0]?.items || [];
+            if (epFromUrl && currentEps.length > 0) {
+              const idx = currentEps.findIndex((e) => e.name === epFromUrl);
+              if (idx !== -1) {
+                setSelectedEpisode(idx);
+                setActiveChunk(Math.floor(idx / 20));
+              }
+            }
+          }
+        } catch (err) {
+          console.error("Lỗi Client fetch bù chi tiết phim:", err);
+        } finally {
+          setIsLoading(false);
+        }
+      } else {
+        // Nếu Server bốc trúng phim sẵn rồi (dưới localhost) thì tắt trạng thái loading luôn
+        setIsLoading(false);
       }
     };
-    if (slug) checkFavoriteStatus();
-  }, [slug, session]);
+
+    if (slug) checkAndFetchMovie();
+  }, [slug, initialMovie, session, epFromUrl]);
+
+  // Cấu hình đồng bộ lại vị trí tập phim khi dữ liệu servers thay đổi
+  useEffect(() => {
+    const eps = servers[selectedServer]?.items || [];
+    if (epFromUrl && eps.length > 0) {
+      const idx = eps.findIndex((e) => e.name === epFromUrl);
+      if (idx !== -1) {
+        setSelectedEpisode(idx);
+        setActiveChunk(Math.floor(idx / 20));
+      }
+    }
+  }, [servers, selectedServer, epFromUrl]);
 
   // Hàm xử lý khi bấm nút Yêu thích
   const handleToggleFavorite = async () => {
-    if (favLoading) return;
+    if (favLoading || !movie) return;
     setFavLoading(true);
     try {
       const res = await fetch("/api/favorites", {
@@ -72,6 +132,7 @@ export default function WatchClient({ initialMovie, slug }) {
           slug: slug,
           name: movie.name,
           thumb_url: movie.thumb_url || movie.poster_url,
+          userEmail: session?.user?.email,
         }),
       });
       if (res.ok) {
@@ -83,36 +144,6 @@ export default function WatchClient({ initialMovie, slug }) {
       setFavLoading(false);
     }
   };
-
-  const servers = movie?.episodes || [];
-  const epFromUrl = searchParams.get("ep");
-
-  const [selectedServer, setSelectedServer] = useState(0);
-  const [selectedEpisode, setSelectedEpisode] = useState(() => {
-    const eps = servers[0]?.items || [];
-    if (epFromUrl && eps.length > 0) {
-      const idx = eps.findIndex((e) => e.name === epFromUrl);
-      return idx !== -1 ? idx : 0;
-    }
-    return 0;
-  });
-
-  const [activeChunk, setActiveChunk] = useState(() => {
-    const eps = servers[0]?.items || [];
-    if (epFromUrl && eps.length > 0) {
-      const idx = eps.findIndex((e) => e.name === epFromUrl);
-      return idx !== -1 ? Math.floor(idx / 20) : 0;
-    }
-    return 0;
-  });
-
-  const playerRef = useRef(null);
-  const historyTimerRef = useRef(null);
-  const loadingTimerRef = useRef(null);
-
-  const currentEpisodes = servers[selectedServer]?.items || [];
-  const episodeChunks = chunkEpisodes(currentEpisodes, 20);
-  const currentEp = currentEpisodes[selectedEpisode];
 
   // ── Spinner fallback timeout ──
   useEffect(() => {
@@ -191,14 +222,20 @@ export default function WatchClient({ initialMovie, slug }) {
     [selectedServer],
   );
 
-  if (!movie) return null;
+  // 🚀 ĐÃ SỬA: Thay thế khối chặn sập màn hình đen bằng màn hình Loading Neon sang xịn mịn
+  if (!movie) {
+    return (
+      <div className="h-screen w-screen bg-[#0a0a0c] flex items-center justify-center text-red-500 font-bold tracking-widest animate-pulse">
+        ĐANG KẾT NỐI MÁY CHIẾU... ❤️
+      </div>
+    );
+  }
 
   const genre = movie.category?.["3"]?.list?.[0]?.name || "";
   const country = movie.category?.["4"]?.list?.[0]?.name || "";
   const epName = currentEp?.name || "1";
 
   return (
-    // 🚀 ĐÃ SỬA: Khóa chết khung view ngoài cùng bằng h-screen overflow-hidden y đúc trang chủ của anh
     <div className="h-screen w-screen bg-[#0a0a0c] text-white font-sans antialiased flex flex-col overflow-hidden select-none">
       {/* 1. HEADER (Đứng yên cố định trên đỉnh) */}
       <Header
@@ -206,29 +243,29 @@ export default function WatchClient({ initialMovie, slug }) {
         sidebarCollapsed={sidebarCollapsed}
       />
 
-      {/* 2. TẦNG THÂN GIỮA (Trừ đi chiều cao Header để nhốt Sidebar khít màn hình) */}
+      {/* 2. TẦNG THÂN GIỮA */}
       <div className="flex flex-1 w-full h-[calc(100vh-56px)] md:h-[calc(100vh-64px)] overflow-hidden relative">
-        {/* SIDEBAR BÊN TRÁI CỦA ANH (Lúc này tự động đứng im bám theo khung cha) */}
         <Sidebar collapsed={sidebarCollapsed} />
 
-        {/* 🚀 ĐÃ SỬA: KHU VỰC RUỘT CUỘN ĐỘC LẬP (Chứa toàn bộ nội dung xem phim và Footer) */}
+        {/* KHU VỰC RUỘT CUỘN ĐỘC LẬP */}
         <div className="flex-1 min-w-0 h-full overflow-y-auto custom-scrollbar flex flex-col justify-between">
-          {/* Grid Layout chứa Player + Cột Phải */}
           <div className="w-full max-w-[1680px] mx-auto px-4 md:px-8 xl:px-10 py-6 grid grid-cols-1 xl:grid-cols-[1fr_290px] 2xl:grid-cols-[1fr_320px] gap-6">
             {/* ── CỘT TRÁI (Player + Metadata + Tabs) ── */}
             <div className="min-w-0 w-full space-y-5">
-              <WatchPlayer
-                movie={movie}
-                currentEp={currentEp}
-                selectedServer={selectedServer}
-                epName={epName}
-                isLoading={isLoading}
-                iframeError={iframeError}
-                getEmbedUrl={getEmbedUrl}
-                setIsLoading={setIsLoading}
-                setIframeError={setIframeError}
-                collapsed={sidebarCollapsed}
-              />
+              <div ref={playerRef}>
+                <WatchPlayer
+                  movie={movie}
+                  currentEp={currentEp}
+                  selectedServer={selectedServer}
+                  epName={epName}
+                  isLoading={isLoading}
+                  iframeError={iframeError}
+                  getEmbedUrl={getEmbedUrl}
+                  setIsLoading={setIsLoading}
+                  setIframeError={setIframeError}
+                  collapsed={sidebarCollapsed}
+                />
+              </div>
               <WatchMetadata
                 movie={movie}
                 genre={genre}
@@ -285,24 +322,12 @@ export default function WatchClient({ initialMovie, slug }) {
             </aside>
           </div>
 
-          {/* 🚀 3. FOOTER ĐÃ ĐƯỢC FIX CHIỀU CAO: Bọc trong khối block cố định chiều cao tự nhiên */}
+          {/* 3. FOOTER ĐÃ ĐƯỢC FIX CHIỀU CAO */}
           <div className="w-full block clear-both mt-auto pt-6 flex-shrink-0">
             <Footer className="w-full" />
           </div>
         </div>
       </div>
-
-      <style jsx global>{`
-        @keyframes sb {
-          0%,
-          100% {
-            transform: scaleY(1);
-          }
-          50% {
-            transform: scaleY(0.35);
-          }
-        }
-      `}</style>
     </div>
   );
 }

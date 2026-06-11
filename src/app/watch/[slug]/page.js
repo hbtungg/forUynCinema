@@ -43,6 +43,12 @@ export default async function WatchPage({ params }) {
   const { slug } = await params;
   const data = await getMovieData(slug);
 
-  // Không ngắt trang ở đây nữa, đẩy hết xuống WatchClient để Client tự động kích hoạt cào ngầm lấp đầy phim nếu Server bị chặn
-  return <WatchClient initialMovie={data?.movie} slug={slug} />;
+  // 🚀 ĐÃ CẬP NHẬT: Truyền toàn bộ cục dữ liệu gốc (bao gồm cả danh sách tập phim episodes) xuống Client
+  // Nếu Server bị Cloudflare chặn, data sẽ là { movie: null, episodes: [] }, Client sẽ tự bốc bù qua Proxy Browser!
+  return (
+    <WatchClient 
+      initialMovie={data} 
+      slug={slug} 
+    />
+  );
 }
