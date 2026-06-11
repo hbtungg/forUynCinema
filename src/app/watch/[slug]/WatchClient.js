@@ -88,6 +88,9 @@ export default function WatchClient({ initialMovie, slug }) {
         try {
           const resDetail = await getMovieDetail(slug);
           
+          console.log("=== BÁO CÁO TỪ TRÌNH DUYỆT ===");
+          console.log("Dữ liệu bốc được từ NguồnC:", resDetail);
+          
           if (resDetail && resDetail.movie) {
             setMovie(resDetail.movie);
             const eps = resDetail.episodes || [];
