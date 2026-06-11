@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
 import Header from "@/components/Header";
 import RelatedMovies from "@/components/RelatedMovies";
 import Footer from "@/components/Footer";
+
 
 // LINH KIỆN CŨ CỦA ANH
 import WatchPlayer from "@/components/watch/WatchPlayer";

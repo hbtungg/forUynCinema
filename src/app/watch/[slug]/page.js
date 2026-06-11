@@ -13,7 +13,6 @@ async function getMovieData(slug) {
 
     if (!res.ok) return { movie: null, episodes: [] };
 
-    // Nếu API trả về HTML thay vì JSON sạch, nuốt lỗi trả về cấu trúc rỗng luôn
     const contentType = res.headers.get("content-type");
     if (!contentType || !contentType.includes("application/json")) {
       return { movie: null, episodes: [] };
@@ -28,26 +27,40 @@ async function getMovieData(slug) {
 
 // 1. DYNAMIC METADATA: Bảo vệ tiêu đề Tab không bị sập theo API
 export async function generateMetadata({ params }) {
-  const { slug } = await params;
-  const data = await getMovieData(slug);
-  const movieName = data?.movie?.name || "Đang xem phim";
+  try {
+    const { slug } = await params;
+    const data = await getMovieData(slug);
+    const movieName = data?.movie?.name || "Đang xem phim";
 
-  return {
-    title: `${movieName} - forUyn Cinema 🍿`,
-    description: data?.movie?.description?.replace(/<[^>]*>?/gm, '').slice(0, 160) || "Xem phim tại forUyn Cinema",
-  };
+    return {
+      title: `${movieName} - forUyn Cinema 🍿`,
+      description: data?.movie?.description?.replace(/<[^>]*>?/gm, '').slice(0, 160) || "Xem phim tại forUyn Cinema",
+    };
+  } catch (e) {
+    return { title: "Đang xem phim - forUyn Cinema 🍿" };
+  }
 }
 
-// 2. PAGE COMPONENT: Truyền dữ liệu (có thể là mảng sạch hoặc mảng trống do bị chặn) xuống Client bọc lót
+// 2. PAGE COMPONENT: Truyền dữ liệu an toàn xuống Client bọc lót
 export default async function WatchPage({ params }) {
   const { slug } = await params;
-  const data = await getMovieData(slug);
+  let movieData = { movie: null, episodes: [] };
 
-  // 🚀 ĐÃ CẬP NHẬT: Truyền toàn bộ cục dữ liệu gốc (bao gồm cả danh sách tập phim episodes) xuống Client
-  // Nếu Server bị Cloudflare chặn, data sẽ là { movie: null, episodes: [] }, Client sẽ tự bốc bù qua Proxy Browser!
+  // 🚀 ĐÃ SỬA CHUẨN ĐÉT: Chỉ bọc try/catch cho phần logic lấy dữ liệu, cách ly hoàn toàn khỏi JSX
+  try {
+    const data = await getMovieData(slug);
+    if (data) {
+      movieData = data;
+    }
+  } catch (error) {
+    console.error("Sập mạch lấy dữ liệu Server WatchPage:", error);
+    // Giữ nguyên trạng thái mặc định rỗng để Client tự kích hoạt cào bù
+  }
+
+  // Trả về thẻ JSX một cách thuần khiết bên ngoài khối try/catch, đúng chuẩn React yêu cầu!
   return (
     <WatchClient 
-      initialMovie={data} 
+      initialMovie={movieData} 
       slug={slug} 
     />
   );
