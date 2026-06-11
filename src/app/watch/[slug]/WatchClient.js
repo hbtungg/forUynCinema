@@ -51,9 +51,22 @@ export default function WatchClient({ initialMovie, slug }) {
   const historyTimerRef = useRef(null);
   const loadingTimerRef = useRef(null);
 
-  const currentEpisodes = servers[selectedServer]?.items || [];
-  const episodeChunks = chunkEpisodes(currentEpisodes, 20);
-  const currentEp = currentEpisodes[selectedEpisode];
+  // const currentEpisodes = servers[selectedServer]?.items || [];
+  // const episodeChunks = chunkEpisodes(currentEpisodes, 20);
+  // const currentEp = currentEpisodes[selectedEpisode];
+
+  // 🚀 ĐÃ SỬA: Dùng useMemo để ép React tính toán lại chuẩn đét tập phim ngay khi servers cào bù thành công
+  const currentEpisodes = useMemo(() => {
+    return servers[selectedServer]?.items || [];
+  }, [servers, selectedServer]);
+
+  const episodeChunks = useMemo(() => {
+    return chunkEpisodes(currentEpisodes, 20);
+  }, [currentEpisodes]);
+
+  const currentEp = useMemo(() => {
+    return currentEpisodes[selectedEpisode] || null;
+  }, [currentEpisodes, selectedEpisode]);
 
   // 🚀 LUỒNG BẤT TỬ: Đập tan màn hình đen - Tự động bốc phim bù qua Proxy Browser nếu Server bị chặn
   useEffect(() => {
