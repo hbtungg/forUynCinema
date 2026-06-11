@@ -11,7 +11,7 @@ export async function GET(request) {
 
   try {
     // Gọi sang NguồnC từ tầng Server ẩn danh của Vercel
-    const res = await fetch(`https://phim.nguonc.com/api/films/${path}?page=${page}`, {
+    const res = await fetch(`https://phim.nguonc.com/api/${path}?page=${page}`, {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
