@@ -1,49 +1,58 @@
-// 🚀 ÉP VERCEL VÀ NETLIFY LUÔN LUÔN FETCH DỮ LIỆU THỜI GIAN THỰC (DYNAMIC RUNTIME)
-// Triệt tiêu hoàn toàn việc Cloudflare của NguồnC chặn IP khi đóng gói tĩnh
-export const dynamic = 'force-dynamic';
-export const fetchCache = 'force-no-store';
+'use client';
 
-import { 
-  getMovies, 
-  getMoviesByCountry, 
-  getMoviesByCategory 
-} from '@/lib/movies';
+import { useState, useEffect } from 'react';
+import { getMovies, getMoviesByCountry, getMoviesByCategory } from '@/lib/movies';
 import HomePageClient from './HomePageClient';
 
-export default async function HomePage() {
-  // 🚀 KHẮC PHỤC CHÍ MẠNG: Gọi tuần tự có bọc lót an toàn, chống nghẽn IP máy chủ Vercel/Netlify
-  // Các hàm Helper tự động gọi trực tiếp API gốc ở tầng Server, đảm bảo mượt mà 100%
-  let allMovies = [];
-  let koreaMovies = [];
-  let actionMovies = [];
-  let chinaMovies = [];
-  let animeMovies = [];
+export default function HomePage() {
+  const [data, setData] = useState({
+    allMovies: [],
+    koreaMovies: [],
+    actionMovies: [],
+    chinaMovies: [],
+    animeMovies: [],
+    topRated: [],
+    continueItems: []
+  });
+  const [loading, setLoading] = useState(true);
 
-  try {
-    const resAll = await getMovies(1);
-    allMovies = resAll?.items || [];
-    
-    const resKorea = await getMoviesByCountry('han-quoc', 1);
-    koreaMovies = resKorea?.items || [];
+  useEffect(() => {
+    async function fetchAllMovies() {
+      try {
+        // 🚀 BƯỚC NGOẶT CHÍ MẠNG: Trình duyệt chạy mạng cá nhân tự fetch song song qua cổng Proxy ngầm
+        // Bypass hoàn toàn màng lọc IP của Server Vercel/Netlify
+        const [resAll, resKorea, resAction, resChina, resAnime] = await Promise.all([
+          getMovies(1),
+          getMoviesByCountry('han-quoc', 1),
+          getMoviesByCategory('hanh-dong', 1),
+          getMoviesByCountry('trung-quoc', 1),
+          getMoviesByCategory('hoat-hinh', 1)
+        ]);
 
-    const resAction = await getMoviesByCategory('hanh-dong', 1);
-    actionMovies = resAction?.items || [];
+        const all = resAll?.items || [];
+        const topRatedMapped = all.slice(0, 5).map((m, i) => ({
+          ...m,
+          fakeRating: [9.3, 9.2, 9.0, 8.9, 8.8][i],
+        }));
 
-    const resChina = await getMoviesByCountry('trung-quoc', 1);
-    chinaMovies = resChina?.items || [];
+        setData({
+          allMovies: all,
+          koreaMovies: resKorea?.items || [],
+          actionMovies: resAction?.items || [],
+          chinaMovies: resChina?.items || [],
+          animeMovies: resAnime?.items || [],
+          topRated: topRatedMapped,
+          continueItems: all.slice(5, 8)
+        });
+      } catch (err) {
+        console.error("Lỗi fetch phim tại Client qua Proxy:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
 
-    const resAnime = await getMoviesByCategory('hoat-hinh', 1);
-    animeMovies = resAnime?.items || [];
-  } catch (err) {
-    console.error("Hệ thống phát hiện lỗi cào dữ liệu trang chủ:", err);
-  }
-
-  // Xử lý logic hiển thị BXH Top Rated và Phim đang xem tiếp tục
-  const topRated = allMovies.slice(0, 5).map((m, i) => ({
-    ...m,
-    fakeRating: [9.3, 9.2, 9.0, 8.9, 8.8][i],
-  }));
-  const continueItems = allMovies.slice(5, 8);
+    fetchAllMovies();
+  }, []);
 
   // Danh mục thể loại phổ biến hiển thị ở RightPanel
   const genres = [
@@ -57,15 +66,23 @@ export default async function HomePage() {
     { label: 'Tài liệu',  icon: '📽️', href: '/danh-sach?type=tai-lieu' },
   ];
 
+  if (loading) {
+    return (
+      <div className="h-screen w-screen bg-[#0a0a0c] flex items-center justify-center text-red-500 font-bold tracking-widest animate-pulse">
+        ĐANG KHỞI CHẠY RẠP PHIM... ❤️
+      </div>
+    );
+  }
+
   return (
     <HomePageClient
-      allMovies={allMovies}
-      koreaMovies={koreaMovies}
-      actionMovies={actionMovies}
-      chinaMovies={chinaMovies}
-      animeMovies={animeMovies}
-      topRated={topRated}
-      continueItems={continueItems}
+      allMovies={data.allMovies}
+      koreaMovies={data.koreaMovies}
+      actionMovies={data.actionMovies}
+      chinaMovies={data.chinaMovies}
+      animeMovies={data.animeMovies}
+      topRated={data.topRated}
+      continueItems={data.continueItems}
       genres={genres}
     />
   );
