@@ -65,10 +65,9 @@ export default function WatchClient({ initialMovie, slug }) {
     return currentEpisodes[selectedEpisode] || null;
   }, [currentEpisodes, selectedEpisode]);
 
-  // 🚀 LUỒNG BẤT TỬ: Tự động bốc phim bù qua Proxy Browser nếu Server bị chặn IP
+  // 🚀 LUỒNG BẤT TỬ: Khóa chết lỗi cấu trúc API NguồnC, lấp đầy danh sách tập phim
   useEffect(() => {
     const checkAndFetchMovie = async () => {
-      // 1. Kiểm tra trạng thái yêu thích từ DB
       if (session?.user?.email) {
         try {
           const resFav = await fetch(
@@ -83,35 +82,35 @@ export default function WatchClient({ initialMovie, slug }) {
         }
       }
 
-      // 2. Nếu Server bị chặn (initialMovie rỗng), Trình duyệt gọi trực tiếp hàm getMovieDetail qua Proxy ngầm
-      if (!initialMovie?.movie) {
-        try {
-          const resDetail = await getMovieDetail(slug);
+      // Kích hoạt cào dữ liệu từ Browser (Do slug xanh và CORS thông suốt hoàn hảo!)
+      try {
+        const resDetail = await getMovieDetail(slug);
+        
+        if (resDetail && resDetail.movie) {
+          setMovie(resDetail.movie);
           
-          console.log("=== BÁO CÁO TỪ TRÌNH DUYỆT ===");
-          console.log("Dữ liệu bốc được từ NguồnC:", resDetail);
-          
-          if (resDetail && resDetail.movie) {
-            setMovie(resDetail.movie);
-            const eps = resDetail.episodes || [];
-            setServers(eps);
+          // 🚀 BƯỚC NGOẶT CHÍ MẠNG: Ép cấu trúc mảng tập phim của NguồnC (server_data) về dạng chuẩn (.items) của UI
+          const rawEps = resDetail.movie.episodes || [];
+          const mappedServers = rawEps.map(srv => ({
+            server_name: srv.server_name || "Thuyết Minh",
+            items: srv.server_data || srv.items || [] // Chuyển đổi server_data thành items để khớp UI của anh!
+          }));
 
-            // Tự động định vị tập phim từ URL sau khi nạp dữ liệu Client thành công
-            const currentEps = eps[0]?.items || [];
-            if (epFromUrl && currentEps.length > 0) {
-              const idx = currentEps.findIndex((e) => e.name === epFromUrl);
-              if (idx !== -1) {
-                setSelectedEpisode(idx);
-                setActiveChunk(Math.floor(idx / 20));
-              }
+          setServers(mappedServers);
+
+          // Định vị tập phim từ URL
+          const currentEps = mappedServers[0]?.items || [];
+          if (epFromUrl && currentEps.length > 0) {
+            const idx = currentEps.findIndex((e) => e.name === epFromUrl);
+            if (idx !== -1) {
+              setSelectedEpisode(idx);
+              setActiveChunk(Math.floor(idx / 20));
             }
           }
-        } catch (err) {
-          console.error("Lỗi Client fetch bù chi tiết phim:", err);
-        } finally {
-          setIsLoading(false);
         }
-      } else {
+      } catch (err) {
+        console.error("Lỗi Client fetch bù chi tiết phim:", err);
+      } finally {
         setIsLoading(false);
       }
     };
