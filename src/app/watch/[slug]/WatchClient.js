@@ -118,7 +118,6 @@ export default function WatchClient({ initialMovie, slug }) {
     if (slug) checkAndFetchMovie();
   }, [slug, initialMovie, session, epFromUrl]);
 
-  // Cấu hình đồng bộ lại vị trí tập phim khi dữ liệu servers hoặc URL thay đổi
   useEffect(() => {
     const eps = servers[selectedServer]?.items || [];
     if (epFromUrl && eps.length > 0) {
