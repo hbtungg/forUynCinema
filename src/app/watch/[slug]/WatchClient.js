@@ -69,6 +69,9 @@ export default function WatchClient({ slug }) {
   const [movie, setMovie] = useState(null);
   const [servers, setServers] = useState([]);
   const [isFetching, setIsFetching] = useState(true); // fetch lần đầu
+  
+  // 🚀 CẢI TIẾN 1: Thêm State lưu danh sách phim liên quan bọc từ Client
+  const [relatedMovies, setRelatedMovies] = useState([]);
 
   const [activeTab, setActiveTab] = useState("episodes");
   const [isDescExpanded, setIsDescExpanded] = useState(false);
@@ -87,6 +90,9 @@ export default function WatchClient({ slug }) {
   const playerRef = useRef(null);
   const historyTimerRef = useRef(null);
   const loadingTimerRef = useRef(null);
+  
+  // 🚀 CẢI TIẾN 2: Cờ hiệu khóa chết luồng fetch, chống reload phim vô tội vạ khi đổi tab/app
+  const hasFetchedRef = useRef(false);
 
   const currentEpisodes = useMemo(() => servers[selectedServer]?.items || [], [servers, selectedServer]);
   const episodeChunks = useMemo(() => chunkEpisodes(currentEpisodes, 20), [currentEpisodes]);
@@ -95,6 +101,9 @@ export default function WatchClient({ slug }) {
   // Fetch phim từ browser — IP dân cư, Cloudflare không chặn
   useEffect(() => {
     if (!slug) return;
+    
+    // Đã chặn đứng: Nếu cờ hiệu báo đã từng lấy phim rồi thì đứng im, không chạy lại nữa!
+    if (hasFetchedRef.current) return;
 
     async function fetchAll() {
       setIsFetching(true);
@@ -114,12 +123,25 @@ export default function WatchClient({ slug }) {
         if (resDetail?.movie) {
           setMovie(resDetail.movie);
 
+          // 🚀 CẢI TIẾN 3: Đổi tiêu đề Tab theo tên phim thật để xóa sổ chữ "Đang tải phim..."
+          document.title = `${resDetail.movie.name} - forUyn Cinema 🍿`;
+
           const rawEps = resDetail.movie.episodes || [];
           const mappedServers = rawEps.map(srv => ({
             server_name: srv.server_name || "Thuyết Minh",
             items: srv.server_data || srv.items || [],
           }));
           setServers(mappedServers);
+
+          // 🚀 CẢI TIẾN 4: Chủ động bốc phim liên quan dựa trên thể loại chính của phim từ Client-side
+          try {
+            const { getRelatedMovies } = await import("@/lib/movies");
+            const categorySlug = resDetail.movie.category?.["3"]?.list?.[0]?.slug || "hanh-dong";
+            const relatedData = await getRelatedMovies(categorySlug, 6);
+            setRelatedMovies(relatedData || []);
+          } catch (relErr) {
+            console.error("Lỗi lấy phim liên quan:", relErr);
+          }
 
           // Định vị tập phim từ URL
           if (epFromUrl) {
@@ -130,6 +152,9 @@ export default function WatchClient({ slug }) {
               setActiveChunk(Math.floor(idx / 20));
             }
           }
+          
+          // Khóa cờ hiệu vĩnh viễn sau khi lấy dữ liệu thành công
+          hasFetchedRef.current = true;
         }
       } catch (err) {
         console.error("WatchClient fetch error:", err);
@@ -140,7 +165,7 @@ export default function WatchClient({ slug }) {
     }
 
     fetchAll();
-  }, [slug, session]);
+  }, [slug, session, epFromUrl]);
 
   // Đồng bộ tập phim khi servers thay đổi
   useEffect(() => {
@@ -327,11 +352,18 @@ export default function WatchClient({ slug }) {
                 selectedEpisode={selectedEpisode}
                 handleEpisodeChange={handleEpisodeChange}
               />
+              {/* 🚀 ĐÃ SỬA CHUẨN ĐÉT: Khung đề xuất lấp đầy phim cào mượt mà từ Client */}
               <div className="bg-[#111115] border border-white/5 rounded-2xl overflow-hidden p-2">
                 <span className="block text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 px-2 py-2.5 mb-1">
                   Có thể bạn thích
                 </span>
-                <RelatedMovies key={`sb-${slug}`} allCategories={movie.category} isSidebarMode={true} />
+                {relatedMovies.length > 0 ? (
+                  <RelatedMovies key={`sb-${slug}`} initialMovies={relatedMovies} isSidebarMode={true} />
+                ) : (
+                  <div className="text-zinc-600 text-xs text-center py-6 animate-pulse">
+                    Đang tìm phim tương tự... 🍿
+                  </div>
+                )}
               </div>
             </aside>
           </div>
