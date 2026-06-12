@@ -1,32 +1,48 @@
-import { searchMovies } from '@/lib/movies';
+"use client";
+
+import { useState, useEffect, use } from 'react';
+import { searchMovies } from '@/lib/clientMovies'; // Sử dụng hàm Client sạch mới tinh
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import MovieCard from '@/components/MovieCard';
 import Link from 'next/link';
 
-export async function generateMetadata({ searchParams }) {
-  const sParams = await searchParams;
-  const keyword = sParams?.keyword || ''; // Đổi q thành keyword cho đồng bộ
-  
-  return {
-    title: keyword ? `Tìm kiếm "${keyword}"` : 'Tìm kiếm phim',
-  };
-}
-
-export default async function SearchPage({ searchParams }) {
-  const sParams = await searchParams;
+export default function SearchPage({ searchParams }) {
+  // Giải nén các param bất đồng bộ từ URL bằng hàm use() chuẩn Next.js mới
+  const sParams = use(searchParams);
   const keyword = sParams?.keyword || '';
   const page = Number(sParams?.page || 1);
 
-  // Gọi API tìm kiếm phim
-  const data = await searchMovies(keyword, page);
-  const movies = data.items || [];
-  
-  // FIX: Kiểm tra cả hai trường hợp có 's' và không có 's' ở total_page
-  const totalPages = data.paginate?.total_pages || data.paginate?.total_page || 1;
+  const [movies, setMovies] = useState([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [isFetching, setIsFetching] = useState(true);
+
+  // Ép Trình duyệt tự gọi API tìm kiếm dựa trên từ khóa thay đổi trên URL
+  useEffect(() => {
+    async function executeSearch() {
+      setIsFetching(true);
+      // Dùng nháy đơn bọc ngoài nháy kép cho chuỗi tiêu đề Tab
+      document.title = keyword ? `Tìm kiếm "${keyword}" - forUyn Cinema 🍿` : 'Tìm kiếm phim - forUyn Cinema 🍿';
+      
+      try {
+        const data = await searchMovies(keyword, page);
+        if (data) {
+          setMovies(data.items || []);
+          const total = data.paginate?.total_pages || data.paginate?.total_page || 1;
+          setTotalPages(total);
+        }
+      } catch (err) {
+        console.error("Lỗi tìm kiếm:", err);
+      } finally {
+        setIsFetching(false);
+      }
+    }
+
+    executeSearch();
+  }, [keyword, page]);
 
   return (
-    <main className="min-h-screen bg-black text-white font-sans relative overflow-x-hidden">
+    <main className="min-h-screen bg-black text-white font-sans relative overflow-x-hidden select-none">
       <Header />
 
       <div className="px-6 md:px-12 pt-24 md:pt-32 pb-10">
@@ -43,29 +59,39 @@ export default async function SearchPage({ searchParams }) {
           <div className="flex items-center gap-3">
             <div className="w-1.5 h-10 bg-red-600 rounded-full shadow-[0_0_20px_rgba(220,38,38,0.4)]"></div>
             <h1 className="text-3xl md:text-5xl font-black text-zinc-100 uppercase italic tracking-tighter leading-none">
-              Kết quả cho: <span className="text-red-600">"{keyword}"</span>
+              {/* 🚀 ĐÃ KHỬ LỖI CÚ PHÁP: Sử dụng mã hóa &quot */}
+              Kết quả cho: <span className="text-red-600">&quot;{keyword}&quot;</span>
             </h1>
           </div>
         </header>
 
         {/* DANH SÁCH PHIM */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 md:gap-8">
-          {movies.length > 0 ? (
-            movies.map((phim) => (
-              <div key={phim.slug}>
-                <MovieCard movie={phim} />
+        {isFetching ? (
+          // Khung xương Skeleton trong lúc chờ trình duyệt cào phim tìm kiếm
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 md:gap-8">
+            {Array.from({ length: 10 }).map((_, i) => (
+              <div key={i} className="aspect-[2/3] w-full bg-[#111115] rounded-2xl animate-pulse" />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 md:gap-8">
+            {movies.length > 0 ? (
+              movies.map((phim) => (
+                <div key={phim.slug}>
+                  <MovieCard movie={phim} />
+                </div>
+              ))
+            ) : (
+              <div className="col-span-full py-20 text-center flex flex-col items-center gap-4">
+                 <span className="text-4xl animate-bounce">🍿</span>
+                 <p className="italic opacity-30 text-sm">Không tìm thấy phim này!</p>
               </div>
-            ))
-          ) : (
-            <div className="col-span-full py-20 text-center flex flex-col items-center gap-4">
-               <span className="text-4xl animate-bounce">🍿</span>
-               <p className="italic opacity-30 text-sm">Không tìm thấy phim này rồi anh yêu ơi... ❤️</p>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
 
-        {/* 4. PHÂN TRANG - Đã tối ưu điều kiện hiển thị */}
-        {Number(totalPages) > 1 && (
+        {/* PHÂN TRANG */}
+        {!isFetching && Number(totalPages) > 1 && (
           <div className="flex justify-center items-center mt-20 gap-4 pb-10">
             {page > 1 && (
               <Link 

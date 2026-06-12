@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import Link from 'next/link'; // 🚀 Dùng Link của Next.js để chuyển trang mượt mà
+import Link from 'next/link'; 
 
 export default function RelatedMovies({ allCategories, isEpo = false, actor = '', currentId = '', isSidebarMode = false }) {
   const [related, setRelated] = useState([]);
@@ -10,53 +10,76 @@ export default function RelatedMovies({ allCategories, isEpo = false, actor = ''
     async function loadData() {
       setLoading(true);
       try {
-        let url = '';
+        // 🚀 NHÁNH 1: XỬ LÝ PHIM NGƯỜI LỚN (EPO) GIỮ NGUYÊN QUA SERVER ROUTE
         if (isEpo) {
-          url = `/api/related?isEpo=true&actor=${encodeURIComponent(actor)}`;
-        } else {
-          const getSafeSlug = () => {
-            if (!allCategories) return 'tinh-cam';
-            try {
-              if (allCategories['3']?.list?.[0]?.slug) {
-                const s = allCategories['3'].list[0].slug;
-                if (s !== 'phim-le' && s !== 'phim-bo') return s;
-              }
+          const url = `/api/related?isEpo=true&actor=${encodeURIComponent(actor)}`;
+          const res = await fetch(url);
+          const data = await res.json();
+          if (data?.items) {
+            const formatted = data.items
+              .filter(v => String(v.id || v.slug) !== String(currentId))
+              .map(v => ({
+                ...v,
+                thumb_url: v.default_thumb?.src,
+                name: v.title,
+                customHref: `/epo/watch/${v.id}`,
+                quality: '4K'
+              }));
+            const sorted = formatted.sort(() => 0.5 - Math.random());
+            setRelated(sorted.slice(0, isSidebarMode ? 5 : 8));
+          }
+          return;
+        }
+
+        // 🚀 NHÁNH 2: XỬ LÝ PHIM THƯỜNG (NGUỒNC) - BẮN TRỰC TIẾP TỪ BROWSER BYPASS CLOUDFLARE
+        // 1. Phân tích tìm nhanh slug thể loại tự động từ dữ liệu Client bốc về
+        let categorySlug = 'tinh-cam';
+        if (allCategories) {
+          try {
+            // Check nếu là cấu trúc API bốc từ Client mới
+            if (allCategories["3"]?.list?.[0]?.slug) {
+              categorySlug = allCategories["3"].list[0].slug;
+            } else if (Array.isArray(allCategories)) {
+              // Dự phòng cấu trúc mảng phẳng
+              categorySlug = allCategories[0]?.slug || 'tinh-cam';
+            } else {
               const values = Object.values(allCategories);
               for (let val of values) {
                 if (val?.list?.[0]?.slug) {
-                  const s = val.list[0].slug;
-                  if (s !== 'phim-le' && s !== 'phim-bo') return s;
+                  categorySlug = val.list[0].slug;
+                  break;
                 }
               }
-            } catch (e) { return 'tinh-cam'; }
-            return 'tinh-cam';
-          };
-          url = `/api/related?slug=${getSafeSlug()}`;
+            }
+          } catch (e) { categorySlug = 'tinh-cam'; }
         }
 
-        const res = await fetch(url);
-        const data = await res.json();
+        if (categorySlug === 'phim-le' || categorySlug === 'phim-bo') {
+          categorySlug = 'tinh-cam'; // Fallback danh mục tránh lỗi bốc danh mục chung chung
+        }
+
+        // 2. Gọi thẳng hàm helper của Client cào qua API NguồnC (Không thông qua Server Vercel nữa!)
+        const directUrl = `https://phim.nguonc.com/api/films/the-loai/${categorySlug}?page=1`;
+        const response = await fetch(directUrl, { headers: { Accept: "application/json" } });
         
-        if (data?.items) {
-          const formatted = data.items
-            .filter(v => (v.id || v.slug) !== currentId)
-            .map(v => ({
-              ...v,
-              thumb_url: isEpo ? v.default_thumb?.src : v.thumb_url,
-              name: isEpo ? v.title : v.name,
-              customHref: isEpo ? `/epo/watch/${v.id}` : (v.customHref || `/watch/${v.slug}`),
-              quality: isEpo ? '4K' : v.quality
-            }));
+        if (response.ok) {
+          const resData = await response.json();
+          if (resData?.items) {
+            const formatted = resData.items
+              .filter(v => String(v.id || v.slug) !== String(currentId))
+              .map(v => ({
+                ...v,
+                customHref: `/watch/${v.slug}`,
+              }));
 
-          // Xử lý đảo ngẫu nhiên an toàn ở Client bảo vệ lỗi Hydration
-          const sorted = formatted.sort(() => 0.5 - Math.random());
-
-          // Ở thanh bên phải dọc lấy 5 phim là vừa vặn khung hình nhìn rất sang
-          const limitCount = isSidebarMode ? 5 : (isEpo ? 8 : 6);
-          setRelated(sorted.slice(0, limitCount));
+            // Đảo ngẫu nhiên danh sách bảo vệ lỗi Hydration
+            const sorted = formatted.sort(() => 0.5 - Math.random());
+            const limitCount = isSidebarMode ? 5 : 6;
+            setRelated(sorted.slice(0, limitCount));
+          }
         }
       } catch (err) {
-        console.error("Lỗi đề xuất:", err);
+        console.error("Lỗi cào dữ liệu đề xuất tại Client:", err);
       } finally {
         setLoading(false);
       }
@@ -64,7 +87,7 @@ export default function RelatedMovies({ allCategories, isEpo = false, actor = ''
     loadData();
   }, [isEpo, actor, allCategories, currentId, isSidebarMode]);
 
-  // ─── 🚀 THIẾT LẬP 1: GIAO DIỆN DẠNG LIST NGANG NHỎ GỌN TRÊN SIDEBAR BÊN PHẢI ───
+  // ─── 🚀 GIAO DIỆN DẠNG LIST NGANG NHỎ GỌN TRÊN SIDEBAR BÊN PHẢI ───
   if (isSidebarMode) {
     if (loading) {
       return (
@@ -84,12 +107,12 @@ export default function RelatedMovies({ allCategories, isEpo = false, actor = ''
             href={item.customHref}
             className="flex items-center gap-3 p-1.5 w-full rounded-xl hover:bg-white/[0.03] transition-all duration-300 border border-transparent hover:border-white/[0.02] group"
           >
-            {/* Thumbnail nho nhỏ bo góc */}
             <div className="w-11 h-14 flex-shrink-0 rounded-lg overflow-hidden bg-zinc-900 border border-white/[0.04] relative">
               <img 
                 src={item.thumb_url} 
                 alt="" 
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                onError={(e) => { e.target.src = item.poster_url; }} // Sửa lỗi rụng link ảnh của NguồnC
               />
               {item.quality && (
                 <span className="absolute bottom-0.5 right-0.5 text-[7px] font-black tracking-tight px-1 py-0.2 bg-black/60 rounded text-zinc-400 border border-white/5 scale-90 origin-bottom-right">
@@ -98,7 +121,6 @@ export default function RelatedMovies({ allCategories, isEpo = false, actor = ''
               )}
             </div>
 
-            {/* Thông tin chữ xếp bên cạnh ảnh */}
             <div className="flex-1 min-w-0 pr-1">
               <h4 className="text-[11px] font-bold text-zinc-300 truncate leading-tight group-hover:text-red-500 transition-colors uppercase tracking-wide">
                 {item.name}
@@ -115,7 +137,7 @@ export default function RelatedMovies({ allCategories, isEpo = false, actor = ''
     );
   }
 
-  // ─── 🚀 THIẾT LẬP 2: GIAO DIỆN Ô CARD DÀN NGANG TO ĐỒNG BỘ DƯỚI ĐÁY TRANG ───
+  // ─── 🚀 GIAO DIỆN Ô CARD DÀN NGANG TO ĐỒNG BỘ DƯỚI ĐÁY TRANG ───
   return (
     <div className="mt-16 border-t border-zinc-900/30 pt-10 pb-16 w-full">
       <div className="flex items-center gap-4 mb-8 px-1">
@@ -138,7 +160,6 @@ export default function RelatedMovies({ allCategories, isEpo = false, actor = ''
           isEpo ? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4' : 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'
         }`}>
           {related.length > 0 && related.map((item) => {
-            // Nhánh fallback hiển thị Card to nguyên bản của anh dưới đáy trang
             const MovieCard = require('./MovieCard').default; 
             return (
               <div key={item.id || item.slug} className="hover:translate-y-[-6px] transition-all duration-500">
