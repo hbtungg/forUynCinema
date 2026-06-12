@@ -1,6 +1,5 @@
 "use client";
-import WorldCupWidget from "@/components/watch/WorldCupWidget";
-import { ACTIVE_THEME } from "@/themes/worldcup";
+
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -48,15 +47,10 @@ function WatchSkeleton({ sidebarCollapsed, onToggleSidebar }) {
                 ))}
               </div>
             </div>
-
-            {/* 🚀 ĐÃ SỬA: Right panel skeleton tích hợp Widget bóng đá hiện lập tức */}
+            {/* Right panel skeleton */}
             <div className="space-y-4">
-              {/* Nếu theme là worldcup, hiển thị Widget realtime ngay từ giây đầu tiên */}
-              {ACTIVE_THEME === "worldcup" && <WorldCupWidget />}
-              
-              {/* Các khung xương phụ của danh sách tập phim phía dưới giữ nguyên */}
               <div className="h-12 bg-[#111115] rounded-xl animate-pulse" />
-              {Array.from({ length: 5 }).map((_, i) => (
+              {Array.from({ length: 6 }).map((_, i) => (
                 <div key={i} className="h-10 bg-[#111115] rounded-lg animate-pulse" />
               ))}
             </div>
@@ -68,9 +62,6 @@ function WatchSkeleton({ sidebarCollapsed, onToggleSidebar }) {
 }
 
 export default function WatchClient({ slug }) {
-  console.log("=== KIỂM TRA TRẠNG THÁI SKIN WORLD CUP ===");
-  console.log("ACTIVE_THEME hiện tại là:", ACTIVE_THEME);
-  console.log("Linh kiện WorldCupWidget có tồn tại không:", typeof WorldCupWidget);
   const { data: session } = useSession();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -352,9 +343,7 @@ export default function WatchClient({ slug }) {
             </div>
 
             <aside className="w-full space-y-5 min-w-0">
-              {ACTIVE_THEME === "worldcup" && <WorldCupWidget />}
               <WatchServerDropdown servers={servers} selectedServer={selectedServer} handleServerChange={handleServerChange} />
-              
               <WatchRightEpList
                 currentEpisodes={currentEpisodes}
                 episodeChunks={episodeChunks}
