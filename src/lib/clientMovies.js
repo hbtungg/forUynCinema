@@ -1,37 +1,23 @@
-// 🚀 FILE CHUYÊN TRÁCH ĐỘC LẬP CHO CLIENT - BYPASS CLOUDFLARE NGUONC
-const PROXY_BASE = "/api-nguonc";
+// CLIENT-ONLY: Gọi thẳng phim.nguonc.com từ browser của người dùng
+// Browser dùng IP dân cư → Cloudflare không chặn → không cần proxy
+const DIRECT_API = "https://phim.nguonc.com/api";
 
-function buildUrl(path, params = {}) {
-  const url = new URL(`${PROXY_BASE}/${path}`, typeof window !== "undefined" ? window.location.origin : "http://localhost:3000");
-  Object.entries(params).forEach(([k, v]) => {
-    if (v !== undefined && v !== "") url.searchParams.set(k, v);
-  });
-  return url.toString();
-}
-
-async function safeFetch(url, options = {}) {
+async function safeFetch(url) {
   try {
     const res = await fetch(url, {
-      ...options,
-      headers: {
-        Accept: "application/json",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        ...options.headers,
-      },
+      headers: { Accept: "application/json" },
     });
     if (!res.ok) return null;
     const contentType = res.headers.get("content-type");
-    if (!contentType || !contentType.includes("application/json")) return null;
+    if (!contentType?.includes("application/json")) return null;
     return await res.json();
   } catch (error) {
-    console.error(`Fetch Error tại ${url}:`, error);
+    console.error(`clientMovies fetch error: ${url}`, error);
     return null;
   }
 }
 
-// Hàm lõi phục vụ trang xem phim ở Client
 export async function getMovieDetail(slug) {
-  const url = buildUrl(`film/${slug}`);
-  const data = await safeFetch(url);
+  const data = await safeFetch(`${DIRECT_API}/film/${slug}`);
   return data || { movie: null, episodes: [] };
 }

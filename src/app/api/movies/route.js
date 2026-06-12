@@ -15,7 +15,7 @@ export async function GET(request) {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
-        // 🚀 ĐÒN QUYẾT ĐỊNH: Xóa sạch dấu vết vercel.app, giả lập như một trình duyệt độc lập
+        // Giả lập như một trình duyệt độc lập
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
         'Referer': 'https://phim.nguonc.com/',
         'Origin': 'https://phim.nguonc.com'
@@ -30,7 +30,7 @@ export async function GET(request) {
     const data = await res.json();
     return NextResponse.json(data);
   } catch (error) {
-    console.error("Lỗi Trạm Trung Chuyển API:", error);
+    console.error("Lỗi API:", error);
     return NextResponse.json({ items: [] }, { status: 500 });
   }
 }
