@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-// 🚀 ĐÃ SỬA: Chuyển sang dùng file clientMovies sạch, giải quyết triệt để lỗi import Node.js ngầm
 import { getMovies, getMoviesByCountry, getMoviesByCategory } from '@/lib/clientMovies';
 import HomePageClient from './HomePageClient';
 import Header from '@/components/Header';
@@ -21,12 +20,6 @@ const genres = [
   { label: 'Tài liệu',   icon: '📽️', href: '/danh-sach?type=tai-lieu' },
 ];
 
-const EMPTY_DATA = {
-  allMovies: [], koreaMovies: [], actionMovies: [],
-  chinaMovies: [], animeMovies: [], topRated: [], continueItems: []
-};
-
-// Skeleton trang chủ — hiện ngay lập tức, không chờ fetch
 function HomeSkeleton() {
   return (
     <div className="flex flex-col h-screen w-screen bg-[#0a0a0c] text-white overflow-hidden">
@@ -41,7 +34,7 @@ function HomeSkeleton() {
                 <div key={si} className="space-y-3">
                   <div className="h-5 w-40 bg-[#111115] rounded-lg animate-pulse" />
                   <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
-                    {Array.from({ length: 12 }).map((_, i) => (
+                    {Array.from({ length: 6 }).map((_, i) => (
                       <div key={i} className="space-y-2">
                         <div className="w-full aspect-[2/3] bg-[#111115] rounded-xl animate-pulse" />
                         <div className="h-3 w-3/4 bg-[#111115] rounded animate-pulse" />
@@ -52,25 +45,6 @@ function HomeSkeleton() {
               ))}
             </div>
           </div>
-
-          <div className="hidden xl:flex flex-col w-[300px] h-full bg-[#0d0d10] border-l border-white/5 p-4 gap-4 overflow-hidden">
-            <div className="h-5 w-32 bg-[#111115] rounded animate-pulse" />
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="flex gap-3 items-center">
-                <div className="w-16 h-10 bg-[#111115] rounded-lg animate-pulse flex-shrink-0" />
-                <div className="flex-1 space-y-1">
-                  <div className="h-3 w-full bg-[#111115] rounded animate-pulse" />
-                  <div className="h-3 w-2/3 bg-[#111115] rounded animate-pulse" />
-                </div>
-              </div>
-            ))}
-            <div className="h-5 w-32 bg-[#111115] rounded animate-pulse mt-2" />
-            <div className="grid grid-cols-2 gap-2">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="h-9 bg-[#111115] rounded-xl animate-pulse" />
-              ))}
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -78,69 +52,94 @@ function HomeSkeleton() {
 }
 
 export default function HomePage() {
-  const [data, setData] = useState(null); 
-  const [loading, setLoading] = useState(true);
+  // 🚀 SỬA ĐỔI THẦN THÁNH: Đọc và gài Cache đồng bộ ngay từ lúc khởi tạo State ban đầu (Khử hoàn toàn lỗi setState trong effect)
+  const [data, setData] = useState(() => {
+    const defaultData = {
+      allMovies: [], koreaMovies: [], actionMovies: [],
+      chinaMovies: [], animeMovies: [], topRated: [], continueItems: []
+    };
+    
+    if (typeof window !== "undefined") {
+      try {
+        const raw = sessionStorage.getItem(CACHE_KEY);
+        if (raw) {
+          const { ts, payload } = JSON.parse(raw);
+          if (Date.now() - ts < CACHE_TTL) {
+            return payload; // Có cache tươi -> Ăn ngay dữ liệu sạch vòng đầu tiên!
+          }
+        }
+      } catch (_) {}
+    }
+    return defaultData;
+  });
+
+  // Tương tự, loading sẽ bằng false ngay nếu data đã lấy được từ Cache thành công
+  const [loading, setLoading] = useState(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const raw = sessionStorage.getItem(CACHE_KEY);
+        if (raw) {
+          const { ts } = JSON.parse(raw);
+          if (Date.now() - ts < CACHE_TTL) return false;
+        }
+      } catch (_) {}
+    }
+    return true;
+  });
 
   useEffect(() => {
-    // Ép đổi tên tiêu đề tab động chuẩn chỉnh ngay khi người dùng về Trang Chủ
-    document.title = "forUyn Cinema 🍿 - Rạp phim bất tử cho hai vợ chồng";
+    document.title = "forUyn Cinema 🍿 - Rạp phim bất tử";
 
-    try {
-      const raw = sessionStorage.getItem(CACHE_KEY);
-      if (raw) {
-        const { ts, payload } = JSON.parse(raw);
-        if (Date.now() - ts < CACHE_TTL) {
-          setData(payload);
-          setLoading(false);
-          return; 
-        }
-      }
-    } catch (_) {}
+    // Nếu đã có sẵn dữ liệu từ cache nạp ở useState, không làm phiền Server nữa
+    if (!loading && data.allMovies.length > 0) return;
 
-    async function fetchAllMovies() {
+    async function fetchCoreData() {
       try {
-        // TỐI ƯU LUỒNG: Gọi trước API danh sách tổng để lấp đầy phần giao diện chính trước
+        // LUỒNG 1: Kéo duy nhất danh sách phim Slider chính
         const resAll = await getMovies(1);
         const all = resAll?.items || [];
-
-        // Sau đó chạy ngầm song song các danh mục phụ, tránh dồn 5 request làm giật mình Server NguồnC
-        const [resKorea, resAction, resChina, resAnime] = await Promise.all([
-          getMoviesByCountry('han-quoc', 1),
-          getMoviesByCategory('hanh-dong', 1),
-          getMoviesByCountry('trung-quoc', 1),
-          getMoviesByCategory('hoat-hinh', 1),
-        ]);
-
-        const payload = {
+        
+        const corePayload = {
           allMovies: all,
-          koreaMovies: resKorea?.items || [],
-          actionMovies: resAction?.items || [],
-          chinaMovies: resChina?.items || [],
-          animeMovies: resAnime?.items || [],
-          topRated: all.slice(0, 5).map((m, i) => ({
-            ...m,
-            fakeRating: [9.3, 9.2, 9.0, 8.9, 8.8][i],
-          })),
+          koreaMovies: [], actionMovies: [], chinaMovies: [], animeMovies: [],
+          topRated: all.slice(0, 5).map((m, i) => ({ ...m, fakeRating: [9.3, 9.2, 9.0, 8.9, 8.8][i] })),
           continueItems: all.slice(5, 8),
         };
+        
+        setData(corePayload);
+        setLoading(false);
 
-        try {
-          sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), payload }));
-        } catch (_) {}
+        // LUỒNG 2: Kéo ngầm bất đồng bộ các hàng phim phụ bên dưới
+        Promise.all([
+          getMoviesByCountry('han-quoc', 1).then(r => r?.items || []).catch(() => []),
+          getMoviesByCategory('hanh-dong', 1).then(r => r?.items || []).catch(() => []),
+          getMoviesByCountry('trung-quoc', 1).then(r => r?.items || []).catch(() => []),
+          getMoviesByCategory('hoat-hinh', 1).then(r => r?.items || []),
+        ]).then(([korea, action, china, anime]) => {
+          const fullPayload = {
+            ...corePayload,
+            koreaMovies: korea,
+            actionMovies: action,
+            chinaMovies: china,
+            animeMovies: anime
+          };
+          setData(fullPayload);
+          
+          try {
+            sessionStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), payload: fullPayload }));
+          } catch (_) {}
+        });
 
-        setData(payload);
       } catch (err) {
-        console.error("Lỗi fetch phim trang chủ:", err);
-        setData(EMPTY_DATA);
-      } finally {
+        console.error("Lỗi fetch dữ liệu trang chủ:", err);
         setLoading(false);
       }
     }
 
-    fetchAllMovies();
-  }, []);
+    fetchCoreData();
+  }, [loading, data.allMovies.length]);
 
-  if (loading || !data) return <HomeSkeleton />;
+  if (loading && data.allMovies.length === 0) return <HomeSkeleton />;
 
   return (
     <HomePageClient
