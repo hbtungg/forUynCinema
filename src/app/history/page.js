@@ -1,6 +1,7 @@
 'use client';
-import { useState, useEffect } from 'react';
-import { useSession } from "next-auth/react";
+
+import { useCallback, useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -9,114 +10,172 @@ export default function HistoryPage() {
   const { data: session, status } = useSession();
   const [history, setHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const loadHistory = async () => {
-    if (status === "authenticated" && session?.user?.email) {
-      try {
-        const res = await fetch(`/api/history?userEmail=${session.user.email}`);
-        if (res.ok) {
-          const data = await res.json();
-          setHistory(data);
-        }
-      } catch (error) {
-        console.error("Lỗi lấy lịch sử:", error);
-      } finally {
-        setIsLoading(false);
+  const loadHistory = useCallback(async () => {
+    if (status === 'loading') return;
+
+    if (status !== 'authenticated' || !session?.user?.email) {
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const res = await fetch(
+        `/api/history?userEmail=${encodeURIComponent(session.user.email)}`
+      );
+
+      if (!res.ok) {
+        throw new Error('Không thể tải lịch sử xem');
       }
-    } else if (status === "unauthenticated") {
+
+      const data = await res.json();
+      setHistory(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Lỗi lấy lịch sử:', error);
+      setError('Không tải được lịch sử xem. Anh thử lại sau nhé.');
+    } finally {
       setIsLoading(false);
     }
-  };
+  }, [status, session?.user?.email]);
 
   useEffect(() => {
     loadHistory();
-  }, [status, session]);
+  }, [loadHistory]);
 
   const removeHistory = async (slug) => {
     if (!session?.user?.email) return;
-    const updatedHistory = history.filter(item => item.slug !== slug);
+
+    const previousHistory = history;
+    const updatedHistory = history.filter((item) => item.slug !== slug);
+
     setHistory(updatedHistory);
+
     try {
-      await fetch(`/api/history`, {
+      const res = await fetch('/api/history', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userEmail: session.user.email, slug: slug }),
+        body: JSON.stringify({
+          userEmail: session.user.email,
+          slug,
+        }),
       });
+
+      if (!res.ok) {
+        throw new Error('Không thể xoá lịch sử');
+      }
+
       const saved = JSON.parse(localStorage.getItem('watchHistory') || '[]');
-      const updatedLocal = saved.filter(item => item.slug !== slug);
+      const updatedLocal = saved.filter((item) => item.slug !== slug);
+
       localStorage.setItem('watchHistory', JSON.stringify(updatedLocal));
       window.dispatchEvent(new Event('historyUpdated'));
     } catch (error) {
-      loadHistory();
+      console.error('Lỗi xoá lịch sử:', error);
+      setHistory(previousHistory);
+      setError('Không xoá được phim khỏi lịch sử. Anh thử lại sau nhé.');
     }
   };
 
   return (
     <main className="min-h-screen bg-black text-white font-sans overflow-x-hidden">
       <Header />
-      
-      {/* 1. ĐỒNG BỘ PADDING VÀ VỊ TRÍ VỚI SEARCH PAGE */}
-      <div className="px-6 md:px-12 pt-24 md:pt-32 pb-20">
-        
-        {/* 2. NÚT QUAY LẠI LÃNG MẠN */}
-        <Link 
-          href="/home" 
+
+      <div className="px-6 md:px-12 pt-8 md:pt-12 pb-20">
+        <Link
+          href="/home"
           className="text-zinc-500 hover:text-red-600 text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 mb-8 transition-all group w-fit"
         >
-          <span className="group-hover:-translate-x-1 transition-transform">←</span> Quay lại trang chủ
+          <span className="group-hover:-translate-x-1 transition-transform">
+            ←
+          </span>
+          Quay lại trang chủ
         </Link>
 
-        {/* 3. TIÊU ĐỀ TRANG CỰC CHÁY */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16 border-l-[6px] border-red-600 pl-8">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-14 border-l-[6px] border-red-600 pl-6 md:pl-8">
           <div>
-            <p className="text-red-600 font-black uppercase tracking-[0.5em] text-[10px] mb-2">Personal Cinema</p>
-            <h1 className="text-5xl md:text-7xl font-black italic uppercase tracking-tighter leading-none">
-              Phim đang <span className="text-zinc-800">xem</span>
+            <p className="text-red-600 font-black uppercase tracking-[0.45em] text-[10px] mb-2">
+              Personal Cinema
+            </p>
+            <h1 className="text-4xl md:text-7xl font-black italic uppercase tracking-tighter leading-none">
+              Phim đang <span className="text-zinc-700">xem</span>
             </h1>
           </div>
-          <div className="text-zinc-600 font-bold uppercase text-[10px] tracking-widest pb-2">
-            Tổng cộng: {history.length} Phim
+
+          <div className="text-zinc-500 font-bold uppercase text-[10px] tracking-widest pb-2">
+            Tổng cộng: {history.length} phim
           </div>
         </div>
 
-        {/* 4. NỘI DUNG CHÍNH */}
+        {error && (
+          <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-red-600/30 bg-red-950/20 px-5 py-4">
+            <p className="text-sm text-red-100 font-semibold">{error}</p>
+            <button
+              type="button"
+              onClick={loadHistory}
+              className="w-fit px-5 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-[10px] font-black uppercase tracking-[0.2em] transition-colors"
+            >
+              Thử lại
+            </button>
+          </div>
+        )}
+
         {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
-            {[1, 2, 3, 4].map(i => (
-              <div key={i} className="aspect-video bg-zinc-900/50 rounded-[2rem] animate-pulse"></div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            {[1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className="aspect-video bg-zinc-900/70 rounded-2xl animate-pulse"
+              />
             ))}
           </div>
         ) : history.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10 md:gap-x-8 md:gap-y-16">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 md:gap-y-12">
             {history.map((item) => (
               <div key={item.slug} className="group/card relative">
                 <button
+                  type="button"
+                  aria-label={`Xoá ${item.name} khỏi lịch sử xem`}
                   onClick={() => removeHistory(item.slug)}
-                  className="absolute -top-3 -right-3 w-10 h-10 bg-zinc-900 border border-white/10 rounded-full flex items-center justify-center text-zinc-500 hover:bg-red-600 hover:text-white transition-all z-20 shadow-2xl opacity-0 group-hover/card:opacity-100"
+                  className="absolute top-3 right-3 w-9 h-9 bg-black/70 border border-white/10 rounded-full flex items-center justify-center text-zinc-300 hover:bg-red-600 hover:text-white transition-all z-20 shadow-xl md:opacity-0 md:group-hover/card:opacity-100"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="18"
+                    height="18"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path d="M18 6L6 18M6 6l12 12" />
+                  </svg>
                 </button>
 
-                <Link href={`/watch/${item.slug}?ep=${item.episode}`} className="block">
-                  <div className="relative aspect-video rounded-[2rem] overflow-hidden border-2 border-zinc-900 group-hover/card:border-red-600/50 transition-all duration-500 bg-zinc-900 shadow-2xl">
-                    <img 
-                      src={item.thumb_url} 
-                      alt={item.name} 
-                      className="w-full h-full object-cover opacity-60 group-hover/card:opacity-100 group-hover/card:scale-105 transition-all duration-700" 
+                <Link
+                  href={`/watch/${item.slug}?ep=${item.episode || '1'}`}
+                  className="block"
+                >
+                  <div className="relative aspect-video rounded-2xl overflow-hidden border border-zinc-800 group-hover/card:border-red-600/60 transition-all duration-500 bg-zinc-900 shadow-2xl">
+                    <img
+                      src={item.thumb_url}
+                      alt={item.name}
+                      className="w-full h-full object-cover opacity-70 group-hover/card:opacity-100 group-hover/card:scale-105 transition-all duration-700"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent p-6 flex flex-col justify-end">
-                      <h3 className="text-white font-black text-sm md:text-base uppercase truncate tracking-tight mb-1">
+
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent p-5 flex flex-col justify-end">
+                      <h3 className="text-white font-black text-sm md:text-base uppercase truncate tracking-tight mb-2">
                         {item.name}
                       </h3>
-                      <div className="flex items-center justify-between">
-                        <span className="text-red-600 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
-                          <span className="w-1.5 h-1.5 bg-red-600 rounded-full animate-pulse"></span>
-                          Tập {item.episode || "1"}
-                        </span>
-                      </div>
-                      <div className="mt-4 w-full h-1 bg-white/10 rounded-full overflow-hidden">
-                        <div className="w-[65%] h-full bg-red-600 shadow-[0_0_15px_rgba(220,38,38,0.8)]"></div>
-                      </div>
+
+                      <span className="w-fit text-red-500 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 bg-red-600 rounded-full" />
+                        Tập {item.episode || '1'}
+                      </span>
                     </div>
                   </div>
                 </Link>
@@ -124,10 +183,19 @@ export default function HistoryPage() {
             ))}
           </div>
         ) : (
-          <div className="py-40 text-center">
-            <div className="text-zinc-900 text-[100px] md:text-[150px] font-black mb-4 leading-none select-none opacity-50">EMPTY</div>
-            <p className="text-zinc-500 font-bold uppercase tracking-[0.4em] text-xs">Em iu chưa có phim nào trong danh sách đang xem</p>
-            <Link href="/" className="inline-block mt-10 px-10 py-4 bg-zinc-900 hover:bg-red-600 text-white text-[10px] font-black uppercase tracking-[0.3em] rounded-2xl transition-all shadow-xl">
+          <div className="py-20 md:py-24 text-center">
+            <div className="text-zinc-900 text-5xl md:text-8xl font-black mb-5 leading-none select-none">
+              Chưa có phim
+            </div>
+
+            <p className="max-w-xl mx-auto text-zinc-500 font-bold uppercase tracking-[0.25em] text-[11px] leading-6">
+              Chưa xem phim nào!
+            </p>
+
+            <Link
+              href="/home"
+              className="inline-block mt-10 px-8 py-4 bg-zinc-900 hover:bg-red-600 text-white text-[10px] font-black uppercase tracking-[0.25em] rounded-xl transition-all shadow-xl"
+            >
               Khám phá ngay
             </Link>
           </div>
