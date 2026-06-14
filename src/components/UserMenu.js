@@ -33,8 +33,8 @@ export default function UserMenu({ isMobile = false }) {
             <span className={`${isMobile ? 'text-[13px]' : 'text-sm'} font-semibold text-zinc-100 tracking-tight leading-tight truncate`}>
               {session.user.name}
             </span>
-            <span className="text-[10px] text-zinc-600 font-medium tracking-widest mt-0.5">
-              Member
+            <span className="text-[10px] text-green-500 font-medium tracking-widest mt-0.5 uppercase">
+              Đang online
             </span>
           </div>
         </div>

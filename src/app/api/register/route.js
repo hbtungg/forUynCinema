@@ -23,6 +23,9 @@ export async function POST(req) {
       email,
       password: hashedPassword,
       role: "user",
+      isOnline: false,
+      lastSeenAt: null,
+      wentOfflineAt: null,
       createdAt: new Date(),
     });
 
