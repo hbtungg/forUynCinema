@@ -6,14 +6,44 @@ const ONLINE_TTL_MS = 45 * 1000;
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
+    const onlineOnly = searchParams.get("online") === "1";
     const userEmail = searchParams.get("userEmail");
+    const client = await clientPromise;
+    const db = client.db("ForUynDB");
+    const onlineSince = new Date(Date.now() - ONLINE_TTL_MS);
+
+    if (onlineOnly) {
+      const users = await db.collection("users")
+        .find(
+          {
+            isOnline: true,
+            lastSeenAt: { $gte: onlineSince },
+          },
+          {
+            projection: {
+              email: 1,
+              name: 1,
+              lastSeenAt: 1,
+            },
+          }
+        )
+        .sort({ lastSeenAt: -1 })
+        .limit(12)
+        .toArray();
+
+      return NextResponse.json({
+        users: users.map((user) => ({
+          email: user.email,
+          name: user.name,
+          lastSeenAt: user.lastSeenAt || null,
+        })),
+      });
+    }
 
     if (!userEmail) {
       return NextResponse.json({ error: "Thiếu email người dùng" }, { status: 400 });
     }
 
-    const client = await clientPromise;
-    const db = client.db("ForUynDB");
     const user = await db.collection("users").findOne(
       { email: userEmail },
       { projection: { email: 1, name: 1, isOnline: 1, lastSeenAt: 1, wentOfflineAt: 1 } }

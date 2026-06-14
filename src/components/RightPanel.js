@@ -2,6 +2,7 @@
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useState, useEffect } from 'react';
+import OnlineUsersMenu from "@/components/OnlineUsersMenu";
 
 export default function RightPanel({ continueItems: initialItems, genres, topRated }) {
     const { data: session, status } = useSession();
@@ -122,6 +123,8 @@ export default function RightPanel({ continueItems: initialItems, genres, topRat
                     </div>
                 )}
             </section>
+
+            <OnlineUsersMenu />
 
             {/* ── 2. THỂ LOẠI PHỔ BIẾN (GIỮ NGUYÊN BẢN CỦA ANH) ── */}
             <section className="px-5 py-5 border-b border-white/[0.04]">
