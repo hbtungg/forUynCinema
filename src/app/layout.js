@@ -24,7 +24,7 @@ export const metadata = {
     "Uynflix - Watch series online, watch films online free",
 
   openGraph: {
-    title: "Uynflix - Watch series online, watch films online free",
+    title: "Uynflix",
     description:
       "Anh ơi em thích xem phim",
     url: "https://uynflix.vercel.app",
