@@ -124,7 +124,7 @@ export default function WatchClient({ slug }) {
           setMovie(resDetail.movie);
 
           // 🚀 CẢI TIẾN 3: Đổi tiêu đề Tab theo tên phim thật để xóa sổ chữ "Đang tải phim..."
-          document.title = `${resDetail.movie.name} - forUyn Cinema 🍿`;
+          document.title = `${resDetail.movie.name} - Uynflix`;
 
           const rawEps = resDetail.movie.episodes || [];
           const mappedServers = rawEps.map(srv => ({
