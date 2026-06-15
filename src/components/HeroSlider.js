@@ -1,4 +1,5 @@
 'use client';
+import { useState, useEffect } from 'react'; // 🚀 CHÈN THÊM: Import useState và useEffect để fix Hydration
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Pagination, EffectFade } from 'swiper/modules';
 import 'swiper/css';
@@ -7,6 +8,23 @@ import 'swiper/css/effect-fade';
 import Link from 'next/link';
 
 export default function HeroSlider({ movies }) {
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Ép luồng chạy Swiper chỉ kích hoạt sau khi Client đã Hydrate xong mã JavaScript
+  useEffect(() => {
+    // 🛡️ SỬA TẠI ĐÂY: Bọc luồng thay đổi state vào requestAnimationFrame để tránh Cascading Renders
+    const animationFrame = requestAnimationFrame(() => {
+      setIsMounted(true);
+    });
+
+    return () => cancelAnimationFrame(animationFrame);
+  }, []);
+
+  // 🛡️ XỬ LÝ TRẢ VỀ ĐỆM: Giữ nguyên cấu trúc Skeleton trơn khớp hoàn toàn với Server dựng sẵn
+  if (!isMounted) {
+    return <div className="w-full aspect-[21/9] bg-[#111115] animate-pulse" />;
+  }
+
   return (
     <section className="relative h-[75vh] md:h-[85vh] w-full overflow-hidden bg-black font-sans">
       <Swiper
@@ -26,6 +44,7 @@ export default function HeroSlider({ movies }) {
               <div className="relative h-full w-full group">
                 
                 {/* --- 1. ẢNH NỀN (BACKGROUND) --- */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img 
                   src={movie.poster_url} 
                   className="absolute inset-0 h-full w-full object-cover object-top md:object-center transition-transform duration-[2000ms] group-hover:scale-105" 
@@ -34,21 +53,16 @@ export default function HeroSlider({ movies }) {
                 />
                 
                 {/* --- 2. LỚP PHỦ (GRADIENTS) --- */}
-                {/* Mobile: Gradient phủ đáy | Desktop: Gradient bám sát lề trái */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 md:via-transparent to-transparent md:hidden"></div>
                 <div className="absolute inset-0 hidden md:block bg-gradient-to-r from-black via-black/60 to-transparent"></div>
                 <div className="absolute inset-0 hidden md:block bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
 
                 {/* --- 3. NỘI DUNG (CONTENT CONTAINER) --- */}
-                {/* TRÊN DESKTOP: Gỡ bỏ mx-auto, dùng md:pl-20 để ép nội dung dạt hẳn về bên trái.
-                   TRÊN MOBILE: Căn giữa (items-center) và đẩy xuống đáy (justify-end).
-                */}
                 <div className="relative z-10 h-full flex flex-col justify-end md:justify-center items-center md:items-start px-6 md:px-0 md:pl-20 pb-16 md:pb-0 w-full">
                   
                   <div className="flex flex-col items-center md:items-start text-center md:text-left w-full md:max-w-3xl space-y-4 md:space-y-6">
                     
                     <div className="space-y-2 md:space-y-4">
-                      {/* Tên phim: line-clamp-2 cho mobile, md:line-clamp-none cho desktop */}
                       <h2 className="text-3xl md:text-5xl lg:text-7xl font-black italic uppercase tracking-tighter text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.8)] leading-[1.1] line-clamp-2 md:line-clamp-none">
                         {movie.name}
                       </h2>
