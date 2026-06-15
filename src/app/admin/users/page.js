@@ -9,7 +9,7 @@ export default function AdminUsersPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   
-  // 🚀 CHÈN THÊM: Kho lưu trữ nhật ký hệ thống tổng tham khảo từ history/page.js
+  // Kho lưu trữ nhật ký hệ thống tổng tham khảo từ history/page.js
   const [globalHistory, setGlobalHistory] = useState([]);
   
   const [showAddForm, setShowAddForm] = useState(false);
@@ -37,7 +37,7 @@ export default function AdminUsersPage() {
     }
   };
 
-  // 🚀 CHÈN THÊM: Luồng tải nhật ký xem phim tổng từ API đối tác hệ thống
+  // Luồng tải nhật ký xem phim tổng từ API đối tác hệ thống
   const fetchGlobalHistory = async () => {
     try {
       const res = await fetch('/api/admin/history');
@@ -60,7 +60,7 @@ export default function AdminUsersPage() {
     initDashboard();
   }, []);
 
-  // 🚀 CHÈN THÊM: Hàm tính khoảng thời gian tương đối đồng bộ chuẩn chỉ từ history
+  // Hàm tính khoảng thời gian tương đối đồng bộ chuẩn chỉ từ history
   const getRelativeTime = (dateString) => {
     if (!dateString) return 'Vừa xong';
     const now = new Date().getTime();
@@ -73,7 +73,7 @@ export default function AdminUsersPage() {
     return `${Math.floor(diff / 86400)} ngày trước`;
   };
 
-  // 🚀 CHÈN THÊM: Tự động bóc tách và lọc riêng toàn bộ lịch sử xem của User đang được chọn
+  // Tự động bóc tách và lọc riêng toàn bộ lịch sử xem của User đang được chọn
   const selectedUserHistory = useMemo(() => {
     if (!selectedUser?.email) return [];
     return globalHistory.filter(
@@ -129,12 +129,6 @@ export default function AdminUsersPage() {
     if (filter === 'online') return matchesSearch && user.isOnline;
     return matchesSearch;
   });
-
-  const getAvatarSrc = (email) => {
-    if (email === 'hb.tungg@gmail.com') return '/avatar-tung.png'; 
-    if (email === 'thuuyen009900@gmail.com') return '/avatar-uyen.png'; 
-    return null;
-  };
 
   return (
     <div className="space-y-6 font-sans text-zinc-200 select-none">
@@ -206,78 +200,87 @@ export default function AdminUsersPage() {
       {/* BỐ CỤC HAI PHÂN KHU */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         
-        {/* KHỐI BÊN TRÁI: DANH SÁCH USER DẠNG KÉN */}
-        <div className="lg:col-span-2 space-y-2">
+        {/* 🚀 KHỐI BÊN TRÁI: DANH SÁCH USER QUY HOẠCH THÀNH BẢNG PHẲNG CAO CẤP */}
+        <div className="lg:col-span-2 overflow-hidden rounded-2xl border border-white/[0.04] bg-[#0c0c0e]/40 backdrop-blur-2xl">
           {loading ? (
             <div className="py-20 flex justify-center">
               <div className="w-5 h-5 border-2 border-white/[0.05] border-t-red-600 rounded-full animate-spin" />
             </div>
           ) : filteredUsers.length > 0 ? (
-            filteredUsers.map((user) => {
-              const avatarSrc = getAvatarSrc(user.email);
-              return (
-                <div 
-                  key={user.id}
-                  onClick={() => setSelectedUser(user)}
-                  className={`w-full flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl border transition-all cursor-pointer group
-                    ${selectedUser?.id === user.id 
-                      ? 'bg-white/[0.03] border-white/[0.08]' 
-                      : 'bg-white/[0.01] border-white/[0.03] hover:bg-white/[0.02] hover:border-white/[0.05]'
-                    }
-                  `}
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-8 h-8 rounded-full border border-white/[0.05] bg-zinc-900 overflow-hidden flex items-center justify-center font-bold text-zinc-400 text-xs flex-shrink-0">
-                      {avatarSrc ? (
-                        <img src={avatarSrc} alt={user.name} className="w-full h-full object-cover" />
-                      ) : (
-                        user.name?.charAt(0) || 'U'
-                      )}
-                    </div>
-                    <div className="flex flex-col min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="text-zinc-100 font-bold text-[13px] tracking-tight truncate">{user.name}</span>
-                        <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${user.isOnline ? 'bg-green-500 animate-pulse' : 'bg-zinc-700'}`} />
-                        {user.role === 'admin' && (
-                          <span className="text-[8px] font-black bg-red-600/10 border border-red-600/20 text-red-500 px-1 rounded uppercase tracking-wider">
-                            Sáng lập
-                          </span>
-                        )}
-                      </div>
-                      <span className="text-zinc-600 text-[11px] truncate select-text mt-0.5">{user.email}</span>
-                    </div>
-                  </div>
-
-                  <div className="sm:text-left mt-3 sm:mt-0 flex-1 sm:px-10 min-w-0">
-                    {user.isOnline && user.watching ? (
-                      <div className="flex flex-col">
-                        <span className="text-red-500 font-bold text-xs truncate tracking-tight">{user.watching.movieName}</span>
-                        <span className="text-zinc-600 text-[10px] mt-0.5">Vừa khởi chạy: {user.watching.timeAt?.split(' ')[1] || ''}</span>
-                      </div>
-                    ) : (
-                      <span className="text-zinc-700 italic text-[11px] tracking-wide">Đang ngoại tuyến</span>
-                    )}
-                  </div>
-
-                  <div className="text-right mt-3 sm:mt-0 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
-                    <button
-                      onClick={() => handleDeleteUser(user.id, user.email)}
-                      disabled={user.role === 'admin'}
-                      className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all border
-                        ${user.role === 'admin' 
-                          ? 'border-transparent text-zinc-800 cursor-not-allowed' 
-                          : 'border-transparent text-zinc-500 hover:text-red-400 hover:bg-red-500/5 hover:border-red-500/10'
-                        }
-                      `}
+            <table className="w-full min-w-[550px] border-collapse text-left">
+              <thead>
+                <tr className="border-b border-white/[0.04] text-zinc-500 text-[9px] font-black uppercase tracking-[0.15em] bg-white/[0.005]">
+                  <th className="py-4 px-5">Thành viên</th>
+                  <th className="py-4 px-5">Trạng thái luồng</th>
+                  <th className="py-4 px-5 text-right">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/[0.02]">
+                {filteredUsers.map((user) => {
+                  const isSelected = selectedUser?.id === user.id;
+                  return (
+                    <tr 
+                      key={user.id}
+                      onClick={() => setSelectedUser(user)}
+                      className={`group hover:bg-red-500/5 transition-all duration-300 cursor-pointer ${
+                        isSelected ? 'bg-white/[0.02]' : ''
+                      }`}
                     >
-                      Xóa rạp
-                    </button>
-                  </div>
-                </div>
-              );
-            })
+                      {/* CỘT TÊN THÀNH VIÊN (Bỏ hoàn toàn avatar ảnh riêng của hb.tungg & thuuyen) */}
+                      <td className="py-4 px-5 flex items-center gap-3 min-w-0">
+                        <div className="w-8 h-8 rounded-full border border-white/[0.05] bg-zinc-900 flex items-center justify-center font-bold text-zinc-400 text-xs flex-shrink-0 group-hover:bg-red-600/10 group-hover:text-red-400 transition-colors">
+                          {user.name?.charAt(0) || 'U'}
+                        </div>
+                        <div className="flex flex-col min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="text-zinc-100 font-bold text-[13px] tracking-tight truncate">{user.name}</span>
+                            {user.role === 'admin' && (
+                              <span className="text-[8px] font-black bg-red-600/10 border border-red-600/20 text-red-500 px-1 rounded uppercase tracking-wider">
+                                Sáng lập
+                              </span>
+                            )}
+                          </div>
+                          <span className="text-zinc-600 text-[11px] truncate select-text mt-0.5">{user.email}</span>
+                        </div>
+                      </td>
+
+                      {/* CỘT TRẠNG THÁI LUỒNG XEM PHIM */}
+                      <td className="py-4 px-5">
+                        {user.isOnline && user.watching ? (
+                          <div className="flex flex-col max-w-[220px]">
+                            <span className="text-red-500 font-bold text-xs truncate tracking-tight">{user.watching.movieName}</span>
+                            <span className="text-zinc-600 text-[10px] mt-0.5">Khởi chạy: {user.watching.timeAt?.split(' ')[1] || ''}</span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1.5 text-zinc-700 italic text-[11px] tracking-wide">
+                            <span className="w-1.5 h-1.5 rounded-full bg-zinc-800" />
+                            <span>Ngoại tuyến</span>
+                          </div>
+                        )}
+                      </td>
+
+                      {/* CỘT THAO TÁC XÓA RẠP */}
+                      <td className="py-4 px-5 text-right" onClick={(e) => e.stopPropagation()}>
+                        <button
+                          onClick={() => handleDeleteUser(user.id, user.email)}
+                          disabled={user.role === 'admin'}
+                          className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all border
+                            ${user.role === 'admin' 
+                              ? 'border-transparent text-zinc-800 cursor-not-allowed' 
+                              : 'border-transparent text-zinc-500 hover:text-red-400 hover:bg-red-500/5 hover:border-red-500/10'
+                            }
+                          `}
+                        >
+                          Xóa rạp
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           ) : (
-            <div className="text-center py-16 border border-dashed border-white/[0.03] rounded-xl text-zinc-600 tracking-widest font-bold uppercase text-[9px]">
+            <div className="text-center py-16 text-zinc-600 tracking-widest font-bold uppercase text-[9px]">
               Không tìm thấy thành viên nào phù hợp
             </div>
           )}
@@ -288,12 +291,8 @@ export default function AdminUsersPage() {
           {selectedUser ? (
             <div className="space-y-5 animate-fade-in">
               <div className="border-b border-white/[0.04] pb-4 flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full border border-white/[0.05] bg-zinc-900 overflow-hidden flex items-center justify-center font-bold text-zinc-400 text-sm flex-shrink-0">
-                  {getAvatarSrc(selectedUser.email) ? (
-                    <img src={getAvatarSrc(selectedUser.email)} alt={selectedUser.name} className="w-full h-full object-cover" />
-                  ) : (
-                    selectedUser.name?.charAt(0) || 'U'
-                  )}
+                <div className="w-9 h-9 rounded-full border border-white/[0.05] bg-zinc-900 flex items-center justify-center font-bold text-zinc-400 text-sm flex-shrink-0">
+                  {selectedUser.name?.charAt(0) || 'U'}
                 </div>
                 <div className="flex flex-col min-w-0">
                   <h3 className="text-xs font-black text-white tracking-wide uppercase truncate">{selectedUser.name}</h3>
@@ -314,7 +313,7 @@ export default function AdminUsersPage() {
                 )}
               </div>
 
-              {/* 🚀 ĐÃ SỬA: Đổ dữ liệu lịch sử xem phim chính xác kết nối từ API history */}
+              {/* Lịch sử xem gần đây kết nối từ API history */}
               <div className="space-y-2 pt-1">
                 <h4 className="text-[9px] font-black text-zinc-600 uppercase tracking-widest pl-0.5">Lịch sử xem gần đây</h4>
                 {selectedUserHistory && selectedUserHistory.length > 0 ? (
