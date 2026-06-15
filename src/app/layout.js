@@ -14,12 +14,26 @@ const beVietnamPro = Be_Vietnam_Pro({
 
 export const metadata = {
   title: {
-    default: 'Uynflix - Watch series online, watch films online free', 
-    template: '%s - Uynflix', 
+    default: 'Uynflix',
+    template: '%s - Uynflix',
   },
-  description: 'Em bảo anh ơi em thích xem phim',
-  icons: {
-    icon: '/favicon.ico',
+  description: 'Uynflix - Watch series online, watch films online free',
+  // 🚀 Cấu hình Open Graph để đổi ảnh và chữ khi share link
+  openGraph: {
+    title: 'Uynflix - Watch series online, watch films online free',
+    description: 'Em bảo anh ơi em thích xem phim',
+    url: 'https://uynflix.vercel.app', // Đường dẫn rạp phim thực tế của anh
+    siteName: 'Uynflix',
+    images: [
+      {
+        url: '/opengraph-image.png', // Đường dẫn trỏ tới file ảnh anh để trong thư mục public
+        width: 1200,
+        height: 630,
+        alt: 'Uynflix Preview Banner',
+      },
+    ],
+    locale: 'vi_VN',
+    type: 'website',
   },
 };
 
