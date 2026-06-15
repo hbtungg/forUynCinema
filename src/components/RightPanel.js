@@ -124,7 +124,7 @@ export default function RightPanel({ continueItems: initialItems, genres, topRat
                 )}
             </section>
 
-            <OnlineUsersMenu />
+            {/* <OnlineUsersMenu /> */}
 
             {/* ── 2. THỂ LOẠI PHỔ BIẾN (GIỮ NGUYÊN BẢN CỦA ANH) ── */}
             <section className="px-5 py-5 border-b border-white/[0.04]">

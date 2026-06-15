@@ -1,9 +1,14 @@
 'use client';
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
+// 🚀 CHÈN THÊM: Import component hiển thị người dùng online của anh
+import OnlineUsersMenu from "./OnlineUsersMenu"; 
 
 export default function UserMenu({ isMobile = false }) {
   const { data: session, status } = useSession();
+
+  // Kiểm tra xem có phải tài khoản admin tối cao của anh không
+  const isAdmin = session?.user?.email === 'hb.tungg@gmail.com';
 
   if (status === "loading") {
     return (
@@ -47,9 +52,9 @@ export default function UserMenu({ isMobile = false }) {
         </div>
       )}
 
-      {/* — Nav — */}
+      {/* — Nav Thư Viện — */}
       {session && (
-        <p className="text-[9px] text-zinc-700 font-medium tracking-[0.12em] uppercase px-2.5 pt-2 pb-0.5">
+        <p className="text-[9px] text-zinc-700 font-black uppercase px-2.5 pt-2 pb-0.5 tracking-[0.15em]">
           Thư viện
         </p>
       )}
@@ -59,19 +64,32 @@ export default function UserMenu({ isMobile = false }) {
           <>
             <NavItem href="/history" icon={<ClockIcon />} label="Đang xem" isMobile={isMobile} />
             <NavItem href="/favorites" icon={<HeartIcon />} label="Yêu thích" isMobile={isMobile} />
-
-            {session.user.email === 'hb.tungg@gmail.com' && (
-              <NavItem href="/admin/history" icon={<EyeIcon />} label="Giám sát rạp" isMobile={isMobile} admin pulse />
-            )}
           </>
         )}
       </nav>
+
+      {/* — Nav Quản Trị Hệ Thống (Chỉ hiển thị riêng cho anh) — */}
+      {isAdmin && (
+        <>
+          <p className="text-[9px] text-zinc-700 font-black uppercase px-2.5 pt-2 pb-0.5 tracking-[0.15em] border-t border-white/[0.03] mt-1.5">
+            Hệ thống
+          </p>
+          <nav className="flex flex-col gap-0.5">
+            <NavItem href="/admin/history" icon={<EyeIcon />} label="Giám sát rạp" isMobile={isMobile} admin pulse />
+          </nav>
+          
+          {/* 🛠️ CHÈN THÊM: Nhúng bảng quản lý người dùng Online lọt thỏm tinh tế ở đây */}
+          <div className="px-1 pt-1 border-t border-white/[0.03] mt-1">
+            <OnlineUsersMenu />
+          </div>
+        </>
+      )}
 
       {/* — Footer — */}
       {session ? (
         <button
           onClick={() => signOut({ callbackUrl: '/home' })}
-          className={`w-full ${isMobile ? 'py-2.5' : 'py-3'} mt-1 flex items-center justify-center gap-2 rounded-xl border border-white/[0.07] text-zinc-600 hover:text-red-400 hover:border-red-500/25 hover:bg-red-500/5 text-[11px] font-medium tracking-widest uppercase transition-all duration-200`}
+          className={`w-full ${isMobile ? 'py-2.5' : 'py-3'} mt-2 flex items-center justify-center gap-2 rounded-xl border border-white/[0.07] text-zinc-600 hover:text-red-400 hover:border-red-500/25 hover:bg-red-500/5 text-[11px] font-medium tracking-widest uppercase transition-all duration-200`}
         >
           <LogoutIcon />
           Đăng xuất
