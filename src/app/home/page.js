@@ -88,7 +88,7 @@ export default function HomePage() {
   });
 
   useEffect(() => {
-    document.title = "UYNFLIX";
+    document.title = "Uynflix Vietnam - Watch series online, watch films online free";
 
     // Nếu đã có sẵn dữ liệu từ cache nạp ở useState, không làm phiền Server nữa
     if (!loading && data.allMovies.length > 0) return;
