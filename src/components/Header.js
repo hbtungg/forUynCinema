@@ -10,6 +10,7 @@ import Hamburger from './header/Hamburger';
 import HeaderLogo from './header/HeaderLogo';
 import MobileDrawer from './header/MobileDrawer';
 import SecretChat from './SecretChat';
+import EventButton from './EventButton';
 
 export default function Header({ onToggleSidebar, sidebarCollapsed }) {
   const { data: session, status } = useSession();
@@ -141,6 +142,8 @@ export default function Header({ onToggleSidebar, sidebarCollapsed }) {
               </button>
 
               {/* 🔔 NOTIFICATION — FIX: dùng portal-style z-index thay overflow clip */}
+              <EventButton />
+
               <div className="relative" ref={notifyRef}>
                 <button
                   onClick={() => setIsNotifyOpen(v => !v)}
