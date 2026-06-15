@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState([]);
@@ -9,19 +9,19 @@ export default function AdminUsersPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   
-  // State phục vụ việc Thêm tài khoản mới bằng Form kén ẩn
+  // 🚀 CHÈN THÊM: Kho lưu trữ nhật ký hệ thống tổng tham khảo từ history/page.js
+  const [globalHistory, setGlobalHistory] = useState([]);
+  
   const [showAddForm, setShowAddForm] = useState(false);
   const [newUserData, setNewUserData] = useState({ name: '', email: '' });
 
-  // 🚀 CHÈN THÊM: Ép cập nhật tên Tab trình duyệt đồng bộ theo cấu trúc template của anh
   useEffect(() => {
     document.title = "Hệ thống thành viên - Uynflix";
   }, []);
 
-  // ── LUỒNG TẢI DỮ LIỆU THỰC TẾ TỪ API ──
+  // ── LUỒNG TẢI DỮ LIỆU THÀNH VIÊN THỰC TẾ ──
   const fetchUsers = async () => {
     try {
-      setLoading(true);
       const res = await fetch('/api/admin/users');
       if (res.ok) {
         const data = await res.json();
@@ -34,16 +34,53 @@ export default function AdminUsersPage() {
       }
     } catch (error) {
       console.error("Lỗi khi tải danh sách user từ hệ thống:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
+  // 🚀 CHÈN THÊM: Luồng tải nhật ký xem phim tổng từ API đối tác hệ thống
+  const fetchGlobalHistory = async () => {
+    try {
+      const res = await fetch('/api/admin/history');
+      const result = await res.json();
+      if (result.success) {
+        setGlobalHistory(result.data);
+      }
+    } catch (error) {
+      console.error("Lỗi khi đồng bộ log lịch sử về trang user:", error);
+    }
+  };
+
+  // Khởi chạy đồng bộ toàn bộ tài nguyên khi trang lên đèn
   useEffect(() => {
-    fetchUsers();
+    async function initDashboard() {
+      setLoading(true);
+      await Promise.all([fetchUsers(), fetchGlobalHistory()]);
+      setLoading(false);
+    }
+    initDashboard();
   }, []);
 
-  // 🛠️ XỬ LÝ: Thêm thành viên mới thông qua API backend
+  // 🚀 CHÈN THÊM: Hàm tính khoảng thời gian tương đối đồng bộ chuẩn chỉ từ history
+  const getRelativeTime = (dateString) => {
+    if (!dateString) return 'Vừa xong';
+    const now = new Date().getTime();
+    const past = new Date(dateString).getTime();
+    const diff = Math.max(0, Math.floor((now - past) / 1000));
+
+    if (diff < 60) return `${diff}s trước`;
+    if (diff < 3600) return `${Math.floor(diff / 60)} phút trước`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)} giờ trước`;
+    return `${Math.floor(diff / 86400)} ngày trước`;
+  };
+
+  // 🚀 CHÈN THÊM: Tự động bóc tách và lọc riêng toàn bộ lịch sử xem của User đang được chọn
+  const selectedUserHistory = useMemo(() => {
+    if (!selectedUser?.email) return [];
+    return globalHistory.filter(
+      (item) => item.userEmail?.toLowerCase() === selectedUser.email.toLowerCase()
+    );
+  }, [globalHistory, selectedUser]);
+
   const handleAddUser = async (e) => {
     e.preventDefault();
     if (!newUserData.name || !newUserData.email) return;
@@ -65,9 +102,8 @@ export default function AdminUsersPage() {
     }
   };
 
-  // 🛠️ XỬ LÝ: Xóa vĩnh viễn tài khoản khỏi hệ thống rạp thông qua API
   const handleDeleteUser = async (userId, userEmail) => {
-    if (userEmail === 'hb.tungg@gmail.com') return; // Bảo vệ tuyệt đối tài khoản của anh
+    if (userEmail === 'hb.tungg@gmail.com') return; 
     if (!confirm(`Anh có chắc muốn xóa tài khoản này khỏi rạp không? Người này sẽ không thể đăng nhập nữa.`)) return;
 
     try {
@@ -84,7 +120,6 @@ export default function AdminUsersPage() {
     }
   };
 
-  // Luồng tìm kiếm và lọc dữ liệu thật từ State hệ thống
   const filteredUsers = users.filter(user => {
     const nameLower = user.name?.toLowerCase() || '';
     const emailLower = user.email?.toLowerCase() || '';
@@ -95,7 +130,6 @@ export default function AdminUsersPage() {
     return matchesSearch;
   });
 
-  // Hàm helper nhận diện Avatar Đôi độc quyền của anh và chị nhà
   const getAvatarSrc = (email) => {
     if (email === 'hb.tungg@gmail.com') return '/avatar-tung.png'; 
     if (email === 'thuuyen009900@gmail.com') return '/avatar-uyen.png'; 
@@ -105,7 +139,7 @@ export default function AdminUsersPage() {
   return (
     <div className="space-y-6 font-sans text-zinc-200 select-none">
       
-      {/* ── TIÊU ĐỀ PHÂN KHU & NÚT THÊM THÀNH VIÊN KÉN PHẲNG ── */}
+      {/* HEADER */}
       <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.04] pb-5">
         <div>
           <h1 className="text-base font-black text-white uppercase tracking-[0.12em]">Hệ thống thành viên</h1>
@@ -119,7 +153,7 @@ export default function AdminUsersPage() {
         </button>
       </header>
 
-      {/* ── FORM THÊM TÀI KHOẢN MỚI ── */}
+      {/* FORM THÊM TÀI KHOẢN MỚI */}
       {showAddForm && (
         <form onSubmit={handleAddUser} className="bg-white/[0.02] border border-white/[0.05] p-5 rounded-xl max-w-xl flex flex-col sm:flex-row gap-3 items-end animate-fade-in">
           <div className="flex-1 space-y-1.5 w-full">
@@ -150,7 +184,7 @@ export default function AdminUsersPage() {
         </form>
       )}
 
-      {/* ── THANH CÔNG CỤ TÌM KIẾM VÀ BỘ LỌC TỐI GIẢN ── */}
+      {/* THANH CÔNG CỤ */}
       <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
         <input
           type="text"
@@ -169,10 +203,10 @@ export default function AdminUsersPage() {
         </div>
       </div>
 
-      {/* ── BỐ CỤC HAI PHÂN KHU ── */}
+      {/* BỐ CỤC HAI PHÂN KHU */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         
-        {/* KHỐI BÊN TRÁI: DANH SÁCH THÀNH VIÊN THEO DẠNG KÉN PHẲNG */}
+        {/* KHỐI BÊN TRÁI: DANH SÁCH USER DẠNG KÉN */}
         <div className="lg:col-span-2 space-y-2">
           {loading ? (
             <div className="py-20 flex justify-center">
@@ -249,7 +283,7 @@ export default function AdminUsersPage() {
           )}
         </div>
 
-        {/* KHỐI BÊN PHẢI: BẢNG GIÁM SÁT HÀNH VI CHI TIẾT */}
+        {/* KHỐI BÊN PHẢI: BẢNG GIÁM SÁT CHI TIẾT TỪNG THÀNH VIÊN */}
         <div className="bg-[#0c0c0f] border border-white/[0.04] rounded-xl p-5 shadow-2xl space-y-5 min-h-[320px]">
           {selectedUser ? (
             <div className="space-y-5 animate-fade-in">
@@ -267,6 +301,7 @@ export default function AdminUsersPage() {
                 </div>
               </div>
 
+              {/* Tiến trình xem phim thời gian thực */}
               <div className="space-y-2">
                 <h4 className="text-[9px] font-black text-zinc-600 uppercase tracking-widest pl-0.5">Tiến trình thực tế</h4>
                 {selectedUser.isOnline && selectedUser.watching ? (
@@ -279,16 +314,25 @@ export default function AdminUsersPage() {
                 )}
               </div>
 
+              {/* 🚀 ĐÃ SỬA: Đổ dữ liệu lịch sử xem phim chính xác kết nối từ API history */}
               <div className="space-y-2 pt-1">
                 <h4 className="text-[9px] font-black text-zinc-600 uppercase tracking-widest pl-0.5">Lịch sử xem gần đây</h4>
-                {selectedUser.history && selectedUser.history.length > 0 ? (
-                  <div className="space-y-1.5 max-h-[190px] overflow-y-auto pr-1 custom-scrollbar">
-                    {selectedUser.history.map((hist, i) => (
-                      <div key={i} className="flex justify-between items-start gap-4 text-[11px] p-2 rounded-lg bg-white/[0.005] border border-white/[0.02]">
-                        <span className="text-zinc-400 font-semibold tracking-tight truncate">{hist.movieName}</span>
-                        <span className="text-zinc-600 text-[10px] font-medium whitespace-nowrap flex-shrink-0 mt-0.5">{hist.timeAt}</span>
-                      </div>
-                    ))}
+                {selectedUserHistory && selectedUserHistory.length > 0 ? (
+                  <div className="space-y-1.5 max-h-[220px] overflow-y-auto pr-1 custom-scrollbar">
+                    {selectedUserHistory.map((hist, i) => {
+                      const epLabel = hist.movie?.episode === 'Full' ? 'FULL' : `Tập ${hist.movie?.episode || '??'}`;
+                      return (
+                        <div key={i} className="flex justify-between items-start gap-4 text-[11px] p-2.5 rounded-lg bg-white/[0.005] border border-white/[0.02] hover:bg-white/[0.01] transition-all">
+                          <div className="flex flex-col min-w-0 gap-0.5">
+                            <span className="text-zinc-300 font-bold tracking-tight truncate">{hist.movie?.name || 'N/A'}</span>
+                            <span className="text-red-500/80 text-[9px] font-black uppercase tracking-wider">{epLabel}</span>
+                          </div>
+                          <span className="text-zinc-600 text-[10px] font-medium whitespace-nowrap flex-shrink-0 mt-0.5">
+                            {getRelativeTime(hist.updatedAt)}
+                          </span>
+                        </div>
+                      );
+                    })}
                   </div>
                 ) : (
                   <p className="text-[11px] text-zinc-700 italic pl-0.5">Chưa có dữ liệu lịch sử chiếu.</p>

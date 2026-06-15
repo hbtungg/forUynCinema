@@ -75,7 +75,7 @@ export default function UserMenu({ isMobile = false }) {
             Hệ thống
           </p>
           <nav className="flex flex-col gap-0.5">
-            <NavItem href="/admin/history" icon={<EyeIcon />} label="Giám sát rạp" isMobile={isMobile} admin pulse />
+            <NavItem href="/admin/users" icon={<EyeIcon />} label="Admin Dashboard" isMobile={isMobile} admin pulse />
           </nav>
           
           {/* 🛠️ CHÈN THÊM: Nhúng bảng quản lý người dùng Online lọt thỏm tinh tế ở đây */}
