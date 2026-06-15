@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSession } from "next-auth/react";
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 
@@ -13,6 +14,7 @@ const MOVIE_BACKDROPS = [
 
 function WelcomePage() {
   const router = useRouter();
+  const { data: session, status } = useSession(); // 🚀 ĐÃ CẬP NHẬT: Lấy thêm dữ liệu session để lấy tên người dùng
   const [isExiting, setIsExiting] = useState(false);
   const [bgIndex, setBgIndex] = useState(0);
   const [loaded, setLoaded] = useState(false);
@@ -76,30 +78,40 @@ function WelcomePage() {
           className="object-contain"
           priority
         />
-        <button
-          onClick={handleLogin}
-          className="px-5 py-2 bg-red-600 hover:bg-red-700 active:scale-95 text-white text-sm font-semibold rounded transition-all duration-200 cursor-pointer"
-        >
-          Đăng nhập
-        </button>
+        
+        {/* 🛠️ ĐÃ CẬP NHẬT: Xử lý hiển thị động khu vực nút góc phải */}
+        {status === "loading" ? (
+          // Khối skeleton mờ nhẹ khi đang tải trạng thái
+          <div className="w-20 h-8 bg-white/5 rounded animate-pulse" />
+        ) : status === "authenticated" ? (
+          // Khi ĐÃ ĐĂNG NHẬP: Hiện dòng chữ welcome phẳng, viết hoa sang trọng
+          <span className="text-[11px] font-black text-white/80 uppercase tracking-[0.2em] select-none bg-white/[0.03] border border-white/[0.05] px-4 py-2 rounded-lg backdrop-blur-sm">
+            Welcome, {session?.user?.name || 'User'}
+          </span>
+        ) : (
+          // Khi CHƯA ĐĂNG NHẬP: Hiện nút Đăng nhập mặc định
+          <button
+            onClick={handleLogin}
+            className="px-5 py-2 bg-red-600 hover:bg-red-700 active:scale-95 text-white text-sm font-semibold rounded transition-all duration-200 cursor-pointer"
+          >
+            Đăng nhập
+          </button>
+        )}
       </nav>
 
       {/* ── HERO CONTENT ── */}
       <div className={`absolute inset-0 z-10 flex flex-col justify-center px-8 md:px-16 lg:px-24 transition-all duration-1000 ${loaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
         <div className="max-w-2xl space-y-6">
 
-          {/* 🛠️ ĐÃ SỬA: Thay thế dòng chữ sến thành dòng tracking ngắn gọn, chuyên nghiệp */}
           <p className="text-xs font-bold uppercase tracking-[0.4em] text-red-500">
             ● Premium Streaming Platform
           </p>
 
-          {/* 🛠️ ĐÃ SỬA: Sửa lại tiêu đề chính cho hiện đại, mang tính công nghệ hơn */}
           <h1 className="text-4xl sm:text-6xl md:text-7xl font-black text-white leading-[1.05] tracking-tight">
             Trải nghiệm điện ảnh<br />
             <span className="text-red-500">không giới hạn.</span>
           </h1>
 
-          {/* 🛠️ ĐÃ SỬA: Sửa phần mô tả trung lập, tập trung vào tính năng mượt mà của web */}
           <p className="text-base sm:text-lg text-white/70 max-w-lg leading-relaxed">
             Hàng ngàn bộ phim bom tấn chất lượng cao, cập nhật liên tục. Không quảng cáo, trải nghiệm mượt mà trên mọi thiết bị.
           </p>
@@ -130,7 +142,6 @@ function WelcomePage() {
           <span>Saigon</span>
           <span className="w-px h-3 bg-white/20" />
           <span>09 · 11 · 2025</span>
-          {/* 🛠️ ĐÃ SỬA: Xóa bỏ dòng text sến "em bảo em thích xem phim" ở lề dưới */}
         </div>
         <p className="text-white/30 text-[10px] tracking-widest uppercase font-semibold">© 2026 Uynflix</p>
       </div>
