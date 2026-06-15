@@ -6,16 +6,15 @@ import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
-export const metadata = {
-  title: 'Lịch sử xem | Uynflix',
-  description: 'Watch series online, watch films online free',
-};
-
 export default function HistoryPage() {
   const { data: session, status } = useSession();
   const [history, setHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    document.title = "Lịch sử - Uynflix";
+  }, []);
 
   const loadHistory = useCallback(async () => {
     if (status === 'loading') return;

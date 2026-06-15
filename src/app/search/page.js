@@ -22,8 +22,8 @@ export default function SearchPage({ searchParams }) {
       setIsFetching(true);
       setError('');
       document.title = keyword
-        ? `Tìm kiếm "${keyword}" - forUyn Cinema`
-        : 'Tìm kiếm phim - forUyn Cinema';
+        ? `Tìm kiếm "${keyword}" - Uynflix`
+        : 'Tìm kiếm phim - Uynflix';
 
       try {
         const data = await searchMovies(keyword, page);

@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react'; // Bổ sung điều phối đồng bộ luồng chạy tab
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 
@@ -17,8 +18,21 @@ export default function WatchPlayer({
 }) {
   const { data: session, status } = useSession(); // Lấy trạng thái đăng nhập
 
-  // 🚀 ĐÃ SỬA ĐỒNG BỘ: Ép cứng chiều cao cố định (ví dụ h-[68vh]) cho cả 2 trạng thái
-  // Anh có thể tăng giảm h-[68vh] thành h-[65vh] hoặc h-[70vh] tùy ý, chiều cao sẽ giữ nguyên khi đóng/mở sidebar!
+  // 🚀 ĐÃ SỬA TRIỆT ĐỂ: Theo dõi sát sao biến isLoading để ép đổi tên tab chính xác theo tiến độ nạp phim
+  useEffect(() => {
+    if (movie?.name && epName) {
+      if (isLoading) {
+        // Trong lúc luồng phát đang nạp dữ liệu
+        document.title = `Đang tải phim... - Uynflix`;
+      } else {
+        // Ngay khi iframe nạp xong hoàn toàn, trả lại tên phim và tập tương ứng
+        const episodeText = epName === 'Full' ? 'FULL' : `Tập ${epName}`;
+        document.title = `Đang xem: ${movie.name} - ${episodeText} - Uynflix`;
+      }
+    }
+  }, [movie?.name, epName, isLoading]); // 🚀 Thêm isLoading vào đây để bắt trọn khoảnh khắc chuyển trạng thái
+
+  // Ép cứng chiều cao cố định cho khung phát
   const playerLayoutClass = 'w-full h-[68vh]'; 
 
   // ── 🚀 VÒNG CHỜ CHUYỂN TRẠNG THÁI HỆ THỐNG ──

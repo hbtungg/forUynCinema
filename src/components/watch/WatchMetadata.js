@@ -8,7 +8,6 @@ export default function WatchMetadata({
   country, 
   isDescExpanded, 
   setIsDescExpanded,
-  // 🚀 Nhận các props xử lý yêu thích từ cha truyền vào
   isFavorite,
   favLoading,
   onToggleFavorite

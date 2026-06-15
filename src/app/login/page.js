@@ -1,13 +1,8 @@
 'use client';
 import { signIn } from "next-auth/react";
-import { useState } from "react";
+import { useState, useEffect } from "react"; // 🚀 ĐÃ SỬA: Import thêm useEffect để ép đổi tên tab
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-
-export const metadata = {
-  title: 'Login | Uynflix',
-  description: 'Watch series online, watch films online free',
-};
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -15,6 +10,10 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    document.title = "Login - Uynflix";
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,7 +28,6 @@ export default function LoginPage() {
       });
 
       if (result.error) {
-        // 🛠️ ĐÃ SỬA: Xóa từ ngữ tình cảm chỉ đích danh
         setError("Email hoặc mật khẩu không đúng! ❌");
         setLoading(false);
       } else {
@@ -37,7 +35,6 @@ export default function LoginPage() {
         router.refresh();
       }
     } catch (err) {
-      // 🛠️ ĐÃ SỬA: Chuẩn hóa câu thông báo lỗi hệ thống trung lập
       setError("Có lỗi hệ thống xảy ra, vui lòng kiểm tra lại!");
       setLoading(false);
     }
@@ -51,7 +48,6 @@ export default function LoginPage() {
       <div className="w-full max-w-md bg-zinc-900/40 backdrop-blur-3xl border border-zinc-800/50 p-10 rounded-[2.5rem] shadow-[0_30px_60px_rgba(0,0,0,0.8)] relative z-10">
         
         {/* LOGO THƯƠNG HIỆU */}
-        {/* 🛠️ ĐÃ SỬA: Thay thế hoàn toàn text cũ bằng file logo.png, khống chế chiều cao tinh tế */}
         <header className="flex flex-col items-center justify-center mb-12">
           <Link href="/home" className="block select-none">
             <img 
@@ -120,7 +116,6 @@ export default function LoginPage() {
           {/* Nút Đăng ký mới */}
           <p className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.2em]">
             Chưa có tài khoản? 
-            {/* 🛠️ ĐÃ SỬA: Xóa icon trái tim ở text link đăng ký */}
             <Link 
               href="/register" 
               className="text-red-600 ml-2 hover:underline transition-all active:opacity-70"

@@ -9,7 +9,8 @@ export default function WatchRightEpList({
   handleEpisodeChange 
 }) {
   return (
-    <div className="dark:bg-[#111115] bg-white border dark:border-white/5 border-zinc-200 rounded-2xl overflow-hidden">
+    /* 🚀 ĐÃ SỬA: Thêm "hidden lg:block" để ẩn hoàn toàn danh sách này trên mobile/tablet, chỉ hiện trên màn hình desktop lớn */
+    <div className="hidden lg:block dark:bg-[#111115] bg-white border dark:border-white/5 border-zinc-200 rounded-2xl overflow-hidden">
       <div className="flex items-center justify-between px-4 py-3.5 border-b dark:border-white/5 border-zinc-100">
         <span className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Danh sách tập</span>
         {episodeChunks.length > 1 && (

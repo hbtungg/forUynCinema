@@ -13,6 +13,11 @@ export default function AdminUsersPage() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [newUserData, setNewUserData] = useState({ name: '', email: '' });
 
+  // 🚀 CHÈN THÊM: Ép cập nhật tên Tab trình duyệt đồng bộ theo cấu trúc template của anh
+  useEffect(() => {
+    document.title = "Hệ thống thành viên - Uynflix";
+  }, []);
+
   // ── LUỒNG TẢI DỮ LIỆU THỰC TẾ TỪ API ──
   const fetchUsers = async () => {
     try {
@@ -22,7 +27,6 @@ export default function AdminUsersPage() {
         const data = await res.json();
         setUsers(data);
         
-        // Cập nhật lại thông tin mới nhất vào panel bên phải nếu đang chọn
         if (selectedUser) {
           const updated = data.find(u => u.id === selectedUser.id);
           if (updated) setSelectedUser(updated);
@@ -93,8 +97,8 @@ export default function AdminUsersPage() {
 
   // Hàm helper nhận diện Avatar Đôi độc quyền của anh và chị nhà
   const getAvatarSrc = (email) => {
-    if (email === 'hb.tungg@gmail.com') return '/avatar-tung.png'; // Ảnh chân dung của anh
-    if (email === 'thuuyen009900@gmail.com') return '/avatar-uyen.png'; // Ảnh chân dung của chị nhà
+    if (email === 'hb.tungg@gmail.com') return '/avatar-tung.png'; 
+    if (email === 'thuuyen009900@gmail.com') return '/avatar-uyen.png'; 
     return null;
   };
 
@@ -165,7 +169,7 @@ export default function AdminUsersPage() {
         </div>
       </div>
 
-      {/* ── BỐ CỤC HAI PHÂN KHU SANG TRỌNG ── */}
+      {/* ── BỐ CỤC HAI PHÂN KHU ── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         
         {/* KHỐI BÊN TRÁI: DANH SÁCH THÀNH VIÊN THEO DẠNG KÉN PHẲNG */}
@@ -188,7 +192,6 @@ export default function AdminUsersPage() {
                     }
                   `}
                 >
-                  {/* Khối danh tính bên trái */}
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-8 h-8 rounded-full border border-white/[0.05] bg-zinc-900 overflow-hidden flex items-center justify-center font-bold text-zinc-400 text-xs flex-shrink-0">
                       {avatarSrc ? (
@@ -211,7 +214,6 @@ export default function AdminUsersPage() {
                     </div>
                   </div>
 
-                  {/* Khối trạng thái phim ở giữa */}
                   <div className="sm:text-left mt-3 sm:mt-0 flex-1 sm:px-10 min-w-0">
                     {user.isOnline && user.watching ? (
                       <div className="flex flex-col">
@@ -223,7 +225,6 @@ export default function AdminUsersPage() {
                     )}
                   </div>
 
-                  {/* Khối nút xóa ở bên phải */}
                   <div className="text-right mt-3 sm:mt-0 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
                     <button
                       onClick={() => handleDeleteUser(user.id, user.email)}
@@ -252,7 +253,6 @@ export default function AdminUsersPage() {
         <div className="bg-[#0c0c0f] border border-white/[0.04] rounded-xl p-5 shadow-2xl space-y-5 min-h-[320px]">
           {selectedUser ? (
             <div className="space-y-5 animate-fade-in">
-              {/* Định danh chính */}
               <div className="border-b border-white/[0.04] pb-4 flex items-center gap-3">
                 <div className="w-9 h-9 rounded-full border border-white/[0.05] bg-zinc-900 overflow-hidden flex items-center justify-center font-bold text-zinc-400 text-sm flex-shrink-0">
                   {getAvatarSrc(selectedUser.email) ? (
@@ -267,7 +267,6 @@ export default function AdminUsersPage() {
                 </div>
               </div>
 
-              {/* Luồng hoạt động thời gian thực */}
               <div className="space-y-2">
                 <h4 className="text-[9px] font-black text-zinc-600 uppercase tracking-widest pl-0.5">Tiến trình thực tế</h4>
                 {selectedUser.isOnline && selectedUser.watching ? (
@@ -280,7 +279,6 @@ export default function AdminUsersPage() {
                 )}
               </div>
 
-              {/* Lịch sử lưu vết thiết kế phẳng cuộn */}
               <div className="space-y-2 pt-1">
                 <h4 className="text-[9px] font-black text-zinc-600 uppercase tracking-widest pl-0.5">Lịch sử xem gần đây</h4>
                 {selectedUser.history && selectedUser.history.length > 0 ? (
