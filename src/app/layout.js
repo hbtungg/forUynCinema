@@ -5,8 +5,8 @@ import './globals.css';
 
 export const metadata = {
   title: {
-    default: 'UYNFLIX', // Tiêu đề mặc định khi trang con không khai báo
-    template: '%s - UYNFLIX', // %s sẽ được thay bằng tiêu đề của trang con
+    default: 'Uynflix', 
+    template: '%s - Uynflix', 
   },
   description: 'Em bảo anh ơi em thích xem phim',
   icons: {

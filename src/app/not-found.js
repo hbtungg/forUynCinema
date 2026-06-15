@@ -41,7 +41,7 @@ export default function NotFound() {
 
       {/* Dấu ấn bản quyền mờ tinh tế dưới gầm */}
       <p className="absolute bottom-6 text-[9px] font-black uppercase tracking-[0.4em] text-zinc-800">
-        forUynCinema • Premium Theater
+        Uynflix • 2026 © All Rights Reserved
       </p>
     </div>
   );

@@ -1,97 +1,153 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
+import Image from 'next/image';
+
+const MOVIE_BACKDROPS = [
+  'https://image.tmdb.org/t/p/original/628Dep6AxEtDxjZoGP78TsOxYbK.jpg',
+  'https://image.tmdb.org/t/p/original/xJHokMbljvjADYdit5fK5VQsXEG.jpg',
+  'https://image.tmdb.org/t/p/original/rqbCbjB19amtOtFQbb3K2lgm2zv.jpg',
+];
 
 function WelcomePage() {
   const router = useRouter();
   const [isExiting, setIsExiting] = useState(false);
+  const [bgIndex, setBgIndex] = useState(0);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    document.title = 'Uynflix Việt Nam - Watch series online, watch films online free';
+    const animationFrame = requestAnimationFrame(() => {
+      setLoaded(true);
+    });
+
+    const interval = setInterval(() => {
+      setBgIndex((i) => (i + 1) % MOVIE_BACKDROPS.length);
+    }, 6000);
+
+    return () => {
+      cancelAnimationFrame(animationFrame);
+      clearInterval(interval);
+    };
+  }, []);
 
   const handleEnter = () => {
     setIsExiting(true);
-    setTimeout(() => {
-      router.push('/home');
-    }, 800); // Hiệu ứng lướt màn hình cổ điển khi vào rạp
+    setTimeout(() => router.push('/home'), 800);
+  };
+
+  const handleLogin = () => {
+    setIsExiting(true);
+    setTimeout(() => router.push('/login'), 800);
   };
 
   return (
-    <main className="h-screen w-screen bg-[#f4f1ea] dark:bg-[#0c0c0f] text-[#2b2927] dark:text-[#e4e2dd] flex flex-col justify-between p-8 md:p-16 relative overflow-hidden transition-colors duration-700 select-none">
-      
-      {/* ── HIỆU ỨNG "TẮT ĐÈN RẠP PHIM" (Chuyển trang mượt màng) ── */}
-      <div 
-        className={`absolute inset-0 bg-[#0a0a0c] z-50 pointer-events-none transition-opacity duration-[800ms] ease-in-out ${
-          isExiting ? 'opacity-100' : 'opacity-0'
-        }`} 
-      />
+    <main className="relative h-screen w-screen overflow-hidden select-none font-sans">
 
-      {/* ── TOP BAR (Thiết kế như một tấm vé phim cổ điển) ── */}
-      <header className="flex justify-between items-start w-full max-w-5xl mx-auto border-b border-[#2b2927]/10 dark:border-[#e4e2dd]/10 pb-4 animate-fade-in">
-        <div className="space-y-1">
-          <p className="text-[10px] uppercase font-black tracking-[0.3em] opacity-40">09-11-2025</p>
-          <p className="text-xs font-serif italic font-bold">fall in luv</p>
-        </div>
-        <div className="text-right">
-          <p className="text-[9px] uppercase font-black tracking-[0.4em] text-red-700 dark:text-red-500 animate-pulse">● Premium Access</p>
-          <p className="text-[9px] uppercase font-medium tracking-widest opacity-50 mt-1">Saigon · Hue</p>
-        </div>
-      </header>
+      {/* ── BACKDROP SLIDESHOW ── */}
+      {MOVIE_BACKDROPS.map((src, i) => (
+        <div
+          key={src}
+          className="absolute inset-0 bg-cover bg-center transition-opacity duration-[2000ms]"
+          style={{
+            backgroundImage: `url(${src})`,
+            opacity: i === bgIndex ? 1 : 0,
+          }}
+        />
+      ))}
 
-      {/* ── CENTER CONTENT (Tối giản, lãng mạn phong cách Retro Vintage) ── */}
-      <div className="flex-1 flex flex-col items-center justify-center text-center max-w-3xl mx-auto my-12 space-y-10 animate-slide-up">
-        
-        {/* Khung nhãn rạp phim bo góc cổ điển */}
-        <div className="border border-[#2b2927]/20 dark:border-[#e4e2dd]/20 p-2 rounded-full scale-90 opacity-80">
-          <p className="text-[9px] uppercase tracking-[0.5em] font-black px-4 py-1.5 border border-dashed border-[#2b2927]/30 dark:border-[#e4e2dd]/30 rounded-full">
-            Vì em bảo rổ phim sập rồi giờ sao anh?
-          </p>
-        </div>
+      {/* ── CINEMATIC OVERLAYS ── */}
+      <div className="absolute inset-0 bg-black/60" />
+      <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.6) 100%)' }} />
+      <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(0,0,0,0.5) 0%, transparent 60%)' }} />
 
-        {/* Khối Logo thương hiệu chữ Serif uốn lượn nghệ thuật */}
-        <div className="space-y-4">
-          <h1 className="text-5xl sm:text-7xl font-serif font-black tracking-tight drop-shadow-sm italic">
-            forUyn <span className="font-light font-sans text-red-700 dark:text-red-500">Cinema</span>
-          </h1>
-          <p className="text-[10px] uppercase tracking-[0.6em] opacity-50 font-medium">
-            Endless movies, endless emotions
-          </p>
-        </div>
+      {/* ── FADE OUT ── */}
+      <div className={`absolute inset-0 bg-black z-50 pointer-events-none transition-opacity duration-[800ms] ease-in-out ${isExiting ? 'opacity-100' : 'opacity-0'}`} />
 
-        <div className="w-16 h-[1px] bg-gradient-to-r from-transparent via-[#2b2927]/30 dark:via-[#e4e2dd]/30 to-transparent" />
-
-        {/* Nút bấm Enter hoài cổ thanh lịch */}
-        <button 
-          onClick={handleEnter}
-          className="group relative px-10 py-4 bg-[#2b2927] dark:bg-[#e4e2dd] text-[#f4f1ea] dark:text-[#0c0c0f] rounded-none font-serif text-sm font-bold italic tracking-widest hover:bg-red-700 dark:hover:bg-red-600 hover:text-white dark:hover:text-white transition-all duration-300 active:scale-95 shadow-xl cursor-pointer"
+      {/* ── NAVBAR ── */}
+      <nav className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-8 md:px-16 py-6">
+        <Image
+          src="/logo.png"
+          alt="Uynflix"
+          width={140}
+          height={40}
+          className="object-contain"
+          priority
+        />
+        <button
+          onClick={handleLogin}
+          className="px-5 py-2 bg-red-600 hover:bg-red-700 active:scale-95 text-white text-sm font-semibold rounded transition-all duration-200 cursor-pointer"
         >
-          <span className="absolute top-1 left-1 bottom-1 right-1 border border-dashed border-[#f4f1ea]/30 dark:border-[#0c0c0f]/30 group-hover:border-white/40" />
-          Bước Vào Rạp Phim —
+          Đăng nhập
         </button>
+      </nav>
 
+      {/* ── HERO CONTENT ── */}
+      <div className={`absolute inset-0 z-10 flex flex-col justify-center px-8 md:px-16 lg:px-24 transition-all duration-1000 ${loaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
+        <div className="max-w-2xl space-y-6">
+
+          {/* 🛠️ ĐÃ SỬA: Thay thế dòng chữ sến thành dòng tracking ngắn gọn, chuyên nghiệp */}
+          <p className="text-xs font-bold uppercase tracking-[0.4em] text-red-500">
+            ● Premium Streaming Platform
+          </p>
+
+          {/* 🛠️ ĐÃ SỬA: Sửa lại tiêu đề chính cho hiện đại, mang tính công nghệ hơn */}
+          <h1 className="text-4xl sm:text-6xl md:text-7xl font-black text-white leading-[1.05] tracking-tight">
+            Trải nghiệm điện ảnh<br />
+            <span className="text-red-500">không giới hạn.</span>
+          </h1>
+
+          {/* 🛠️ ĐÃ SỬA: Sửa phần mô tả trung lập, tập trung vào tính năng mượt mà của web */}
+          <p className="text-base sm:text-lg text-white/70 max-w-lg leading-relaxed">
+            Hàng ngàn bộ phim bom tấn chất lượng cao, cập nhật liên tục. Không quảng cáo, trải nghiệm mượt mà trên mọi thiết bị.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-3 pt-2">
+            <button
+              onClick={handleEnter}
+              className="group flex items-center justify-center gap-3 px-8 py-4 bg-white hover:bg-white/90 active:scale-[0.98] text-black font-bold text-base rounded transition-all duration-200 cursor-pointer"
+            >
+              <svg className="w-5 h-5 fill-black" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+              Bắt đầu xem ngay
+            </button>
+            <button
+              onClick={handleEnter}
+              className="flex items-center justify-center gap-3 px-8 py-4 bg-white/20 hover:bg-white/30 active:scale-[0.98] text-white font-semibold text-base rounded backdrop-blur-sm transition-all duration-200 cursor-pointer"
+            >
+              <svg className="w-5 h-5 fill-white" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+              Xem thêm
+            </button>
+          </div>
+
+        </div>
       </div>
 
-      {/* ── FOOTER CỔ ĐIỂN ── */}
-      <footer className="w-full max-w-5xl mx-auto border-t border-[#2b2927]/10 dark:border-[#e4e2dd]/10 pt-4 flex flex-col sm:flex-row justify-between items-center gap-2 text-[9px] uppercase tracking-widest opacity-40 font-bold animate-fade-in">
-        <p>© 2026 hb.tungg. All Rights Reserved.</p>
-        <p className="font-serif italic font-medium lowercase tracking-normal">em bảo em thích xem phim...</p>
-      </footer>
+      {/* ── BOTTOM BADGE STRIP ── */}
+      <div className="absolute bottom-0 left-0 right-0 z-20 flex flex-col sm:flex-row items-center justify-between gap-4 px-8 md:px-16 py-5 border-t border-white/10">
+        <div className="flex items-center gap-6 text-white/50 text-[11px] uppercase tracking-widest font-semibold">
+          <span>Saigon</span>
+          <span className="w-px h-3 bg-white/20" />
+          <span>09 · 11 · 2025</span>
+          {/* 🛠️ ĐÃ SỬA: Xóa bỏ dòng text sến "em bảo em thích xem phim" ở lề dưới */}
+        </div>
+        <p className="text-white/30 text-[10px] tracking-widest uppercase font-semibold">© 2026 Uynflix</p>
+      </div>
 
-      {/* ── STYLES ANIMATION SIÊU NHẸ ── */}
-      <style jsx global>{`
-        @keyframes slideUp {
-          from { opacity: 0; transform: translateY(24px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 0.4; }
-        }
-        .animate-slide-up { animation: slideUp 1s cubic-bezier(0.16, 1, 0.3, 1) both; }
-        .animate-fade-in { animation: slideUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) both; }
-      `}</style>
+      {/* ── BACKDROP DOTS ── */}
+      <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-20 flex gap-1.5">
+        {MOVIE_BACKDROPS.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setBgIndex(i)}
+            className={`h-[3px] rounded-full transition-all duration-500 cursor-pointer ${i === bgIndex ? 'w-6 bg-red-500' : 'w-2 bg-white/30'}`}
+          />
+        ))}
+      </div>
+
     </main>
   );
 }
 
-// 🚀 ĐÃ FIX: Ép Next.js tắt SSR riêng cho WelcomePage để triệt tiêu lỗi render chồng lặp và Hydration
 export default dynamic(() => Promise.resolve(WelcomePage), { ssr: false });

@@ -24,15 +24,16 @@ export default function LoginPage() {
       });
 
       if (result.error) {
-        setError("Email hoặc mật khẩu không đúng yêu ơi! ❌");
+        // 🛠️ ĐÃ SỬA: Xóa từ ngữ tình cảm chỉ đích danh
+        setError("Email hoặc mật khẩu không đúng! ❌");
         setLoading(false);
       } else {
-        // ĐÃ ĐỔI: Chuyển hướng thẳng vào trang danh sách phim /home
         router.push("/home");
         router.refresh();
       }
     } catch (err) {
-      setError("Có lỗi hệ thống rồi, anh kiểm tra lại nhé!");
+      // 🛠️ ĐÃ SỬA: Chuẩn hóa câu thông báo lỗi hệ thống trung lập
+      setError("Có lỗi hệ thống xảy ra, vui lòng kiểm tra lại!");
       setLoading(false);
     }
   };
@@ -45,13 +46,16 @@ export default function LoginPage() {
       <div className="w-full max-w-md bg-zinc-900/40 backdrop-blur-3xl border border-zinc-800/50 p-10 rounded-[2.5rem] shadow-[0_30px_60px_rgba(0,0,0,0.8)] relative z-10">
         
         {/* LOGO THƯƠNG HIỆU */}
-        <header className="text-center mb-12">
-          <h1 className="text-4xl font-black italic tracking-tighter leading-none">
-            <span className="text-white">for</span>
-            <span className="text-red-600">Uyn</span>
-            <span className="text-white ml-2 text-3xl">Cinema</span>
-          </h1>
-          <p className="text-zinc-500 text-[9px] font-black uppercase mt-3 tracking-[0.4em] opacity-60">
+        {/* 🛠️ ĐÃ SỬA: Thay thế hoàn toàn text cũ bằng file logo.png, khống chế chiều cao tinh tế */}
+        <header className="flex flex-col items-center justify-center mb-12">
+          <Link href="/home" className="block select-none">
+            <img 
+              src="/logo.png" 
+              alt="Uynflix Logo" 
+              className="h-10 w-auto object-contain select-none" 
+            />
+          </Link>
+          <p className="text-zinc-500 text-[9px] font-black uppercase mt-4 tracking-[0.4em] opacity-60">
             Premium Membership
           </p>
         </header>
@@ -101,9 +105,9 @@ export default function LoginPage() {
             {loading ? (
               <span className="flex items-center gap-2">
                 <div className="w-3 h-3 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
-                Đang mở rạp...
+                Đang kết nối...
               </span>
-            ) : "Vào xem phim ngay ❤️"}
+            ) : "Vào xem phim ngay"}
           </button>
         </form>
 
@@ -111,12 +115,13 @@ export default function LoginPage() {
           {/* Nút Đăng ký mới */}
           <p className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.2em]">
             Chưa có tài khoản? 
+            {/* 🛠️ ĐÃ SỬA: Xóa icon trái tim ở text link đăng ký */}
             <Link 
               href="/register" 
               className="text-red-600 ml-2 hover:underline transition-all active:opacity-70"
               style={{ WebkitTapHighlightColor: 'transparent' }}
             >
-              Đăng ký ngay ❤️
+              Đăng ký ngay
             </Link>
           </p>
 
