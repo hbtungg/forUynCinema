@@ -9,6 +9,25 @@ const nextConfig = {
       },
     ];
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'scontent.fdad3-1.fna.fbcdn.net',
+        pathname: '/**', // Cho phép tất cả các thư mục con bên trong
+      },
+      {
+        protocol: 'https',
+        hostname: 'scontent.fdad3-8.fna.fbcdn.net',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'image.tmdb.org',
+        pathname: '/**',
+      },
+    ],
+  },
 };
 
 export default nextConfig;
