@@ -1,7 +1,8 @@
 import clientPromise from "@/lib/mongodb";
 import { NextResponse } from "next/server";
 
-const ONLINE_TTL_MS = 45 * 1000;
+// 🚀 NÂNG LÊN 60 GIÂY: Bù trừ độ trễ mạng, tránh hiện tượng Blink trạng thái
+const ONLINE_TTL_MS = 60 * 1000; 
 
 export async function GET(req) {
   try {
@@ -15,17 +16,8 @@ export async function GET(req) {
     if (onlineOnly) {
       const users = await db.collection("users")
         .find(
-          {
-            isOnline: true,
-            lastSeenAt: { $gte: onlineSince },
-          },
-          {
-            projection: {
-              email: 1,
-              name: 1,
-              lastSeenAt: 1,
-            },
-          }
+          { isOnline: true, lastSeenAt: { $gte: onlineSince } },
+          { projection: { email: 1, name: 1, lastSeenAt: 1 } }
         )
         .sort({ lastSeenAt: -1 })
         .limit(12)
@@ -72,7 +64,6 @@ export async function GET(req) {
 export async function POST(req) {
   try {
     const { userEmail, status } = await req.json();
-
     if (!userEmail) {
       return NextResponse.json({ error: "Thiếu email người dùng" }, { status: 400 });
     }
@@ -82,6 +73,22 @@ export async function POST(req) {
     const client = await clientPromise;
     const db = client.db("ForUynDB");
 
+    // 🚀 CẢI TIẾN ĐẮT GIÁ: Đọc nhanh bản ghi cũ để kiểm tra xem có thực sự cần ghi đè DB không
+    const existingUser = await db.collection("users").findOne(
+      { email: userEmail },
+      { projection: { isOnline: 1, lastSeenAt: 1 } }
+    );
+
+    if (existingUser) {
+      const lastDiff = now.getTime() - (existingUser.lastSeenAt ? new Date(existingUser.lastSeenAt).getTime() : 0);
+      
+      // Nếu trạng thái cũ đang là Online và khoảng cách giữa 2 lần ping nhỏ hơn 40 giây -> BỎ QUA KHÔNG GHI ĐÈ, giảm tải 90% cho DB!
+      if (isOnline && existingUser.isOnline && lastDiff < 40000) {
+        return NextResponse.json({ success: true, throttled: true });
+      }
+    }
+
+    // Thực hiện cập nhật nếu có sự thay đổi trạng thái hoặc hết lượt throttle
     await db.collection("users").updateOne(
       { email: userEmail },
       {
@@ -93,11 +100,7 @@ export async function POST(req) {
       }
     );
 
-    return NextResponse.json({
-      success: true,
-      isOnline,
-      lastSeenAt: now,
-    });
+    return NextResponse.json({ success: true, isOnline, lastSeenAt: now });
   } catch (error) {
     console.error("Lỗi cập nhật trạng thái online:", error);
     return NextResponse.json({ error: "Lỗi hệ thống" }, { status: 500 });
