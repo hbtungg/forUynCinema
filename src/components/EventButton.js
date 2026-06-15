@@ -11,14 +11,13 @@ export default function EventButton() {
       href={event.href}
       aria-label={`Mở sự kiện ${event.label}`}
       title={event.label}
-      className="w-9 h-9 flex items-center justify-center rounded-xl text-zinc-500 hover:text-white hover:bg-white/[0.05] transition-all flex-shrink-0"
+      className="w-9 h-9 hidden md:flex items-center justify-center rounded-xl text-zinc-500 hover:text-white hover:bg-white/[0.05] transition-all flex-shrink-0"
     >
       <TrophyIcon />
     </Link>
   );
 }
 
-// Biểu tượng Cúp Vàng đại diện cho ngày hội bóng đá World Cup 2026 đang diễn ra
 function TrophyIcon() {
   return (
     <svg

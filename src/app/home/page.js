@@ -88,7 +88,7 @@ export default function HomePage() {
   });
 
   useEffect(() => {
-    document.title = "forUyn Cinema 🍿 - Rạp phim bất tử";
+    document.title = "UYNFLIX";
 
     // Nếu đã có sẵn dữ liệu từ cache nạp ở useState, không làm phiền Server nữa
     if (!loading && data.allMovies.length > 0) return;

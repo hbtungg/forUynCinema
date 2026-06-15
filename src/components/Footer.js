@@ -21,7 +21,7 @@ export default function Footer() {
           <div className="text-center md:text-left">
             <Link href="/home" className="group inline-block overflow-visible">
               <img 
-                src="/logo1.png" 
+                src="/logo.png" 
                 alt="forUynCinema Logo" 
                 className="h-20 md:h-24 w-auto object-contain object-left mx-auto md:mx-0 select-none transition-all duration-300 group-hover:scale-[1.02] group-hover:brightness-110 filter drop-shadow-[0_0_20px_rgba(220,38,38,0.2)]" 
               />
@@ -66,7 +66,7 @@ export default function Footer() {
             </p>
             
             <p className="max-w-md text-center md:text-right text-[10px] italic leading-relaxed tracking-[0.18em] text-zinc-700 transition-all duration-700 hover:text-red-500/60 flex-shrink-0">
-              Premium Streaming Experience • Created with love — for em ❤️
+              Premium Streaming Experience • Created with love
             </p>
           </div>
 
@@ -89,8 +89,8 @@ export default function Footer() {
             <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-700">
               Designed by{' '}
               <span className="text-zinc-400">ThTung</span>
-              <span className="mx-2 text-red-900/50">for</span>
-              <span className="text-zinc-400">ThuUyn</span>
+              {/* <span className="mx-2 text-red-900/50">for</span>
+              <span className="text-zinc-400">ThuUyn</span> */}
             </p>
           </div>
 

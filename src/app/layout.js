@@ -5,12 +5,12 @@ import './globals.css';
 
 export const metadata = {
   title: {
-    default: 'forUyn Cinema', // Tiêu đề mặc định khi trang con không khai báo
-    template: '%s - forUyn Cinema', // %s sẽ được thay bằng tiêu đề của trang con
+    default: 'UYNFLIX', // Tiêu đề mặc định khi trang con không khai báo
+    template: '%s - UYNFLIX', // %s sẽ được thay bằng tiêu đề của trang con
   },
-  description: 'Em bảo em thích xem phim',
+  description: 'Em bảo anh ơi em thích xem phim',
   icons: {
-    icon: '/favicon.ico', // Đảm bảo anh có icon để tab trông xịn hơn
+    icon: '/favicon.ico',
   },
 };
 
