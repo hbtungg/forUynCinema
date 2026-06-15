@@ -131,7 +131,8 @@ export default function AdminUsersPage() {
   });
 
   return (
-    <div className="space-y-6 font-sans text-zinc-200 select-none">
+    // 🚀 ĐÃ SỬA: Thêm pb-12 lg:pb-0 để tạo khoảng trống an toàn chống đè bởi thanh Dock Mobile dưới chân
+    <div className="space-y-6 font-sans text-zinc-200 select-none pb-12 lg:pb-0">
       
       {/* HEADER */}
       <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.04] pb-5">
@@ -200,90 +201,80 @@ export default function AdminUsersPage() {
       {/* BỐ CỤC HAI PHÂN KHU */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         
-        {/* 🚀 KHỐI BÊN TRÁI: DANH SÁCH USER QUY HOẠCH THÀNH BẢNG PHẲNG CAO CẤP */}
-        <div className="lg:col-span-2 overflow-hidden rounded-2xl border border-white/[0.04] bg-[#0c0c0e]/40 backdrop-blur-2xl">
-          {loading ? (
-            <div className="py-20 flex justify-center">
-              <div className="w-5 h-5 border-2 border-white/[0.05] border-t-red-600 rounded-full animate-spin" />
-            </div>
-          ) : filteredUsers.length > 0 ? (
-            <table className="w-full min-w-[550px] border-collapse text-left">
-              <thead>
-                <tr className="border-b border-white/[0.04] text-zinc-500 text-[9px] font-black uppercase tracking-[0.15em] bg-white/[0.005]">
-                  <th className="py-4 px-5">Thành viên</th>
-                  <th className="py-4 px-5">Trạng thái luồng</th>
-                  <th className="py-4 px-5 text-right">Thao tác</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/[0.02]">
-                {filteredUsers.map((user) => {
-                  const isSelected = selectedUser?.id === user.id;
-                  return (
-                    <tr 
-                      key={user.id}
-                      onClick={() => setSelectedUser(user)}
-                      className={`group hover:bg-red-500/5 transition-all duration-300 cursor-pointer ${
-                        isSelected ? 'bg-white/[0.02]' : ''
-                      }`}
-                    >
-                      {/* CỘT TÊN THÀNH VIÊN (Bỏ hoàn toàn avatar ảnh riêng của hb.tungg & thuuyen) */}
-                      <td className="py-4 px-5 flex items-center gap-3 min-w-0">
-                        <div className="w-8 h-8 rounded-full border border-white/[0.05] bg-zinc-900 flex items-center justify-center font-bold text-zinc-400 text-xs flex-shrink-0 group-hover:bg-red-600/10 group-hover:text-red-400 transition-colors">
-                          {user.name?.charAt(0) || 'U'}
+        {/* 🚀 ĐÃ SỬA: Thêm lớp "overflow-x-auto no-scrollbar" bọc quanh table để hỗ trợ vuốt trượt ngang êm ru trên Mobile */}
+        <div className="lg:col-span-2 overflow-x-auto no-scrollbar rounded-2xl border border-white/[0.04] bg-[#0c0c0e]/40 backdrop-blur-2xl">
+          <table className="w-full min-w-[550px] border-collapse text-left">
+            <thead>
+              <tr className="border-b border-white/[0.04] text-zinc-500 text-[9px] font-black uppercase tracking-[0.15em] bg-white/[0.005]">
+                <th className="py-4 px-5">Thành viên</th>
+                <th className="py-4 px-5">Trạng thái luồng</th>
+                <th className="py-4 px-5 text-right">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/[0.02]">
+              {filteredUsers.map((user) => {
+                const isSelected = selectedUser?.id === user.id;
+                return (
+                  <tr 
+                    key={user.id}
+                    onClick={() => setSelectedUser(user)}
+                    className={`group hover:bg-red-500/5 transition-all duration-300 cursor-pointer ${
+                      isSelected ? 'bg-white/[0.02]' : ''
+                    }`}
+                  >
+                    {/* CỘT TÊN THÀNH VIÊN */}
+                    <td className="py-4 px-5 flex items-center gap-3 min-w-0">
+                      <div className="w-8 h-8 rounded-full border border-white/[0.05] bg-zinc-900 flex items-center justify-center font-bold text-zinc-400 text-xs flex-shrink-0 group-hover:bg-red-600/10 group-hover:text-red-400 transition-colors">
+                        {user.name?.charAt(0) || 'U'}
+                      </div>
+                      <div className="flex flex-col min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-zinc-100 font-bold text-[13px] tracking-tight truncate">{user.name}</span>
+                          {user.role === 'admin' && (
+                            <span className="text-[8px] font-black bg-red-600/10 border border-red-600/20 text-red-500 px-1 rounded uppercase tracking-wider">
+                              Sáng lập
+                            </span>
+                          )}
                         </div>
-                        <div className="flex flex-col min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="text-zinc-100 font-bold text-[13px] tracking-tight truncate">{user.name}</span>
-                            {user.role === 'admin' && (
-                              <span className="text-[8px] font-black bg-red-600/10 border border-red-600/20 text-red-500 px-1 rounded uppercase tracking-wider">
-                                Sáng lập
-                              </span>
-                            )}
-                          </div>
-                          <span className="text-zinc-600 text-[11px] truncate select-text mt-0.5">{user.email}</span>
+                        <span className="text-zinc-600 text-[11px] truncate select-text mt-0.5">{user.email}</span>
+                      </div>
+                    </td>
+
+                    {/* CỘT TRẠNG THÁI LUỒNG XEM PHIM */}
+                    <td className="py-4 px-5">
+                      {user.isOnline && user.watching ? (
+                        <div className="flex flex-col max-w-[220px]">
+                          <span className="text-red-500 font-bold text-xs truncate tracking-tight">{user.watching.movieName}</span>
+                          <span className="text-zinc-600 text-[10px] mt-0.5">Khởi chạy: {user.watching.timeAt?.split(' ')[1] || ''}</span>
                         </div>
-                      </td>
+                      ) : (
+                        <div className="flex items-center gap-1.5 text-zinc-700 italic text-[11px] tracking-wide">
+                          <span className="w-1.5 h-1.5 rounded-full bg-zinc-800" />
+                          <span>Ngoại tuyến</span>
+                        </div>
+                      )}
+                    </td>
 
-                      {/* CỘT TRẠNG THÁI LUỒNG XEM PHIM */}
-                      <td className="py-4 px-5">
-                        {user.isOnline && user.watching ? (
-                          <div className="flex flex-col max-w-[220px]">
-                            <span className="text-red-500 font-bold text-xs truncate tracking-tight">{user.watching.movieName}</span>
-                            <span className="text-zinc-600 text-[10px] mt-0.5">Khởi chạy: {user.watching.timeAt?.split(' ')[1] || ''}</span>
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-1.5 text-zinc-700 italic text-[11px] tracking-wide">
-                            <span className="w-1.5 h-1.5 rounded-full bg-zinc-800" />
-                            <span>Ngoại tuyến</span>
-                          </div>
-                        )}
-                      </td>
-
-                      {/* CỘT THAO TÁC XÓA RẠP */}
-                      <td className="py-4 px-5 text-right" onClick={(e) => e.stopPropagation()}>
-                        <button
-                          onClick={() => handleDeleteUser(user.id, user.email)}
-                          disabled={user.role === 'admin'}
-                          className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all border
-                            ${user.role === 'admin' 
-                              ? 'border-transparent text-zinc-800 cursor-not-allowed' 
-                              : 'border-transparent text-zinc-500 hover:text-red-400 hover:bg-red-500/5 hover:border-red-500/10'
-                            }
-                          `}
-                        >
-                          Xóa rạp
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          ) : (
-            <div className="text-center py-16 text-zinc-600 tracking-widest font-bold uppercase text-[9px]">
-              Không tìm thấy thành viên nào phù hợp
-            </div>
-          )}
+                    {/* CỘT THAO TÁC XÓA RẠP */}
+                    <td className="py-4 px-5 text-right" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        onClick={() => handleDeleteUser(user.id, user.email)}
+                        disabled={user.role === 'admin'}
+                        className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all border
+                          ${user.role === 'admin' 
+                            ? 'border-transparent text-zinc-800 cursor-not-allowed' 
+                            : 'border-transparent text-zinc-500 hover:text-red-400 hover:bg-red-500/5 hover:border-red-500/10'
+                          }
+                        `}
+                      >
+                        Xóa rạp
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
 
         {/* KHỐI BÊN PHẢI: BẢNG GIÁM SÁT CHI TIẾT TỪNG THÀNH VIÊN */}

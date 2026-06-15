@@ -73,8 +73,8 @@ export default function AdminHistoryPage() {
   };
 
   return (
-    // 🚀 ĐÃ SỬA: Loại bỏ bọc nền <main> và các linh kiện Header/Footer dư thừa để khớp khít vào AdminLayout
-    <div className="w-full space-y-6">
+    // 🚀 ĐÃ SỬA: Chừa khoảng không pb-12 cho Dock Mobile dưới chân màn hình điện thoại, tước bỏ Header/Footer thừa
+    <div className="w-full space-y-6 pb-12 lg:pb-0">
 
       {/* HEADER PHÂN KHU GIÁM SÁT */}
       <motion.div
@@ -184,10 +184,11 @@ export default function AdminHistoryPage() {
           <p className="text-zinc-600 text-xs font-medium">Hệ thống chưa ghi nhận hoạt động nào phù hợp.</p>
         </div>
       ) : (
+        // 🚀 ĐÃ SỬA: Thêm "no-scrollbar" để vuốt ngang mượt mà, bám biên tăm tắp trên Mobile
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="overflow-x-auto rounded-2xl border border-white/[0.04] bg-[#0c0c0e]/40 backdrop-blur-2xl"
+          className="overflow-x-auto no-scrollbar rounded-2xl border border-white/[0.04] bg-[#0c0c0e]/40 backdrop-blur-2xl"
         >
           <table className="w-full min-w-[800px] border-collapse">
             <thead>
