@@ -128,7 +128,7 @@ export default function RelatedMovies({ allCategories, isEpo = false, actor = ''
               <p className="text-[9px] text-zinc-600 font-medium tracking-normal mt-1 flex items-center gap-1.5">
                 <span>{item.year || '2026'}</span>
                 {item.episode && <span className="text-zinc-700">·</span>}
-                {item.episode && <span className="text-red-500/80 font-bold">Tập {item.episode}</span>}
+                {item.episode && <span className="text-red-500/80 font-bold">Tập {String(item.episode).replace(/^(tập|tập|tâp|tap|ep|episode)\s*/i, '').trim()}</span>}
               </p>
             </div>
           </Link>

@@ -26,7 +26,7 @@ export default function MiniPlayerDock({
             {movie.name}
           </p>
           <p className="text-[10px] text-red-500 font-bold mt-0.5">
-            Đang phát · Tập {epName}
+            Đang phát · Tập {String(epName || '').replace(/^(tập|tập|tâp|tap|ep|episode)\s*/i, '').trim()}
           </p>
         </div>
       </div>

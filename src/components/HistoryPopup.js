@@ -9,20 +9,22 @@ export default function HistoryPopup() {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
+    let active = true;
+    let timer;
+    let resetTimer;
+
     if (status === "authenticated" && session?.user?.email) {
       const fetchLatestHistory = async () => {
         try {
           const res = await fetch(`/api/history?userEmail=${session.user.email}`);
-          if (res.ok) {
+          if (res.ok && active) {
             const history = await res.json();
-            if (history.length > 0) {
+            if (history.length > 0 && active) {
               setLastMovie(history[0]);
 
-              const timer = setTimeout(() => {
-                setIsVisible(true);
+              timer = setTimeout(() => {
+                if (active) setIsVisible(true);
               }, 1500);
-
-              return () => clearTimeout(timer);
             }
           }
         } catch (error) {
@@ -32,9 +34,19 @@ export default function HistoryPopup() {
 
       fetchLatestHistory();
     } else {
-      setIsVisible(false);
-      setLastMovie(null);
+      resetTimer = setTimeout(() => {
+        if (active) {
+          setIsVisible(false);
+          setLastMovie(null);
+        }
+      }, 0);
     }
+
+    return () => {
+      active = false;
+      if (timer) clearTimeout(timer);
+      if (resetTimer) clearTimeout(resetTimer);
+    };
   }, [status, session]);
 
   if (!isVisible || !lastMovie || status !== "authenticated") return null;
@@ -66,10 +78,10 @@ export default function HistoryPopup() {
           <div className="mb-5">
             <p className="text-zinc-400 text-[11px] font-medium leading-relaxed">
               Lần trước em đang xem dở bộ phim <br/>
-              <span className="text-white font-black italic text-xs">"{lastMovie.name}"</span>
+              <span className="text-white font-black italic text-xs">&ldquo;{lastMovie.name}&rdquo;</span>
             </p>
             <p className="text-zinc-500 text-[10px] mt-1 font-bold">
-              Đến <span className="text-red-500 uppercase tracking-tighter">Tập {lastMovie.episode}</span> rồi đó nha!
+              Đến <span className="text-red-500 uppercase tracking-tighter">Tập {String(lastMovie.episode || '1').replace(/^(tập|tập|tâp|tap|ep|episode)\s*/i, '').trim()}</span> rồi đó nha!
             </p>
           </div>
 

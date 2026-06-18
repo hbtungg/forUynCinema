@@ -178,7 +178,7 @@ export default function HistoryPage() {
 
                       <span className="w-fit text-red-500 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
                         <span className="w-1.5 h-1.5 bg-red-600 rounded-full" />
-                        Tập {item.episode || '1'}
+                        Tập {String(item.episode || '1').replace(/^(tập|tập|tâp|tap|ep|episode)\s*/i, '').trim()}
                       </span>
                     </div>
                   </div>

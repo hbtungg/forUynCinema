@@ -102,7 +102,7 @@ export default function ContinueWatching() {
                 <img src={item.thumb_url} alt={item.name} className="w-full h-full object-cover opacity-60 group-hover/card:opacity-100 transition-opacity duration-700" />
                 <div className="absolute inset-x-0 bottom-0 p-5 bg-gradient-to-t from-black via-black/80 to-transparent">
                   <h3 className="text-white font-black text-[11px] md:text-[12px] uppercase truncate tracking-tight">{item.name}</h3>
-                  <span className="text-red-600 text-[9px] font-black uppercase tracking-widest mt-1 block">● Tập {item.episode || "1"}</span>
+                  <span className="text-red-600 text-[9px] font-black uppercase tracking-widest mt-1 block">● Tập {String(item.episode || '1').replace(/^(tập|tập|tâp|tap|ep|episode)\s*/i, '').trim()}</span>
                   <div className="mt-3 w-full h-1 bg-zinc-800/50 rounded-full overflow-hidden">
                     <div className="w-1/2 h-full bg-red-600 shadow-[0_0_10px_rgba(220,38,38,0.5)]"></div>
                   </div>
