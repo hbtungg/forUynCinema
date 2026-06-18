@@ -29,10 +29,19 @@ const LIST_TYPES = new Set([
 ]);
 
 function createCanonicalKey(movie = {}) {
+  // Ưu tiên origin_name (tên gốc không dịch) để key nhất quán giữa các provider.
+  // Fallback về name (tên tiếng Việt) rồi slug nếu không có tên gốc.
   const title = movie.origin_name || movie.original_name || movie.name || movie.slug || "";
   const year = movie.year || "";
-  return `${title}`.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + (year ? `-${year}` : "");
+  const normalized = `${title}`
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+  // Nếu sau normalize vẫn rỗng (slug toàn ký tự đặc biệt), dùng slug thô làm fallback
+  const base = normalized || (movie.slug || "unknown").replace(/[^a-z0-9-]/g, "");
+  return base + (year ? `-${year}` : "");
 }
 
 function withTimeout(ms = FETCH_TIMEOUT) {
@@ -301,4 +310,3 @@ export async function getProviderRelatedMovies(categorySlug, limit = 8) {
   const data = await getProviderMoviesByCategory(categorySlug, 1);
   return data?.items?.slice(0, limit) || [];
 }
-
