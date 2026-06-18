@@ -5,7 +5,7 @@ import WatchClient from './WatchClient';
 export async function generateMetadata({ params }) {
   const { slug } = await params;
   // Tên phim sẽ được cập nhật bởi WatchClient sau khi fetch xong
-  return { title: `Đang tải phim... - forUyn Cinema 🍿` };
+  return { title: `Loading... - Uynflix` };
 }
 
 export default async function WatchPage({ params }) {

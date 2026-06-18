@@ -18,25 +18,40 @@ export async function POST(req) {
       return NextResponse.json({ error: "Thiếu canonicalKey" }, { status: 400 });
     }
 
-    const movieKey = { userEmail: userEmail, "movie.canonicalKey": movie.canonicalKey };
+    // Tìm tài liệu lịch sử xem của phim này (trùng canonicalKey hoặc trùng slug)
+    const existingHistory = await db.collection("history").findOne({
+      userEmail: userEmail,
+      $or: [
+        { "movie.canonicalKey": movie.canonicalKey },
+        { "movie.slug": movie.slug }
+      ]
+    });
 
-    // Chỉ cập nhật các field cần thiết thay vì ghi đè toàn bộ movie.
-    // Giữ nguyên movie.provider gốc (lần đầu xem), chỉ cập nhật tập đang xem và thời gian.
-    await db.collection("history").updateOne(
-      movieKey,
-      {
-        $set: {
-          // Cập nhật toàn bộ movie snapshot (bao gồm provider hiện tại)
-          movie: movie,
-          updatedAt: new Date(),
+    if (existingHistory) {
+      await db.collection("history").updateOne(
+        { _id: existingHistory._id },
+        {
+          $set: {
+            movie: movie,
+            updatedAt: new Date(),
+          }
+        }
+      );
+    } else {
+      await db.collection("history").updateOne(
+        { userEmail: userEmail, "movie.canonicalKey": movie.canonicalKey },
+        {
+          $set: {
+            movie: movie,
+            updatedAt: new Date(),
+          },
+          $setOnInsert: {
+            createdAt: new Date(),
+          },
         },
-        // Chỉ set canonicalKey và slug khi upsert (document mới) — không ghi đè nếu đã có
-        $setOnInsert: {
-          createdAt: new Date(),
-        },
-      },
-      { upsert: true }
-    );
+        { upsert: true }
+      );
+    }
     return NextResponse.json({ message: "Đã ghi nhớ ❤️" });
   } catch (e) {
     return NextResponse.json({ error: "Lỗi DB" }, { status: 500 });
@@ -77,15 +92,18 @@ export async function DELETE(req) {
       return NextResponse.json({ error: "Thiếu email hoặc slug" }, { status: 400 });
     }
 
-    // Ưu tiên xóa theo canonicalKey (nhận diện phim chính xác, độc lập provider).
-    // Chỉ fallback về slug nếu không có canonicalKey (dữ liệu cũ chưa có field này).
-    const deleteFilter = canonicalKey
-      ? { userEmail: userEmail, "movie.canonicalKey": canonicalKey }
-      : { userEmail: userEmail, "movie.slug": slug };
+    // Xóa tất cả các bản ghi lịch sử xem trùng canonicalKey hoặc slug
+    const deleteFilter = {
+      userEmail: userEmail,
+      $or: [
+        ...(canonicalKey ? [{ "movie.canonicalKey": canonicalKey }] : []),
+        { "movie.slug": slug }
+      ]
+    };
 
-    const result = await db.collection("history").deleteOne(deleteFilter);
+    const result = await db.collection("history").deleteMany(deleteFilter);
 
-    if (result.deletedCount === 1) {
+    if (result.deletedCount >= 1) {
       return NextResponse.json({ message: "Đã dọn dẹp kho báu 🧹" });
     } else {
       return NextResponse.json({ error: "Không tìm thấy phim để xóa" }, { status: 404 });
