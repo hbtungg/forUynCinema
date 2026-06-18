@@ -15,7 +15,10 @@ export default function FavoriteButton({ phim, compact = false }) {
     try {
       const storageKey = `favs_${session.user.email}`;
       const localFavs = JSON.parse(localStorage.getItem(storageKey) || '[]');
-      return localFavs.some(f => f.slug === phim.slug);
+      return localFavs.some(f => (
+        (phim.canonicalKey && f.canonicalKey === phim.canonicalKey) ||
+        f.slug === phim.slug
+      ));
     } catch (e) {
       console.error("Lỗi đọc trạng thái yêu thích từ LocalStorage:", e);
       return false;
@@ -33,15 +36,19 @@ export default function FavoriteButton({ phim, compact = false }) {
     
     // Đọc danh sách hiện tại ra để xử lý ghi đè
     let localFavs = JSON.parse(localStorage.getItem(storageKey) || '[]');
-    const isCurrentlyFav = localFavs.some(f => f.slug === phim.slug);
+    const isSameMovie = (f) => (
+      (phim.canonicalKey && f.canonicalKey === phim.canonicalKey) ||
+      f.slug === phim.slug
+    );
+    const isCurrentlyFav = localFavs.some(isSameMovie);
     
     const method = isCurrentlyFav ? 'DELETE' : 'POST';
     const body = isCurrentlyFav 
-      ? { slug: phim.slug, userEmail: session.user.email } 
+      ? { slug: phim.slug, canonicalKey: phim.canonicalKey, userEmail: session.user.email } 
       : { movie: phim, userEmail: session.user.email };
 
     if (isCurrentlyFav) {
-      localFavs = localFavs.filter(f => f.slug !== phim.slug);
+      localFavs = localFavs.filter(f => !isSameMovie(f));
     } else {
       localFavs = [phim, ...localFavs];
     }

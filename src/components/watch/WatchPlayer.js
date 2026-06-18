@@ -4,6 +4,26 @@ import { useEffect } from 'react'; // Bổ sung điều phối đồng bộ lu�
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 
+function normalizeEpisodeLabel(value) {
+  if (!value || value === 'Full' || value === 'FULL') return 'FULL';
+
+  const text = String(value).trim();
+
+  if (/^tập\s*/i.test(text)) {
+    return text.replace(/^tập\s*/i, 'Tập ');
+  }
+
+  if (/^ep\s*\d+/i.test(text)) {
+    return text.replace(/^ep\s*/i, 'Tập ');
+  }
+
+  if (/^\d+$/i.test(text)) {
+    return `Tập ${text}`;
+  }
+
+  return text.startsWith('Tập ') ? text : `Tập ${text}`;
+}
+
 export default function WatchPlayer({ 
   movie, 
   currentEp, 
@@ -26,7 +46,7 @@ export default function WatchPlayer({
         document.title = `Đang tải phim... - Uynflix`;
       } else {
         // Ngay khi iframe nạp xong hoàn toàn, trả lại tên phim và tập tương ứng
-        const episodeText = epName === 'Full' ? 'FULL' : `Tập ${epName}`;
+        const episodeText = normalizeEpisodeLabel(epName);
         document.title = `Đang xem: ${movie.name} - ${episodeText} - Uynflix`;
       }
     }
@@ -122,7 +142,7 @@ export default function WatchPlayer({
           className="w-full h-full border-none"
           allowFullScreen
           allow="autoplay; fullscreen"
-          title={`${movie?.name} - Tập ${epName}`}
+          title={`${movie?.name} - ${normalizeEpisodeLabel(epName)}`}
           onLoad={() => setIsLoading(false)}
           onError={() => { setIsLoading(false); setIframeError(true); }}
         />

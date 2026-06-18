@@ -20,6 +20,29 @@ function chunkEpisodes(eps, size = 20) {
   return out;
 }
 
+function normalizeEpisodeMatchKey(value = "") {
+  return String(value)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/^(tập|ep)\s*/i, "")
+    .replace(/[^a-z0-9]+/g, "")
+    .trim();
+}
+
+function findEpisodeIndex(items = [], target = "") {
+  const targetKey = normalizeEpisodeMatchKey(target);
+  if (!targetKey) return -1;
+
+  return items.findIndex((item) => {
+    const candidateKeys = [item?.name, item?.title, item?.slug, item?.episode]
+      .filter(Boolean)
+      .map(normalizeEpisodeMatchKey);
+
+    return candidateKeys.includes(targetKey);
+  });
+}
+
 // Skeleton hiển thị trong lúc fetch — thay thế màn hình đen
 function WatchSkeleton({ sidebarCollapsed, onToggleSidebar }) {
   return (
@@ -83,6 +106,7 @@ export default function WatchClient({ slug }) {
   const [favLoading, setFavLoading] = useState(false);
 
   const epFromUrl = searchParams.get("ep");
+  const [selectedProvider, setSelectedProvider] = useState("auto");
   const [selectedServer, setSelectedServer] = useState(0);
   const [selectedEpisode, setSelectedEpisode] = useState(0);
   const [activeChunk, setActiveChunk] = useState(0);
@@ -91,8 +115,7 @@ export default function WatchClient({ slug }) {
   const historyTimerRef = useRef(null);
   const loadingTimerRef = useRef(null);
   
-  // 🚀 CẢI TIẾN 2: Cờ hiệu khóa chết luồng fetch, chống reload phim vô tội vạ khi đổi tab/app
-  const hasFetchedRef = useRef(false);
+  const fetchKeyRef = useRef("");
 
   const currentEpisodes = useMemo(() => servers[selectedServer]?.items || [], [servers, selectedServer]);
   const episodeChunks = useMemo(() => chunkEpisodes(currentEpisodes, 20), [currentEpisodes]);
@@ -101,16 +124,30 @@ export default function WatchClient({ slug }) {
   // Fetch phim từ browser — IP dân cư, Cloudflare không chặn
   useEffect(() => {
     if (!slug) return;
-    
-    // Đã chặn đứng: Nếu cờ hiệu báo đã từng lấy phim rồi thì đứng im, không chạy lại nữa!
-    if (hasFetchedRef.current) return;
+
+    const fetchKey = `${slug}:${selectedProvider}:${session?.user?.email || "guest"}`;
+    if (fetchKeyRef.current === fetchKey) return;
+    fetchKeyRef.current = fetchKey;
 
     async function fetchAll() {
+      const previousServerIndex = selectedServer;
+      const previousEpisodeIndex = selectedEpisode;
+      const previousEpisodeName = currentEp?.name || epFromUrl || "";
+
       setIsFetching(true);
+      setMovie(null);
+      setServers([]);
+      setSelectedServer(0);
+      setSelectedEpisode(0);
+      setActiveChunk(0);
+      setIsLoading(true);
+      setIframeError(false);
+      setIsDescExpanded(false);
+      setRelatedMovies([]);
       try {
         // Chạy song song: chi tiết phim + trạng thái yêu thích
         const [resDetail, resFav] = await Promise.all([
-          getMovieDetail(slug),
+          getMovieDetail(slug, selectedProvider === "auto" ? null : selectedProvider),
           session?.user?.email
             ? fetch(`/api/favorites/check?slug=${slug}&userEmail=${session.user.email}`)
                 .then(r => r.ok ? r.json() : null)
@@ -143,18 +180,40 @@ export default function WatchClient({ slug }) {
             console.error("Lỗi lấy phim liên quan:", relErr);
           }
 
-          // Định vị tập phim từ URL
+          // Định vị tập phim từ URL theo đúng server đang được chọn (hoặc tìm khắp nếu chưa có)
           if (epFromUrl) {
-            const eps = mappedServers[0]?.items || [];
-            const idx = eps.findIndex(e => e.name === epFromUrl);
-            if (idx !== -1) {
-              setSelectedEpisode(idx);
-              setActiveChunk(Math.floor(idx / 20));
+            let matchedServer = -1;
+            let matchedEpisode = -1;
+
+            for (let i = 0; i < mappedServers.length; i += 1) {
+              const items = mappedServers[i]?.items || [];
+              const episodeIndex = findEpisodeIndex(items, epFromUrl);
+              if (episodeIndex !== -1) {
+                matchedServer = i;
+                matchedEpisode = episodeIndex;
+                break;
+              }
+            }
+
+            if (matchedServer !== -1 && matchedEpisode !== -1) {
+              setSelectedServer(matchedServer);
+              setSelectedEpisode(matchedEpisode);
+              setActiveChunk(Math.floor(matchedEpisode / 20));
+            } else {
+              const fallbackServerIndex = Math.max(0, Math.min(previousServerIndex, mappedServers.length - 1));
+              const fallbackItems = mappedServers[fallbackServerIndex]?.items || [];
+              const fallbackByName = findEpisodeIndex(fallbackItems, previousEpisodeName);
+              const fallbackByIndex = fallbackItems[previousEpisodeIndex] ? previousEpisodeIndex : 0;
+              const finalFallbackIndex = fallbackByName !== -1 ? fallbackByName : fallbackByIndex;
+
+              if (fallbackItems[finalFallbackIndex]) {
+                setSelectedServer(fallbackServerIndex);
+                setSelectedEpisode(finalFallbackIndex);
+                setActiveChunk(Math.floor(finalFallbackIndex / 20));
+              }
             }
           }
           
-          // Khóa cờ hiệu vĩnh viễn sau khi lấy dữ liệu thành công
-          hasFetchedRef.current = true;
         }
       } catch (err) {
         console.error("WatchClient fetch error:", err);
@@ -165,13 +224,13 @@ export default function WatchClient({ slug }) {
     }
 
     fetchAll();
-  }, [slug, session, epFromUrl]);
+  }, [slug, session, selectedProvider]);
 
   // Đồng bộ tập phim khi servers thay đổi
   useEffect(() => {
     const eps = servers[selectedServer]?.items || [];
     if (epFromUrl && eps.length > 0) {
-      const idx = eps.findIndex(e => e.name === epFromUrl);
+      const idx = findEpisodeIndex(eps, epFromUrl);
       if (idx !== -1) {
         setSelectedEpisode(idx);
         setActiveChunk(Math.floor(idx / 20));
@@ -193,14 +252,25 @@ export default function WatchClient({ slug }) {
     historyTimerRef.current = setTimeout(async () => {
       const item = {
         slug,
+        provider: movie.provider || "nguonc",
+        providerSlug: movie.providerSlug || slug,
+        canonicalKey: movie.canonicalKey || `${movie.origin_name || movie.name || slug}-${movie.year || ""}`,
         name: movie.name,
+        origin_name: movie.origin_name || movie.original_name || "",
+        year: movie.year || "",
         thumb_url: movie.thumb_url,
         time: new Date().toLocaleDateString("vi-VN"),
         episode: currentEp.name || "1",
+        episodeIndex: selectedEpisode,
+        serverIndex: selectedServer,
       };
       try {
         const h = JSON.parse(localStorage.getItem("watchHistory") || "[]");
-        localStorage.setItem("watchHistory", JSON.stringify([item, ...h.filter(x => x.slug !== slug)].slice(0, 10)));
+        const sameMovie = (x) => (
+          (item.canonicalKey && x.canonicalKey === item.canonicalKey) ||
+          x.slug === slug
+        );
+        localStorage.setItem("watchHistory", JSON.stringify([item, ...h.filter(x => !sameMovie(x))].slice(0, 10)));
         window.dispatchEvent(new Event("storage"));
         window.dispatchEvent(new Event("historyUpdated"));
       } catch (_) {}
@@ -225,9 +295,17 @@ export default function WatchClient({ slug }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          slug,
-          name: movie.name,
-          thumb_url: movie.thumb_url || movie.poster_url,
+          movie: {
+            slug,
+            provider: movie.provider || "nguonc",
+            providerSlug: movie.providerSlug || slug,
+            canonicalKey: movie.canonicalKey || `${movie.origin_name || movie.name || slug}-${movie.year || ""}`,
+            name: movie.name,
+            origin_name: movie.origin_name || movie.original_name || "",
+            year: movie.year || "",
+            thumb_url: movie.thumb_url || movie.poster_url,
+            poster_url: movie.poster_url || movie.thumb_url,
+          },
           userEmail: session?.user?.email,
         }),
       });
@@ -250,7 +328,8 @@ export default function WatchClient({ slug }) {
     setIsLoading(true);
     setIframeError(false);
     setSelectedEpisode(index);
-    router.replace(`/watch/${slug}?ep=${epName}`, { scroll: false });
+    setActiveChunk(Math.floor(index / 20));
+    router.replace(`/watch/${slug}?ep=${encodeURIComponent(epName)}`, { scroll: false });
     playerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [selectedEpisode, router, slug]);
 
@@ -339,6 +418,8 @@ export default function WatchClient({ slug }) {
                 selectedEpisode={selectedEpisode}
                 handleEpisodeChange={handleEpisodeChange}
                 movie={movie}
+                selectedProvider={selectedProvider}
+                setSelectedProvider={setSelectedProvider}
               />
             </div>
 

@@ -13,6 +13,7 @@ export default function WatchMetadata({
   onToggleFavorite
 }) {
   const directorText = movie.director || 'Đang cập nhật';
+  const descriptionText = movie.description || movie.content || movie.desc || movie.summary || movie.overview || '';
   const [shareToast, setShareToast] = useState(false); // State quản lý thông báo sao chép link
 
   // 🚀 Hàm xử lý chia sẻ: Tự động copy URL hiện tại và hiện Toast thông báo
@@ -127,14 +128,20 @@ export default function WatchMetadata({
       {/* ── 📖 DESCRIPTION ── */}
       <div className="border-t border-white/[0.03] pt-5">
         <div className={`text-zinc-400 text-[12px] md:text-[13px] font-medium leading-relaxed overflow-hidden transition-all duration-500 ease-out ${isDescExpanded ? '' : 'max-h-[3.6rem]'}`}>
-          <div dangerouslySetInnerHTML={{ __html: movie.description }} />
+          {descriptionText ? (
+            <div dangerouslySetInnerHTML={{ __html: descriptionText }} />
+          ) : (
+            <p className="text-zinc-500">Đang cập nhật nội dung phim.</p>
+          )}
         </div>
-        <button
-          onClick={() => setIsDescExpanded(v => !v)}
-          className="flex items-center gap-1 mt-1 text-[10px] md:text-[11px] font-black uppercase tracking-widest text-zinc-600 hover:text-white transition-colors py-1"
-        >
-          {isDescExpanded ? 'Thu gọn cốt truyện ▲' : 'Hiển thị thêm cốt truyện ▼'}
-        </button>
+        {descriptionText && (
+          <button
+            onClick={() => setIsDescExpanded(v => !v)}
+            className="flex items-center gap-1 mt-1 text-[10px] md:text-[11px] font-black uppercase tracking-widest text-zinc-600 hover:text-white transition-colors py-1"
+          >
+            {isDescExpanded ? 'Thu gọn cốt truyện ▲' : 'Hiển thị thêm cốt truyện ▼'}
+          </button>
+        )}
       </div>
 
       {/* ── 🎬 PRODUCTION LAYERS ── */}

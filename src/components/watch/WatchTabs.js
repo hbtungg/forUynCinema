@@ -1,5 +1,22 @@
 'use client';
 
+import { useState } from 'react';
+
+function formatEpisodeLabel(name) {
+  if (!name || name === 'Full' || name === 'FULL') return 'FULL';
+  const text = String(name).trim();
+  if (/^tập\s+/i.test(text)) {
+    return text.replace(/^tập\s+/i, 'Tập ');
+  }
+  if (/^ep\s*\d+/i.test(text)) {
+    return text.replace(/^ep\s*/i, 'Tập ');
+  }
+  if (/^\d+$/i.test(text)) {
+    return `Tập ${text}`;
+  }
+  return text.startsWith('Tập ') ? text : `Tập ${text}`;
+}
+
 // ── Mock data bình luận (Giữ nguyên của anh) ──────────────────────
 
 // ── Mock data bình luận ──────────────────────────────────────────
@@ -70,7 +87,12 @@ export default function WatchTabs({
   selectedEpisode,
   handleEpisodeChange,
   movie,
+  selectedProvider,
+  setSelectedProvider,
 }) {
+  const [isServerMenuOpen, setIsServerMenuOpen] = useState(false);
+  const [isProviderMenuOpen, setIsProviderMenuOpen] = useState(false);
+
   const TABS = [
     { id: 'episodes', label: 'Tập phim', icon: '🎬' },
     { id: 'comments', label: 'Bình luận', icon: '💬', badge: 128 },
@@ -111,18 +133,57 @@ export default function WatchTabs({
           {/* Top Toolbar gọn gàng căn góc trái */}
           <div className="flex flex-wrap items-center gap-3 w-full border-b border-white/[0.02] pb-3">
 
-            {/* 🚀 ĐÃ NÂNG CẤP: Thay select mặc định bằng Dropdown kính mờ Hover siêu sang chảnh */}
+            <div className="relative shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsProviderMenuOpen((prev) => !prev)}
+                className="bg-[#141417] border border-white/5 hover:border-white/10 px-3.5 py-1.5 rounded-xl text-[10px] font-black text-zinc-400 flex items-center gap-1.5 cursor-pointer transition-all duration-300"
+              >
+                <span className="w-1 h-1 rounded-full bg-red-500 animate-pulse" />
+                <span>{selectedProvider === 'nguonc' ? 'Nguồn C' : selectedProvider === 'kkphim' ? 'KKPhim' : 'Tự động'}</span>
+                <span className="text-zinc-600 text-[8px] ml-0.5 tracking-none transition-transform duration-300">▼</span>
+              </button>
+
+              <div className={`absolute left-0 top-full mt-1.5 w-40 bg-[#111114]/95 backdrop-blur-xl border border-white/5 rounded-2xl p-1 shadow-2xl transition-all duration-200 z-50 origin-top ${isProviderMenuOpen ? 'opacity-100 visible scale-100' : 'opacity-0 invisible scale-95'}`}>
+                <div className="max-h-48 overflow-y-auto custom-scrollbar space-y-0.5">
+                  {[
+                    { value: 'auto', label: 'Tự động' },
+                    { value: 'nguonc', label: 'Nguồn C' },
+                    { value: 'kkphim', label: 'KKPhim' },
+                  ].map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => {
+                        setSelectedProvider(option.value);
+                        setIsProviderMenuOpen(false);
+                      }}
+                      className={`w-full text-left px-3 py-2 rounded-xl text-[10px] font-bold transition-all flex items-center justify-between ${selectedProvider === option.value
+                          ? 'bg-red-600 text-white font-black'
+                          : 'text-zinc-400 hover:bg-white/[0.04] hover:text-white'
+                        }`}
+                    >
+                      <span>{option.label}</span>
+                      {selectedProvider === option.value && <span className="text-[8px]">●</span>}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
             {servers.length > 1 && (
-              <div className="relative shrink-0 group/srv">
-                {/* Nút hiển thị Server hiện tại */}
-                <div className="bg-[#141417] border border-white/5 hover:border-white/10 px-3.5 py-1.5 rounded-xl text-[10px] font-black text-zinc-400 flex items-center gap-1.5 cursor-pointer transition-all duration-300 group-hover/srv:text-red-400 group-hover/srv:border-white/10">
+              <div className="relative shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setIsServerMenuOpen((prev) => !prev)}
+                  className="bg-[#141417] border border-white/5 hover:border-white/10 px-3.5 py-1.5 rounded-xl text-[10px] font-black text-zinc-400 flex items-center gap-1.5 cursor-pointer transition-all duration-300"
+                >
                   <span className="w-1 h-1 rounded-full bg-red-500 animate-pulse" />
                   <span>{servers[selectedServer]?.server_name || `Mùa ${selectedServer + 1}`}</span>
-                  <span className="text-zinc-600 text-[8px] ml-0.5 tracking-none transition-transform duration-300 group-hover/srv:rotate-180 group-hover/srv:text-red-400">▼</span>
-                </div>
+                  <span className="text-zinc-600 text-[8px] ml-0.5 tracking-none transition-transform duration-300">▼</span>
+                </button>
 
-                {/* Khay Menu nẩy ra mượt mà khi hover */}
-                <div className="absolute left-0 top-full mt-1.5 w-40 bg-[#111114]/95 backdrop-blur-xl border border-white/5 rounded-2xl p-1 shadow-2xl opacity-0 invisible group-hover/srv:opacity-100 group-hover/srv:visible transition-all duration-200 z-50 origin-top scale-95 group-hover/srv:scale-100">
+                <div className={`absolute left-0 top-full mt-1.5 w-40 bg-[#111114]/95 backdrop-blur-xl border border-white/5 rounded-2xl p-1 shadow-2xl transition-all duration-200 z-50 origin-top ${isServerMenuOpen ? 'opacity-100 visible scale-100' : 'opacity-0 invisible scale-95'}`}>
                   <div className="max-h-48 overflow-y-auto custom-scrollbar space-y-0.5">
                     {servers.map((s, i) => {
                       const isSelected = selectedServer === i;
@@ -130,7 +191,10 @@ export default function WatchTabs({
                         <button
                           key={i}
                           type="button"
-                          onClick={() => handleServerChange(i)} // Giữ nguyên hàm logic đổi server gốc của anh
+                          onClick={() => {
+                            handleServerChange(i);
+                            setIsServerMenuOpen(false);
+                          }}
                           className={`w-full text-left px-3 py-2 rounded-xl text-[10px] font-bold transition-all flex items-center justify-between ${isSelected
                               ? 'bg-red-600 text-white font-black shadow-[0_4px_12px_rgba(220,38,38,0.2)]'
                               : 'text-zinc-400 hover:bg-white/[0.04] hover:text-white'
@@ -174,7 +238,7 @@ export default function WatchTabs({
               {displayEpisodes.map((ep) => {
                 const idx = currentEpisodes.indexOf(ep);
                 const isActive = selectedEpisode === idx;
-                const label = ep.name === 'Full' ? 'FULL' : `Tập ${ep.name}`;
+                const label = formatEpisodeLabel(ep.name);
 
                 return (
                   <button
@@ -199,7 +263,7 @@ export default function WatchTabs({
 
                     <div className="relative z-10 p-3 w-full bg-gradient-to-t from-black/90 to-transparent">
                       <p className={`text-[12px] font-black tracking-wide leading-none ${isActive ? 'text-red-400' : 'text-white'}`}>
-                        {ep.name === 'Full' ? 'FULL' : ep.name}
+                        {label}
                       </p>
                       <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider mt-1 truncate">
                         {label} • 45 phút
@@ -216,7 +280,7 @@ export default function WatchTabs({
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-red-500/5 border border-red-500/10 w-fit">
               <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse shrink-0" />
               <p className="text-[9px] font-black text-red-400/80 uppercase tracking-widest">
-                Đang phát: {currentEpisodes[selectedEpisode].name === 'Full' ? 'Full' : `Tập ${currentEpisodes[selectedEpisode].name}`}
+                Đang phát: {formatEpisodeLabel(currentEpisodes[selectedEpisode].name)}
               </p>
             </div>
           )}

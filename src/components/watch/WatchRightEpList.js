@@ -1,5 +1,20 @@
 'use client';
 
+function formatEpisodeLabel(name) {
+  if (!name || name === 'Full' || name === 'FULL') return 'FULL';
+  const text = String(name).trim();
+  if (/^tập\s+/i.test(text)) {
+    return text.replace(/^tập\s+/i, 'Tập ');
+  }
+  if (/^ep\s*\d+/i.test(text)) {
+    return text.replace(/^ep\s*/i, 'Tập ');
+  }
+  if (/^\d+$/i.test(text)) {
+    return `Tập ${text}`;
+  }
+  return text.startsWith('Tập ') ? text : `Tập ${text}`;
+}
+
 export default function WatchRightEpList({ 
   currentEpisodes, 
   episodeChunks, 
@@ -9,7 +24,6 @@ export default function WatchRightEpList({
   handleEpisodeChange 
 }) {
   return (
-    /* 🚀 ĐÃ SỬA: Thêm "hidden lg:block" để ẩn hoàn toàn danh sách này trên mobile/tablet, chỉ hiện trên màn hình desktop lớn */
     <div className="hidden lg:block dark:bg-[#111115] bg-white border dark:border-white/5 border-zinc-200 rounded-2xl overflow-hidden">
       <div className="flex items-center justify-between px-4 py-3.5 border-b dark:border-white/5 border-zinc-100">
         <span className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Danh sách tập</span>
@@ -34,6 +48,7 @@ export default function WatchRightEpList({
           const isActive = selectedEpisode === idx;
           const globalChunkIdx = Math.floor(idx / 20);
           if (episodeChunks.length > 1 && globalChunkIdx !== activeChunk) return null;
+          const epLabel = formatEpisodeLabel(ep.name);
 
           return (
             <button 
@@ -55,7 +70,7 @@ export default function WatchRightEpList({
                     </span>
                   ) : <span className="text-[9px] text-zinc-400 dark:text-zinc-700 group-hover:text-zinc-600 dark:group-hover:text-zinc-400">▶</span>}
                 </span>
-                <span className="text-[12px] font-black tracking-wide">{ep.name === 'Full' ? 'FULL' : `Tập ${ep.name}`}</span>
+                <span className="text-[12px] font-black tracking-wide">{epLabel}</span>
               </div>
             </button>
           );

@@ -26,8 +26,12 @@ export async function POST(req) {
     const db = client.db("ForUynDB");
     const { movie, userEmail } = await req.json();
 
+    const movieKey = movie.canonicalKey
+      ? { userEmail, canonicalKey: movie.canonicalKey }
+      : { userEmail, slug: movie.slug };
+
     await db.collection("favorites").updateOne(
-      { userEmail, slug: movie.slug },
+      movieKey,
       { $set: { ...movie, userEmail, updatedAt: new Date() } },
       { upsert: true }
     );
@@ -41,9 +45,15 @@ export async function DELETE(req) {
   try {
     const client = await clientPromise;
     const db = client.db("ForUynDB");
-    const { slug, userEmail } = await req.json();
+    const { slug, canonicalKey, userEmail } = await req.json();
 
-    await db.collection("favorites").deleteOne({ userEmail, slug });
+    await db.collection("favorites").deleteOne({
+      userEmail,
+      $or: [
+        ...(canonicalKey ? [{ canonicalKey }] : []),
+        { slug }
+      ]
+    });
     return NextResponse.json({ message: "Đã xóa khỏi mây" });
   } catch (e) {
     return NextResponse.json({ error: "Lỗi" }, { status: 500 });

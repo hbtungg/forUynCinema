@@ -20,9 +20,14 @@ export async function GET(req) {
     const db = client.db("ForUynDB");
 
     // Tìm kiếm xem bộ phim này đã được tài khoản này lưu vào mây chưa
-    const favorite = await db.collection("favorites").findOne({ 
-      userEmail, 
-      slug 
+    const favorite = await db.collection("favorites").findOne({
+      userEmail,
+      $or: [
+        { slug },
+        { canonicalKey: slug },
+        { "movie.slug": slug },
+        { "movie.canonicalKey": slug },
+      ],
     });
 
     // Trả về kết quả logic: true nếu tìm thấy, false nếu chưa có

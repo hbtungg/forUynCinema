@@ -8,6 +8,7 @@ import Link from 'next/link';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import MovieCard from '@/components/MovieCard';
+import { getMovieList } from '@/lib/clientMovies';
 
 // 1. LINH KIỆN CON: Chứa toàn bộ logic xử lý dữ liệu danh sách phim
 function DanhSachContent() {
@@ -85,6 +86,17 @@ function DanhSachContent() {
   const fetchMoviesData = async (category, page = 1) => {
     setLoading(true);
     try {
+      const providerData = await getMovieList(category, page);
+      const providerItems = providerData.items || providerData.data?.items || [];
+      setMovies(providerItems);
+
+      const providerMeta = providerData.paginate || providerData.pagination || {};
+      setPagination({
+        currentPage: providerMeta.current_page || page,
+        totalPages: providerMeta.total_pages || providerMeta.total_page || 1,
+      });
+      return;
+
       let apiUrl = '';
       if (category === 'phim-moi-cap-nhat') {
         apiUrl = `https://phim.nguonc.com/api/films/phim-moi-cap-nhat?page=${page}`;

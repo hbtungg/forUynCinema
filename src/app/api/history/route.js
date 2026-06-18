@@ -11,8 +11,12 @@ export async function POST(req) {
     if (!movie || !userEmail) return NextResponse.json({ error: "Thiếu dữ liệu" }, { status: 400 });
 
     // Cập nhật hoặc thêm mới dựa trên email và slug của phim
+    const movieKey = movie.canonicalKey
+      ? { userEmail: userEmail, "movie.canonicalKey": movie.canonicalKey }
+      : { userEmail: userEmail, "movie.slug": movie.slug };
+
     await db.collection("history").updateOne(
-      { userEmail: userEmail, "movie.slug": movie.slug },
+      movieKey,
       { $set: { movie: movie, updatedAt: new Date() } },
       { upsert: true }
     );
@@ -50,7 +54,7 @@ export async function DELETE(req) {
   try {
     const client = await clientPromise;
     const db = client.db("ForUynDB");
-    const { userEmail, slug } = await req.json();
+    const { userEmail, slug, canonicalKey } = await req.json();
 
     if (!userEmail || !slug) {
       return NextResponse.json({ error: "Thiếu email hoặc slug" }, { status: 400 });
@@ -59,7 +63,10 @@ export async function DELETE(req) {
     // Xóa bản ghi dựa trên email người dùng và slug phim
     const result = await db.collection("history").deleteOne({
       userEmail: userEmail,
-      "movie.slug": slug
+      $or: [
+        ...(canonicalKey ? [{ "movie.canonicalKey": canonicalKey }] : []),
+        { "movie.slug": slug }
+      ]
     });
 
     if (result.deletedCount === 1) {

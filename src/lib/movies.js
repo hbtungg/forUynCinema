@@ -1,112 +1,71 @@
-// 🚀 ĐÃ SỬA CHUẨN ĐÉT: Ép toàn bộ hệ thống gọi qua cổng proxy ngầm trỏ thẳng từ trình duyệt
-const PROXY_BASE = "/api-nguonc";
+import {
+  getProviderCategories,
+  getProviderCountries,
+  getProviderMovieDetail,
+  getProviderMovies,
+  getProviderMoviesByCategory,
+  getProviderMoviesByCountry,
+  getProviderMoviesByYear,
+  getProviderRelatedMovies,
+  searchProviderMovies,
+} from "./movieProvider";
 
-/**
- * Tự động build URL sạch sẽ chạy qua cổng Proxy nội bộ
- */
-function buildUrl(path, params = {}) {
-  // Vì toàn bộ luồng bốc phim đã được đưa về Client, buildUrl sẽ nối chuỗi trỏ thẳng vào proxy
-  const url = new URL(`${PROXY_BASE}/${path}`, typeof window !== "undefined" ? window.location.origin : "http://localhost:3000");
-  Object.entries(params).forEach(([k, v]) => {
-    if (v !== undefined && v !== "") url.searchParams.set(k, v);
-  });
-  return url.toString();
+export async function getMovies(page = 1) {
+  return getProviderMovies(page);
 }
 
-/**
- * HÀM HELPER: Kiểm tra phản hồi và bọc đầu vào chống HTML rác
- */
+export async function getMovieDetail(slug) {
+  return getProviderMovieDetail(slug);
+}
+
+export async function searchMovies(keyword, page = 1) {
+  return searchProviderMovies(keyword, page);
+}
+
+export async function getMoviesByCategory(slug, page = 1, type = "") {
+  return getProviderMoviesByCategory(slug, page, type);
+}
+
+export async function getMoviesByCountry(slug, page = 1, type = "") {
+  return getProviderMoviesByCountry(slug, page, type);
+}
+
+export async function getMoviesByYear(slug, page = 1) {
+  return getProviderMoviesByYear(slug, page);
+}
+
+export async function getCategories() {
+  return getProviderCategories();
+}
+
+export async function getCountries() {
+  return getProviderCountries();
+}
+
+export async function getRelatedMovies(categorySlug, limit = 8) {
+  return getProviderRelatedMovies(categorySlug, limit);
+}
+
+const EPO_BASE_URL = "https://www.eporner.com/api/v2/video";
+
 async function safeFetch(url, options = {}) {
   try {
     const res = await fetch(url, {
       ...options,
       headers: {
         Accept: "application/json",
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
         ...options.headers,
       },
     });
-
     if (!res.ok) return null;
-
-    const contentType = res.headers.get("content-type");
-    if (!contentType || !contentType.includes("application/json")) {
-      console.warn(`Phản hồi không phải JSON tại: ${url}`);
-      return null;
-    }
-
+    const contentType = res.headers.get("content-type") || "";
+    if (!contentType.includes("application/json")) return null;
     return await res.json();
   } catch (error) {
-    console.error(`Fetch Error tại ${url}:`, error);
+    console.error(`Fetch error at ${url}:`, error);
     return null;
   }
 }
-
-// 1. Lấy phim mới cập nhật (Trang chủ)
-export async function getMovies(page = 1) {
-  const url = buildUrl("films/phim-moi-cap-nhat", { page });
-  const data = await safeFetch(url);
-  return data || { items: [], paginate: { total_pages: 1 } };
-}
-
-// 2. Lấy chi tiết một bộ phim
-export async function getMovieDetail(slug) {
-  const url = buildUrl(`film/${slug}`);
-  const data = await safeFetch(url);
-  return data || { movie: null, episodes: [] };
-}
-
-// 3. Tìm kiếm phim
-export async function searchMovies(keyword, page = 1) {
-  const url = buildUrl("films/search", { keyword, page });
-  const data = await safeFetch(url);
-  return data || { items: [], paginate: { total_pages: 1 } };
-}
-
-// 4. Lấy phim theo THỂ LOẠI
-export async function getMoviesByCategory(slug, page = 1, type = "") {
-  const url = buildUrl(`films/the-loai/${slug}`, { page, ...(type && { type }) });
-  const data = await safeFetch(url);
-  return data || { items: [], paginate: { total_pages: 1 } };
-}
-
-// 5. Lấy phim theo QUỐC GIA
-export async function getMoviesByCountry(slug, page = 1, type = "") {
-  const url = buildUrl(`films/quoc-gia/${slug}`, { page, ...(type && { type }) });
-  const data = await safeFetch(url);
-  return data || { items: [], paginate: { total_pages: 1 } };
-}
-
-// 6. Lấy phim theo NĂM PHÁT HÀNH
-export async function getMoviesByYear(slug, page = 1) {
-  const url = buildUrl(`films/nam-phat-hanh/${slug}`, { page });
-  const data = await safeFetch(url);
-  return data || { items: [], paginate: { total_pages: 1 } };
-}
-
-// Lấy danh mục & Quốc gia
-export async function getCategories() {
-  const url = buildUrl("the-loai");
-  const data = await safeFetch(url);
-  return data?.items || [];
-}
-
-export async function getCountries() {
-  const url = buildUrl("quoc-gia");
-  const data = await safeFetch(url);
-  return data?.items || [];
-}
-
-// Lấy phim gợi ý dựa trên thể loại (Related Movies)
-export async function getRelatedMovies(categorySlug, limit = 8) {
-  const url = buildUrl(`films/the-loai/${categorySlug}`, { page: 1 });
-  const data = await safeFetch(url);
-  return data?.items?.slice(0, limit) || [];
-}
-
-// ─── HỆ THỐNG EPO ────────────────────────────────────────────────────────────
-const EPO_BASE_URL = "https://www.eporner.com/api/v2/video";
 
 export async function getEpoVideos(page = 1, category = "all", order = "latest") {
   try {
@@ -153,3 +112,4 @@ export async function getEpoVideoDetail(id) {
   );
   return Array.isArray(data) ? data[0] : data;
 }
+
