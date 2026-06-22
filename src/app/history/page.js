@@ -5,10 +5,35 @@ import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { getMovieDetail } from '@/lib/clientMovies';
+
+function getEpisodeNumber(value) {
+  const matches = String(value || '').match(/\d+/g);
+  if (!matches) return 0;
+  return Math.max(...matches.map(Number));
+}
+
+function getEpisodeLabel(value) {
+  return String(value || '1').replace(/^(tập|tập|tâp|tap|ep|episode)\s*/i, '').trim();
+}
+
+function findLatestEpisode(servers = []) {
+  return servers
+    .flatMap((server) => server?.items || server?.server_data || [])
+    .map((episode) => ({
+      episode,
+      number: getEpisodeNumber(episode?.name || episode?.title || episode?.episode || episode?.slug),
+    }))
+    .filter((item) => item.number > 0)
+    .sort((a, b) => b.number - a.number)[0] || null;
+}
 
 export default function HistoryPage() {
   const { data: session, status } = useSession();
+  const userEmail = session?.user?.email;
   const [history, setHistory] = useState([]);
+  const [episodeUpdates, setEpisodeUpdates] = useState({});
+  const [isCheckingUpdates, setIsCheckingUpdates] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -19,7 +44,7 @@ export default function HistoryPage() {
   const loadHistory = useCallback(async () => {
     if (status === 'loading') return;
 
-    if (status !== 'authenticated' || !session?.user?.email) {
+    if (status !== 'authenticated' || !userEmail) {
       setIsLoading(false);
       return;
     }
@@ -29,7 +54,7 @@ export default function HistoryPage() {
 
     try {
       const res = await fetch(
-        `/api/history?userEmail=${encodeURIComponent(session.user.email)}`
+        `/api/history?userEmail=${encodeURIComponent(userEmail)}`
       );
 
       if (!res.ok) {
@@ -38,32 +63,94 @@ export default function HistoryPage() {
 
       const data = await res.json();
       setHistory(Array.isArray(data) ? data : []);
+      setEpisodeUpdates({});
     } catch (error) {
       console.error('Lỗi lấy lịch sử:', error);
       setError('Không tải được lịch sử xem. Anh thử lại sau nhé.');
     } finally {
       setIsLoading(false);
     }
-  }, [status, session?.user?.email]);
+  }, [status, userEmail]);
 
   useEffect(() => {
-    loadHistory();
+    Promise.resolve().then(loadHistory);
   }, [loadHistory]);
 
+  useEffect(() => {
+    if (!history.length) {
+      return;
+    }
+
+    let isMounted = true;
+
+    async function checkEpisodeUpdates() {
+      setIsCheckingUpdates(true);
+
+      try {
+        const results = await Promise.allSettled(
+          history.map(async (item) => {
+            const detailSlug = item.providerSlug || item.slug;
+            const preferredProvider = item.provider === 'auto' ? null : item.provider;
+            const detail = await getMovieDetail(detailSlug, preferredProvider);
+            const latest = findLatestEpisode(detail?.movie?.episodes || detail?.episodes || []);
+            const watchedNumber = getEpisodeNumber(item.episode);
+
+            if (!latest || !watchedNumber || latest.number <= watchedNumber) {
+              return null;
+            }
+
+            return {
+              slug: item.slug,
+              latestEpisodeName: latest.episode?.name || latest.episode?.title || `Tập ${latest.number}`,
+              latestEpisodeNumber: latest.number,
+              watchedEpisodeNumber: watchedNumber,
+            };
+          })
+        );
+
+        if (!isMounted) return;
+
+        const nextUpdates = {};
+        results.forEach((result) => {
+          if (result.status === 'fulfilled' && result.value) {
+            nextUpdates[result.value.slug] = result.value;
+          }
+        });
+
+        setEpisodeUpdates(nextUpdates);
+      } catch (error) {
+        console.error('Lỗi kiểm tra tập mới:', error);
+      } finally {
+        if (isMounted) setIsCheckingUpdates(false);
+      }
+    }
+
+    checkEpisodeUpdates();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [history]);
+
   const removeHistory = async (slug) => {
-    if (!session?.user?.email) return;
+    if (!userEmail) return;
 
     const previousHistory = history;
     const updatedHistory = history.filter((item) => item.slug !== slug);
 
     setHistory(updatedHistory);
+    setEpisodeUpdates((current) => {
+      const next = { ...current };
+      delete next[slug];
+      return next;
+    });
 
     try {
       const res = await fetch('/api/history', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userEmail: session.user.email,
+          userEmail,
           slug,
         }),
       });
@@ -83,6 +170,8 @@ export default function HistoryPage() {
       setError('Không xoá được phim khỏi lịch sử. Anh thử lại sau nhé.');
     }
   };
+
+  const updatedMovies = history.filter((item) => episodeUpdates[item.slug]);
 
   return (
     <main className="min-h-screen bg-black text-white font-sans overflow-x-hidden">
@@ -111,6 +200,11 @@ export default function HistoryPage() {
 
           <div className="text-zinc-500 font-bold uppercase text-[10px] tracking-widest pb-2">
             Tổng cộng: {history.length} phim
+            {isCheckingUpdates && (
+              <span className="block mt-2 text-red-500 animate-pulse">
+                Đang rà tập mới...
+              </span>
+            )}
           </div>
         </div>
 
@@ -127,6 +221,28 @@ export default function HistoryPage() {
           </div>
         )}
 
+        {!isLoading && updatedMovies.length > 0 && (
+          <div className="mb-8 rounded-2xl border border-red-600/35 bg-red-950/25 px-5 py-4 shadow-2xl shadow-red-950/20">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <p className="text-red-400 text-[10px] font-black uppercase tracking-[0.3em] mb-1">
+                  Có tập mới rồi
+                </p>
+                <p className="text-sm text-zinc-200 font-semibold">
+                  {updatedMovies.length} phim trong danh sách đang xem vừa có tập mới.
+                </p>
+              </div>
+
+              <Link
+                href={`/watch/${updatedMovies[0].slug}?ep=${encodeURIComponent(episodeUpdates[updatedMovies[0].slug]?.latestEpisodeName || '1')}`}
+                className="w-fit px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-[10px] font-black uppercase tracking-[0.2em] transition-colors"
+              >
+                Xem tập mới nhất
+              </Link>
+            </div>
+          </div>
+        )}
+
         {isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {[1, 2, 3, 4].map((i) => (
@@ -140,6 +256,15 @@ export default function HistoryPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 md:gap-y-12">
             {history.map((item) => (
               <div key={item.slug} className="group/card relative">
+                {episodeUpdates[item.slug] && (
+                  <Link
+                    href={`/watch/${item.slug}?ep=${encodeURIComponent(episodeUpdates[item.slug].latestEpisodeName)}`}
+                    className="absolute top-3 left-3 z-20 rounded-full bg-red-600 px-3 py-2 text-[9px] font-black uppercase tracking-[0.18em] text-white shadow-xl shadow-red-950/40 hover:bg-red-700 transition-colors"
+                  >
+                    Tập mới {getEpisodeLabel(episodeUpdates[item.slug].latestEpisodeName)}
+                  </Link>
+                )}
+
                 <button
                   type="button"
                   aria-label={`Xoá ${item.name} khỏi lịch sử xem`}
@@ -178,8 +303,14 @@ export default function HistoryPage() {
 
                       <span className="w-fit text-red-500 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
                         <span className="w-1.5 h-1.5 bg-red-600 rounded-full" />
-                        Tập {String(item.episode || '1').replace(/^(tập|tập|tâp|tap|ep|episode)\s*/i, '').trim()}
+                        Tập {getEpisodeLabel(item.episode)}
                       </span>
+
+                      {episodeUpdates[item.slug] && (
+                        <span className="mt-2 w-fit text-white text-[9px] font-black uppercase tracking-widest">
+                          Đã có tập {getEpisodeLabel(episodeUpdates[item.slug].latestEpisodeName)}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </Link>
