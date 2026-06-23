@@ -92,7 +92,50 @@ export async function POST(request) {
   }
 }
 
-// ── 3. API XÓA TÀI KHOẢN KHỎI DATABASE (DELETE) ──
+// ── 3. API CẬP NHẬT THÔNG TIN TÀI KHOẢN (PATCH) ──
+export async function PATCH(request) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session || session.user?.email !== 'hb.tungg@gmail.com') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { id, name, role } = await request.json();
+    if (!id) {
+      return NextResponse.json({ error: 'Missing user ID' }, { status: 400 });
+    }
+
+    const client = await clientPromise;
+    const db = client.db(DB_NAME);
+
+    const userToUpdate = await db.collection(COLLECTION_NAME).findOne({ _id: new ObjectId(id) });
+    if (!userToUpdate) {
+      return NextResponse.json({ error: 'Không tìm thấy người dùng này' }, { status: 404 });
+    }
+
+    // Không cho phép hạ quyền tài khoản admin sáng lập chính
+    if (userToUpdate.email === 'hb.tungg@gmail.com' && role && role !== 'admin') {
+      return NextResponse.json({ error: 'Không thể thay đổi vai trò tài khoản Admin sáng lập' }, { status: 403 });
+    }
+
+    const updateDoc = {};
+    if (name) updateDoc.name = name;
+    if (role) updateDoc.role = role;
+
+    await db.collection(COLLECTION_NAME).updateOne(
+      { _id: new ObjectId(id) },
+      { $set: updateDoc }
+    );
+
+    return NextResponse.json({ success: true, message: 'Đã cập nhật thông tin tài khoản thành công' });
+
+  } catch (error) {
+    console.error("Lỗi khi cập nhật tài khoản trên MongoDB:", error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
+}
+
+// ── 4. API XÓA TÀI KHOẢN KHỎI DATABASE (DELETE) ──
 export async function DELETE(request) {
   try {
     const session = await getServerSession(authOptions);
