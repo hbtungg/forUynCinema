@@ -27,20 +27,36 @@ export default function UserMenu({ isMobile = false }) {
 
       {/* — Header block — */}
       {session ? (
-        <div className={`flex items-center gap-2.5 ${isMobile ? 'px-2 pb-2' : 'px-2 pb-2.5'}`}>
+        <div className={`flex items-center gap-3 ${isMobile ? 'px-2 pb-2.5' : 'px-2 pb-3'} border-b border-white/[0.04] mb-1`}>
           <div className="relative flex-shrink-0">
-            <div className={`${isMobile ? 'w-9 h-9 text-sm' : 'w-10 h-10 text-[15px]'} rounded-full bg-red-600 flex items-center justify-center font-semibold text-white`}>
-              {session.user.name?.charAt(0).toUpperCase() ?? "U"}
+            {/* Premium/VIP Ring around Avatar in Menu */}
+            <div className={`p-[1.5px] rounded-full bg-gradient-to-br ${
+              session.user.email === 'hb.tungg@gmail.com' 
+                ? 'from-amber-400 via-orange-500 to-yellow-400 shadow-[0_0_12px_rgba(245,158,11,0.25)]' 
+                : 'from-red-500 via-rose-500 to-red-700'
+            }`}>
+              <div className={`${isMobile ? 'w-9 h-9 text-xs' : 'w-10 h-10 text-[13px]'} rounded-full bg-[#0c0c0f] flex items-center justify-center font-black text-white uppercase`}>
+                {session.user.name?.charAt(0).toUpperCase() ?? "U"}
+              </div>
             </div>
-            <span className="absolute bottom-0.5 right-0.5 w-2 h-2 rounded-full bg-green-500 border-[1.5px] border-[#111]" />
+            <span className="absolute bottom-0.5 right-0.5 w-2.5 h-2.5 rounded-full bg-green-500 border-2 border-[#111]" />
           </div>
           <div className="flex flex-col overflow-hidden">
-            <span className={`${isMobile ? 'text-[13px]' : 'text-sm'} font-semibold text-zinc-100 tracking-tight leading-tight truncate`}>
+            <span className={`${isMobile ? 'text-[13px]' : 'text-sm'} font-black text-zinc-100 tracking-tight leading-snug truncate`}>
               {session.user.name}
             </span>
-            <span className="text-[10px] text-green-500 font-medium tracking-widest mt-0.5 uppercase">
-              Đang online
-            </span>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <span className={`text-[7px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider ${
+                session.user.email === 'hb.tungg@gmail.com'
+                  ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                  : 'bg-red-500/10 text-red-400 border border-red-500/20'
+              }`}>
+                {session.user.email === 'hb.tungg@gmail.com' ? 'Premium' : 'VIP'}
+              </span>
+              <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider">
+                Online
+              </span>
+            </div>
           </div>
         </div>
       ) : (

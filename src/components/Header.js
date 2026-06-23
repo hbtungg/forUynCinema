@@ -219,28 +219,50 @@ export default function Header({ onToggleSidebar, sidebarCollapsed }) {
               {/* User menu PC */}
               <div className="relative hidden md:block" ref={userMenuRef}>
                 {status === "loading" ? (
-                  <div className="w-28 h-9 bg-zinc-900/50 border border-white/[0.04] rounded-xl animate-pulse" />
+                  <div className="w-10 h-10 bg-zinc-900/50 border border-white/[0.04] rounded-full animate-pulse" />
                 ) : session ? (
                   <>
                     <button
                       onClick={() => setIsUserMenuOpen((v) => !v)}
-                      className="flex items-center gap-2 pl-1.5 pr-3 py-1.5 rounded-xl border border-white/[0.06] hover:border-white/[0.12] bg-white/[0.03] hover:bg-white/[0.05] transition-all"
+                      className="group flex items-center gap-2 p-1 rounded-full border border-white/[0.06] hover:border-white/[0.12] bg-white/[0.02] hover:bg-white/[0.06] transition-all duration-300"
+                      aria-label="User profile"
                     >
-                      <div className="w-7 h-7 rounded-full bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center text-[11px] font-black text-white flex-shrink-0 uppercase">
-                        {session.user.name?.charAt(0) || "U"}
+                      {/* Premium/VIP Ring around Avatar */}
+                      <div className={`p-[1.5px] rounded-full bg-gradient-to-br ${
+                        session.user.email === 'hb.tungg@gmail.com' 
+                          ? 'from-amber-400 via-orange-500 to-yellow-400 shadow-[0_0_10px_rgba(245,158,11,0.2)]' 
+                          : 'from-red-500 via-rose-500 to-red-700'
+                      } flex-shrink-0`}>
+                        <div className="w-7 h-7 rounded-full bg-[#0c0c0f] flex items-center justify-center text-[11px] font-black text-white uppercase tracking-wider">
+                          {session.user.name?.charAt(0) || "U"}
+                        </div>
                       </div>
-                      <span className="text-[11px] font-black text-white hidden lg:block uppercase tracking-tight max-w-[100px] truncate">
-                        {session.user.name}
-                      </span>
-                      <span className="text-[7px] font-black bg-red-600 text-white px-1.5 py-0.5 rounded uppercase tracking-wide hidden lg:block">
-                        {session.user.email === 'hb.tungg@gmail.com' ? 'Premium' : 'VIP'}
-                      </span>
-                      <svg width="11" height="11" className={`text-zinc-600 transition-transform duration-200 ${isUserMenuOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                      </svg>
+
+                      {/* Small badge / Chevron on the right */}
+                      <div className="flex items-center pr-2 gap-1.5">
+                        <span className={`text-[8px] font-extrabold px-1.5 py-0.5 rounded-full uppercase tracking-wider ${
+                          session.user.email === 'hb.tungg@gmail.com'
+                            ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                            : 'bg-red-500/10 text-red-400 border border-red-500/20'
+                        }`}>
+                          {session.user.email === 'hb.tungg@gmail.com' ? 'Premium' : 'VIP'}
+                        </span>
+                        
+                        <svg 
+                          width="9" 
+                          height="9" 
+                          className={`text-zinc-500 group-hover:text-zinc-300 transition-transform duration-300 ${isUserMenuOpen ? 'rotate-180 text-red-500' : ''}`} 
+                          fill="none" 
+                          viewBox="0 0 24 24" 
+                          stroke="currentColor" 
+                          strokeWidth={3}
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
                     </button>
                     {isUserMenuOpen && (
-                      <div className="absolute top-[calc(100%+6px)] right-0 w-64 bg-[#111114] border border-white/[0.07] rounded-2xl p-4 z-[100] shadow-2xl origin-top-right animate-in fade-in zoom-in-95 duration-200 ease-out">
+                      <div className="absolute top-[calc(100%+6px)] right-0 w-64 bg-[#111114]/95 backdrop-blur-md border border-white/[0.07] rounded-2xl p-4 z-[100] shadow-2xl origin-top-right animate-in fade-in zoom-in-95 duration-200 ease-out">
                         <UserMenu />
                       </div>
                     )}
