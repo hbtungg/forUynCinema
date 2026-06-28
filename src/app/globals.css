@@ -109,3 +109,27 @@ body {
     transform: translateY(-4px) !important;
   }
 }
+
+@media (pointer: coarse) and (min-width: 768px) and (max-width: 1366px) {
+  
+  /* 1. Hạ bớt độ nhòe kính mờ xuống mức an toàn để GPU iPad không bị thắt nút cổ chai */
+  .backdrop-blur-2xl,
+  .backdrop-blur-xl,
+  .backdrop-blur-lg,
+  .midnight-glass {
+    --tw-backdrop-blur: blur(10px) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    
+    /* Tăng nhẹ độ đặc của nền đêm (0.45 -> 0.7) để bù đắp thị giác, giữ độ sang chảnh */
+    background-color: rgba(15, 19, 38, 0.7) !important;
+  }
+
+  /* 2. Ép các phân khu hộp kén di chuyển liên tục (như thanh Header cố định) tăng tốc phần cứng */
+  header,
+  .fixed,
+  .sticky {
+    will-change: transform, opacity !important;
+    transform: translateZ(0) !important; /* Kích hoạt tăng tốc 3D layer trên WebKit */
+  }
+}
