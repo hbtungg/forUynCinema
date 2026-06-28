@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect } from 'react'; // Bổ sung điều phối đồng bộ luồng chạy tab
+import { useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
+import { Lock, Radio, Loader2 } from 'lucide-react';
 
 function normalizeEpisodeLabel(value) {
   if (!value || value === 'Full' || value === 'FULL') return 'FULL';
@@ -36,56 +37,56 @@ export default function WatchPlayer({
   setIframeError,
   collapsed
 }) {
-  const { data: session, status } = useSession(); // Lấy trạng thái đăng nhập
+  const { data: session, status } = useSession();
 
-  // 🚀 ĐÃ SỬA TRIỆT ĐỂ: Theo dõi sát sao biến isLoading để ép đổi tên tab chính xác theo tiến độ nạp phim
+  // Theo dõi sát sao biến isLoading để ép đổi tên tab chính xác theo tiến độ nạp phim
   useEffect(() => {
     if (movie?.name && epName) {
       if (isLoading) {
-        // Trong lúc luồng phát đang nạp dữ liệu
         document.title = `Đang tải phim... - Uynflix`;
       } else {
-        // Ngay khi iframe nạp xong hoàn toàn, trả lại tên phim và tập tương ứng
         const episodeText = normalizeEpisodeLabel(epName);
         document.title = `Đang xem: ${movie.name} - ${episodeText} - Uynflix`;
       }
     }
-  }, [movie?.name, epName, isLoading]); // 🚀 Thêm isLoading vào đây để bắt trọn khoảnh khắc chuyển trạng thái
+  }, [movie?.name, epName, isLoading]);
 
-  // Ép cứng chiều cao cố định cho khung phát
+  // Ép cứng chiều cao cố định cho khung phát chuẩn rạp phim
   const playerLayoutClass = 'w-full h-[68vh]'; 
 
-  // ── 🚀 VÒNG CHỜ CHUYỂN TRẠNG THÁI HỆ THỐNG ──
+  // ── 🚀 VÒNG CHỜ CHUYỂN TRẠNG THÁI HỆ THỐNG KÍNH MỜ ──
   if (status === 'loading') {
     return (
       <div 
-        className={`relative bg-black border border-white/5 rounded-2xl overflow-hidden flex flex-col items-center justify-center gap-3 shadow-2xl transition-all duration-300 ${playerLayoutClass}`}
+        className={`relative bg-[#0F1326]/40 backdrop-blur-2xl border border-white/5 rounded-2xl overflow-hidden flex flex-col items-center justify-center gap-3 shadow-2xl transition-all duration-300 ${playerLayoutClass}`}
+        style={{ fontFamily: "'Be Vietnam Pro', sans-serif" }}
       >
-        <div className="w-10 h-10 rounded-full border-2 border-zinc-800 border-t-zinc-600 animate-spin" />
-        <span className="text-[10px] uppercase tracking-widest text-zinc-600 font-black">Đang kiểm tra quyền...</span>
+        <Loader2 className="w-8 h-8 border-2 border-[#E6C687]/20 border-t-[#E6C687] rounded-full animate-spin text-[#E6C687]" />
+        <span className="text-[10px] uppercase tracking-widest text-[#d0c5b5]/40 font-bold">Đang kiểm tra quyền...</span>
       </div>
     );
   }
 
-  // ── 🚀 CHỐT CHẶN BẢO VỆ: KHÓA CỨNG KHUNG PHÁT PHIM NẾU CHƯA ĐĂNG NHẬP ──
+  // ── 🚀 CHỐT CHẶN BẢO VỆ: KHÓA CỨNG KHUNG PHÁT PHIM NẾU CHƯA ĐĂNG NHẬP (BẢN MOONLIGHT GOLD) ──
   if (!session) {
     return (
       <div 
-        className={`relative bg-[#0d0d11] border border-white/5 rounded-2xl overflow-hidden flex flex-col items-center justify-center gap-4 px-6 text-center select-none shadow-2xl transition-all duration-300 ${playerLayoutClass}`}
+        className={`relative bg-[#0F1326]/40 backdrop-blur-2xl border border-white/5 rounded-2xl overflow-hidden flex flex-col items-center justify-center gap-4 px-6 text-center select-none shadow-2xl transition-all duration-300 ${playerLayoutClass}`}
+        style={{ fontFamily: "'Be Vietnam Pro', sans-serif" }}
       >
-        <div className="w-12 h-12 rounded-full bg-red-600/10 border border-red-500/20 flex items-center justify-center text-red-500 text-lg font-black animate-pulse">
-          🔒
+        <div className="w-12 h-12 rounded-full bg-[#E6C687]/10 border border-[#E6C687]/20 flex items-center justify-center text-[#E6C687] animate-pulse shadow-[0_0_15px_rgba(230,198,135,0.15)]">
+          <Lock className="w-5 h-5 text-[#E6C687]" />
         </div>
-        <div className="space-y-1">
-          <p className="text-sm font-black text-white uppercase tracking-wider">Nội dung giới hạn</p>
-          <p className="text-zinc-500 text-[11px] font-medium tracking-wide">
-            Vui lòng đăng nhập tài khoản để thưởng thức bom tấn <span className="text-red-400 font-bold">“{movie?.name}”</span>
+        <div className="space-y-1.5">
+          <p className="text-sm font-bold text-white uppercase tracking-wider">Nội dung giới hạn</p>
+          <p className="text-[#d0c5b5]/40 text-[11px] font-medium tracking-wide max-w-md">
+            Vui lòng đăng nhập tài khoản để thưởng thức bom tấn <span className="text-[#ffe3ae] font-bold">“{movie?.name}”</span>
           </p>
         </div>
         
         <Link
           href="/login"
-          className="mt-2 px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white font-black text-[10px] uppercase tracking-widest rounded-xl transition-all duration-300 active:scale-95 shadow-[0_4px_25px_rgba(220,38,38,0.25)]"
+          className="mt-2 px-6 py-2.5 bg-[#E6C687]/10 hover:bg-[#E6C687] border border-[#E6C687]/20 text-[#E6C687] hover:text-[#402d00] font-bold text-[10px] uppercase tracking-widest rounded-xl transition-all duration-300 active:scale-95 shadow-lg"
         >
           Đăng nhập ngay
         </Link>
@@ -93,16 +94,17 @@ export default function WatchPlayer({
     );
   }
 
-  // ── 🚀 GIAO DIỆN PHÁT PHIM CHÍNH NGUYÊN BẢN ──
+  // ── 🚀 GIAO DIỆN PHÁT PHIM CHÍNH CHUẨN PHA LÊ ──
   return (
     <div 
       className={`relative bg-black border border-white/5 rounded-2xl overflow-hidden shadow-2xl transition-all duration-300 ${playerLayoutClass}`}
+      style={{ fontFamily: "'Be Vietnam Pro', sans-serif" }}
     >
-      {/* Title overlay */}
-      <div className="absolute top-0 left-0 right-0 z-10 px-5 pt-4 pb-10 bg-gradient-to-b from-black/30 to-transparent pointer-events-none">
-        <p className="text-[13px] font-black text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">{movie?.name}</p>
-        <p className="text-[11px] text-zinc-400 mt-0.5 font-medium">
-          S{selectedServer + 1}E{epName}
+      {/* Title overlay thông tin phim lướt mờ sương nhẹ thượng tầng */}
+      <div className="absolute top-0 left-0 right-0 z-10 px-5 pt-4 pb-12 bg-gradient-to-b from-black/60 to-transparent pointer-events-none">
+        <p className="text-xs md:text-sm font-bold text-white tracking-wide uppercase drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">{movie?.name}</p>
+        <p className="text-[10px] text-[#d0c5b5]/40 mt-1 font-semibold uppercase font-mono tracking-wider">
+          Server: {selectedServer + 1} · Tập: {epName}
           {currentEp?.title ? ` · ${currentEp.title}` : ''}
         </p>
       </div>
@@ -112,24 +114,24 @@ export default function WatchPlayer({
         <div 
           className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-cover bg-center transition-all duration-700"
           style={{ 
-            backgroundImage: `linear-gradient(to top, rgba(0,0,0,0.85), rgba(0,0,0,0.4)), url(${movie?.poster_url || movie?.thumb_url})` 
+            backgroundImage: `linear-gradient(to top, rgba(15,19,38,0.95), rgba(15,19,38,0.7)), url(${movie?.poster_url || movie?.thumb_url})` 
           }}
         >
-          <div className="w-10 h-10 rounded-full border-2 border-white/10 border-t-red-600 animate-spin shadow-lg" />
-          <span className="text-[10px] uppercase tracking-widest text-zinc-300 font-black drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+          <Loader2 className="w-8 h-8 border-2 border-[#E6C687]/20 border-t-[#E6C687] rounded-full animate-spin text-[#E6C687]" />
+          <span className="text-[10px] uppercase tracking-widest text-[#ffe3ae] font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
             Đang cấu hình luồng phát...
           </span>
         </div>
       )}
 
-      {/* Error interface */}
+      {/* Error interface chuẩn tinh hệ khi sập nguồn phim */}
       {iframeError && (
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 bg-black">
-          <span className="text-4xl">📡</span>
-          <p className="text-zinc-400 text-sm font-bold">Nguồn phim gặp sự cố</p>
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 bg-[#0F1326]/90 backdrop-blur-2xl border border-white/5">
+          <Radio className="w-8 h-8 text-amber-500 animate-bounce" />
+          <p className="text-[#d0c5b5]/60 text-xs font-bold uppercase tracking-widest">Nguồn phim gặp sự cố</p>
           <button
             onClick={() => { setIframeError(false); setIsLoading(true); }}
-            className="px-5 py-2 rounded-xl border border-zinc-700 text-[11px] font-black uppercase tracking-wider text-zinc-300 hover:border-red-600 hover:text-red-500 transition-all"
+            className="px-5 py-2 rounded-xl border border-white/10 bg-white/[0.02] text-[10px] font-bold uppercase tracking-wider text-[#d0c5b5] hover:border-[#E6C687]/40 hover:text-[#ffe3ae] transition-all focus:outline-none cursor-pointer"
           >
             Thử lại
           </button>
@@ -147,7 +149,7 @@ export default function WatchPlayer({
           onError={() => { setIsLoading(false); setIframeError(true); }}
         />
       ) : !iframeError ? (
-        <div className="flex items-center justify-center h-full text-zinc-700 text-sm italic">
+        <div className="flex items-center justify-center h-full text-[#d0c5b5]/20 text-xs uppercase font-bold tracking-widest italic">
           Không có nguồn phim
         </div>
       ) : null}

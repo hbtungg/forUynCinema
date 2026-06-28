@@ -1,301 +1,133 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import Link from 'next/link';
-import SearchBox from './SearchBox';
-import UserMenu from './UserMenu';
-
-import Hamburger from './header/Hamburger';
-import HeaderLogo from './header/HeaderLogo';
-import MobileDrawer from './header/MobileDrawer';
+import { useRouter, usePathname } from 'next/navigation';
+import { Bell, ShieldCheck, Heart } from 'lucide-react';
 import SecretChat from './SecretChat';
 import EventButton from './EventButton';
+import SearchBox from './SearchBox'; // 🚀 1. ĐÃ IMPORT SEARCHBOX TỨC THÌ MỚI CỦA ANH
 
-export default function Header({ onToggleSidebar, sidebarCollapsed }) {
+export default function Header() {
   const { data: session, status } = useSession();
+  const router = useRouter();
+  const pathname = usePathname();
 
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
   const [isNotifyOpen, setIsNotifyOpen] = useState(false);
 
   const userMenuRef = useRef(null);
   const notifyRef = useRef(null);
-  const searchRefPC = useRef(null);
 
-  // 1. Tự động đóng Popup khi nhấn chuột ra ngoài rìa (ĐÃ SỬA: Chống sập ô tìm kiếm Mobile)
+  useEffect(() => {
+    setShowDropdown(false);
+    setIsNotifyOpen(false);
+  }, [pathname]);
+
   useEffect(() => {
     const handler = (e) => {
-      // Đóng user menu
-      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
-        setIsUserMenuOpen(false);
-      }
-
-      // 🚀 SỬA TẠI ĐÂY: Chỉ kích hoạt bẫy đóng tìm kiếm khi đang ở màn hình PC (innerWidth >= 768)
-      // Nếu ở màn hình Mobile, mình có nút "Hủy" riêng rồi, không cho click ra ngoài tự đóng nữa!
-      if (window.innerWidth >= 768 && searchRefPC.current && !searchRefPC.current.contains(e.target)) {
-        const input = searchRefPC.current.querySelector('input');
-        if (!input || !input.value) {
-          setIsSearchOpen(false);
-        }
-      }
-
-      // Đóng quả chuông thông báo nếu click ra ngoài
-      if (notifyRef.current && !notifyRef.current.contains(e.target)) {
-        setIsNotifyOpen(false);
-      }
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) setShowDropdown(false);
+      if (notifyRef.current && !notifyRef.current.contains(e.target)) setIsNotifyOpen(false);
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  // Khóa scroll khi mở drawer
-  useEffect(() => {
-    document.body.style.overflow = isMobileMenuOpen ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
-  }, [isMobileMenuOpen]);
-
-  const handleMenuClick = () => {
-    if (window.innerWidth >= 768) {
-      onToggleSidebar?.();
-      return;
-    }
-    // Đóng search nếu đang mở trước khi mở drawer
-    setIsSearchOpen(false);
-    setIsMobileMenuOpen((v) => !v);
-  };
-
   return (
-    <>
-      {/* FIX LỖII 1: Bỏ overflow-hidden trên mobile — dùng z-index thay thế
-          overflow-hidden cắt mất notification dropdown trên mobile */}
-      <header className="flex-shrink-0 h-14 md:h-16 border-b border-white/[0.04] bg-[#0c0c0f] w-full relative z-50">
-        <div className="w-full h-full relative">
+    <header className="fixed top-0 left-0 right-0 w-full z-50 bg-[#0F1326]/60 backdrop-blur-xl border-b border-[#E6C687]/10 h-[72px] flex items-center transition-all duration-300 shadow-[0_4px_30px_rgba(0,0,0,0.4)] select-none">
+      <div className="flex justify-between items-center px-6 md:px-16 w-full relative">
 
-          {/* ── MOBILE SEARCH OVERLAY ── */}
+        {/* KHỐI TRÁI: LOGO ĐỊNH DANH */}
+        <div className="flex items-center gap-12">
           <div
-            className={`absolute inset-0 md:hidden flex items-center w-full gap-3 px-4 bg-[#0c0c0f] transition-all duration-300 ease-in-out z-50
-              ${isSearchOpen ? 'translate-y-0 opacity-100 visible' : 'translate-y-full opacity-0 invisible'}
-            `}
+            onClick={() => router.push('/home')}
+            className="hover:scale-105 transition-transform duration-300 cursor-pointer flex items-center gap-2"
           >
-            <div className="flex-1">
-              <SearchBox />
-            </div>
-            <button
-              onClick={() => setIsSearchOpen(false)}
-              className="text-[11px] font-black uppercase tracking-wider text-zinc-400 hover:text-red-500 active:scale-95 px-2 h-9 flex items-center justify-center transition-all duration-200"
-            >
-              Hủy
-            </button>
+            <span className="text-2xl font-bold tracking-[0.2em] text-[#E6C687] font-sans">
+              UYNFLIX
+            </span>
           </div>
 
-          {/* ── HEADER CHÍNH ── */}
-          <div className="w-full h-full flex items-center justify-between px-4 md:px-6 relative transition-all duration-300 ease-in-out">
-
-            {/* CỤM TRÁI */}
-            <div className="flex items-center gap-3">
-              <Hamburger
-                onClick={handleMenuClick}
-                sidebarCollapsed={sidebarCollapsed}
-                // FIX LỖI 2: Truyền isSearchOpen vào Hamburger
-                // để nó biết ẩn đi khi search overlay đang mở trên mobile
-                isMobileMenuOpen={isMobileMenuOpen}
-                isSearchOpen={isSearchOpen}
-              />
-              <HeaderLogo isSearchOpen={isSearchOpen} />
-            </div>
-
-            {/* CỤM PHẢI */}
-            <div className="flex items-center gap-1.5 ml-auto flex-shrink-0 relative z-20" ref={searchRefPC}>
-
-              {/* Search PC */}
-              <div
-                className={`hidden md:block transition-all duration-300 ease-in-out mr-1
-                  ${isSearchOpen
-                    ? 'w-64 lg:w-80 opacity-100 translate-x-0'
-                    : 'w-0 opacity-0 translate-x-4 pointer-events-none'
-                  }
-                `}
-              >
-                <SearchBox />
-              </div>
-
-              {/* Nút kính lúp */}
-              <button
-                onClick={() => {
-                  setIsSearchOpen((v) => !v);
-                  // Đóng drawer nếu đang mở
-                  setIsMobileMenuOpen(false);
-                }}
-                className={`w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-200 active:scale-90
-                  ${isSearchOpen
-                    ? 'text-red-500 bg-white/[0.05]'
-                    : 'text-zinc-500 hover:text-white hover:bg-white/[0.05]'
-                  }
-                `}
-                aria-label="Toggle search"
-              >
-                <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </button>
-
-              {/* 🔔 NOTIFICATION — FIX: dùng portal-style z-index thay overflow clip */}
-              <EventButton />
-
-              <div className="relative" ref={notifyRef}>
-                <button
-                  onClick={() => setIsNotifyOpen(v => !v)}
-                  aria-label="Notifications"
-                  className={`relative w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-200 ${isNotifyOpen
-                      ? 'text-red-400 bg-red-500/10'
-                      : 'text-zinc-500 hover:text-white hover:bg-white/5'
-                    }`}
-                >
-                  <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                    <path strokeLinecap="round" strokeLinejoin="round"
-                      d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                    />
-                  </svg>
-                  <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-[#0a0a0c] animate-pulse" />
-                </button>
-
-                {/* Dropdown — z-[200] để luôn đè lên mọi thứ kể cả mobile */}
-                {isNotifyOpen && (
-                  <div className="absolute top-[calc(100%+8px)] right-0 w-64 bg-[#111115] border border-white/[0.06] rounded-2xl overflow-hidden z-[200] shadow-[0_8px_32px_rgba(0,0,0,0.5)] origin-top-right animate-in fade-in zoom-in-95 duration-200 ease-out">
-                    <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.06] bg-white/[0.02]">
-                      <span className="text-red-400 text-sm">🔔</span>
-                      <p className="text-[9px] font-black text-zinc-400 uppercase tracking-[0.25em]">
-                        hb.tungg nhắn nhủ
-                      </p>
-                    </div>
-                    <div className="px-4 py-3.5">
-                      {!session ? (
-                        <div className="flex flex-col gap-2">
-                          <p className="text-[11px] font-medium text-zinc-400 leading-relaxed">
-                            Tạo tài khoản đăng nhập nhanh lên 😤
-                          </p>
-                          <p className="text-[9px] text-zinc-600 tracking-wide">đừng để anh phải chờ lâu nha</p>
-                        </div>
-                      ) : session.user.email === 'thuuyen009900@gmail.com' || session.user.email === 'hb.tungg@gmail.com' ? (
-                        <div className="flex flex-col gap-2.5">
-                          <div className="flex items-start gap-2">
-                            <span className="text-base leading-none mt-0.5">💕</span>
-                            <p className="text-[12px] font-bold text-red-300 leading-relaxed">
-                              vk ơi anh iu vk nhấttt
-                            </p>
-                          </div>
-                          <div className="flex items-center justify-end gap-1.5 pt-1 border-t border-white/[0.05]">
-                            <span className="w-3 h-[1px] bg-zinc-700" />
-                            <span className="text-[8px] font-black text-zinc-600 uppercase tracking-[0.2em]">
-                              from hb.tungg with love
-                            </span>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="flex items-start gap-2">
-                          <span className="text-base leading-none mt-0.5">🎬</span>
-                          <p className="text-[11px] font-medium text-zinc-400 leading-relaxed">
-                            Chúc bạn xem phim vui vẻ!
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div className="hidden sm:block">
-                <SecretChat />
-              </div>
-
-              <button className="w-9 h-9 hidden sm:flex items-center justify-center rounded-xl text-zinc-500 hover:text-white hover:bg-white/[0.05] transition-all">
-                <svg width="17" height="17" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </button>
-
-              {/* User menu PC */}
-              <div className="relative hidden md:block" ref={userMenuRef}>
-                {status === "loading" ? (
-                  <div className="w-10 h-10 bg-zinc-900/50 border border-white/[0.04] rounded-full animate-pulse" />
-                ) : session ? (
-                  <>
-                    <button
-                      onClick={() => setIsUserMenuOpen((v) => !v)}
-                      className="group flex items-center gap-2 p-1 rounded-full border border-white/[0.06] hover:border-white/[0.12] bg-white/[0.02] hover:bg-white/[0.06] transition-all duration-300"
-                      aria-label="User profile"
-                    >
-                      {/* Premium/VIP Ring around Avatar */}
-                      <div className={`p-[1.5px] rounded-full bg-gradient-to-br ${
-                        session.user.email === 'hb.tungg@gmail.com' 
-                          ? 'from-amber-400 via-orange-500 to-yellow-400 shadow-[0_0_10px_rgba(245,158,11,0.2)]' 
-                          : 'from-red-500 via-rose-500 to-red-700'
-                      } flex-shrink-0`}>
-                        <div className="w-7 h-7 rounded-full bg-[#0c0c0f] flex items-center justify-center text-[11px] font-black text-white uppercase tracking-wider">
-                          {session.user.name?.charAt(0) || "U"}
-                        </div>
-                      </div>
-
-                      {/* Small badge / Chevron on the right */}
-                      <div className="flex items-center pr-2 gap-1.5">
-                        <span className={`text-[8px] font-extrabold px-1.5 py-0.5 rounded-full uppercase tracking-wider ${
-                          session.user.email === 'hb.tungg@gmail.com'
-                            ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                            : 'bg-red-500/10 text-red-400 border border-red-500/20'
-                        }`}>
-                          {session.user.email === 'hb.tungg@gmail.com' ? 'Premium' : 'VIP'}
-                        </span>
-                        
-                        <svg 
-                          width="9" 
-                          height="9" 
-                          className={`text-zinc-500 group-hover:text-zinc-300 transition-transform duration-300 ${isUserMenuOpen ? 'rotate-180 text-red-500' : ''}`} 
-                          fill="none" 
-                          viewBox="0 0 24 24" 
-                          stroke="currentColor" 
-                          strokeWidth={3}
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </div>
-                    </button>
-                    {isUserMenuOpen && (
-                      <div className="absolute top-[calc(100%+6px)] right-0 w-64 bg-[#111114]/95 backdrop-blur-md border border-white/[0.07] rounded-2xl p-4 z-[100] shadow-2xl origin-top-right animate-in fade-in zoom-in-95 duration-200 ease-out">
-                        <UserMenu />
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <>
-                    <button
-                      onClick={() => setIsUserMenuOpen((v) => !v)}
-                      className="w-9 h-9 flex items-center justify-center rounded-xl border border-white/[0.06] hover:border-white/[0.15] bg-white/[0.02] hover:bg-white/[0.06] text-zinc-400 hover:text-white transition-all duration-200 active:scale-95"
-                      aria-label="User menu"
-                    >
-                      <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
-                    </button>
-                    {isUserMenuOpen && (
-                      <div className="absolute top-[calc(100%+6px)] right-0 w-64 bg-[#111114] border border-white/[0.07] rounded-2xl p-4 z-[100] shadow-2xl origin-top-right animate-in fade-in zoom-in-95 duration-200 ease-out">
-                        <UserMenu />
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
-
-            </div>
+          <div className="hidden lg:flex items-center gap-6 text-xs font-bold tracking-wider uppercase">
+            <Link href="/home" className={`transition-colors duration-300 ${pathname === '/home' ? 'text-[#E6C687]' : 'text-[#on-surface-variant] hover:text-[#E6C687]'}`}>Movies</Link>
+            <Link href="/danh-sach" className={`transition-colors duration-300 ${pathname === '/danh-sach' ? 'text-[#E6C687]' : 'text-[#on-surface-variant] hover:text-[#E6C687]'}`}>Discover</Link>
+            <Link href="/favorites" className={`transition-colors duration-300 ${pathname === '/favorites' ? 'text-[#E6C687]' : 'text-[#on-surface-variant] hover:text-[#E6C687]'}`}>Favorites</Link>
           </div>
         </div>
-      </header>
 
-      <MobileDrawer
-        isOpen={isMobileMenuOpen}
-        onClose={() => setIsMobileMenuOpen(false)}
-      />
-    </>
+        {/* KHỐI PHẢI: SEARCHBOX MỚI & ACCOUNT */}
+        <div className="flex items-center gap-4">
+          
+          {/* 🚀 2. VỊ TRÍ ĐÃ THAY THẾ: Găm thẳng SearchBox Live gợi ý từ khóa tức thì */}
+          <div className="hidden sm:block">
+            <SearchBox />
+          </div>
+
+          <div className="hidden sm:flex items-center gap-1">
+            <SecretChat />
+            <EventButton />
+          </div>
+
+          {/* Chuông Thông Báo */}
+          <div className="relative" ref={notifyRef}>
+            <button onClick={() => setIsNotifyOpen(!isNotifyOpen)} className="p-2 text-[#e8e1da] hover:text-[#ffe3ae] hover:scale-110 transition-all duration-300 relative">
+              <Bell className="w-4 h-4" />
+              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-[#E6C687] rounded-full ring-2 ring-[#060814]"></span>
+            </button>
+
+            {isNotifyOpen && (
+              <div className="absolute right-0 mt-3 w-64 bg-[#0F1326]/90 backdrop-blur-2xl border border-white/10 rounded-2xl p-1 shadow-2xl z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="px-4 py-2.5 border-b border-white/5 bg-white/[0.02] rounded-t-xl flex items-center gap-1.5">
+                  <span className="text-[#e6c687] text-xs">🌙</span>
+                  <p className="text-[9px] font-black text-[#d0c5b5] uppercase tracking-[0.25em]">hb.tungg nhắn nhủ</p>
+                </div>
+                <div className="p-4 text-[11px] font-medium text-[#d0c5b5]">
+                  {session && (session.user?.email === 'thuuyen009900@gmail.com' || session.user?.email === 'hb.tungg@gmail.com') ? (
+                    <div className="space-y-2">
+                      <div className="flex items-start gap-2">
+                        <Heart className="w-3.5 h-3.5 text-red-400 fill-current shrink-0 mt-0.5 animate-pulse" />
+                        <p className="text-xs font-bold text-[#ffe3ae] drop-shadow-[0_0_8px_rgba(230,227,174,0.3)]">vk ơi anh iu vk nhấttt</p>
+                      </div>
+                    </div>
+                  ) : <p>Chúc bạn xem phim vui vẻ! 🎬</p>}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Profile User Dropdown */}
+          {status !== "loading" && session ? (
+            <div className="relative" ref={userMenuRef}>
+              <button onClick={() => setShowDropdown(!showDropdown)} className="p-0.5 text-[#e8e1da] hover:ring-2 ring-[#E6C687]/40 rounded-full transition-all duration-300 border border-white/5 flex items-center justify-center bg-[#181D38]/60 focus:outline-none">
+                <div className="w-8 h-8 rounded-full bg-[#E6C687]/10 flex items-center justify-center overflow-hidden border border-[#E6C687]/20">
+                  <span className="text-xs font-bold text-[#E6C687] uppercase font-sans">
+                    {session.user?.name?.charAt(0) || "U"}
+                  </span>
+                </div>
+              </button>
+
+              {showDropdown && (
+                <div className="absolute right-0 mt-3 w-52 bg-[#0F1326]/90 backdrop-blur-2xl border border-white/10 rounded-xl p-1.5 shadow-2xl z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="px-3 py-2 border-b border-white/5 mb-1">
+                    <p className="text-xs font-semibold text-white truncate">{session.user?.name}</p>
+                    <p className="text-[9px] text-[#d0c5b5]/50 font-mono mt-0.5 uppercase tracking-widest flex items-center gap-1 font-bold">
+                      <ShieldCheck className="w-3 h-3 text-[#E6C687]" /> TRẠM: {session.user?.email === 'hb.tungg@gmail.com' ? 'Owner' : 'VIP'}
+                    </p>
+                  </div>
+                  {session.user?.email === 'hb.tungg@gmail.com' && (
+                    <button onClick={() => { setShowDropdown(false); router.push('/admin'); }} className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-xs text-[#E6C687] hover:bg-white/5 rounded-lg transition-colors cursor-pointer focus:outline-none">Đại Quan Sát Admin</button>
+                  )}
+                  <button onClick={() => signOut({ callbackUrl: '/home' })} className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-xs text-red-400 hover:bg-red-500/10 rounded-lg transition-colors cursor-pointer focus:outline-none">Đăng Xuất Tinh Hệ</button>
+                </div>
+              )}
+            </div>
+          ) : status !== "loading" && (
+            <button onClick={() => router.push('/login')} className="px-5 py-1.5 bg-[#E6C687]/10 hover:bg-[#E6C687] text-[#E6C687] hover:text-[#402d00] font-bold text-xs rounded-full border border-[#E6C687]/30 transition-all cursor-pointer focus:outline-none">Đăng Nhập</button>
+          )}
+
+        </div>
+      </div>
+    </header>
   );
 }

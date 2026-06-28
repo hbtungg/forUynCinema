@@ -1,12 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import { ChevronDown, Play, MessageSquare, Film, Send } from 'lucide-react';
 
 function formatEpisodeLabel(name) {
   if (!name || name === 'Full' || name === 'FULL') return 'FULL';
   const text = String(name).trim();
   if (/^tập\s+/i.test(text)) {
-    return text.replace(/^tập\s+/i, 'Tập ');
+    return text.replace(/^tập\s*/i, 'Tập ');
   }
   if (/^ep\s*\d+/i.test(text)) {
     return text.replace(/^ep\s*/i, 'Tập ');
@@ -17,59 +18,22 @@ function formatEpisodeLabel(name) {
   return text.startsWith('Tập ') ? text : `Tập ${text}`;
 }
 
-// ── Mock data bình luận (Giữ nguyên của anh) ──────────────────────
-
-// ── Mock data bình luận ──────────────────────────────────────────
+// ── Mock data bình luận (Giữ nguyên vẹn của anh) ──────────────────────
 const MOCK_COMMENTS = [
-  {
-    id: 1,
-    avatar: '🧑‍💻',
-    name: 'minhduc.99',
-    time: '2 giờ trước',
-    text: 'Phim hay vãi, tập này căng thẳng quá xem mà tim đập loạn 😭🔥',
-    likes: 42,
-  },
-  {
-    id: 2,
-    avatar: '👩‍🦰',
-    name: 'linh_xinh_gai',
-    time: '5 giờ trước',
-    text: 'Ôi trời diễn xuất của nam chính ở tập này đỉnh thật sự, xúc động đến chảy nước mắt luôn 😢❤️',
-    likes: 87,
-  },
-  {
-    id: 3,
-    avatar: '🎬',
-    name: 'phimmaniac',
-    time: '1 ngày trước',
-    text: 'Đã xem đi xem lại 3 lần rồi mà vẫn không chán. Đỉnh nóc kịch trần!',
-    likes: 135,
-  },
-  {
-    id: 4,
-    avatar: '🕵️',
-    name: 'anonymous_kun',
-    time: '2 ngày trước',
-    text: 'Plot twist tập 12 ai đoán được không? Mình bị sốc hoàn toàn 😤',
-    likes: 29,
-  },
-  {
-    id: 5,
-    avatar: '🌸',
-    name: 'hana.watch',
-    time: '3 ngày trước',
-    text: 'Sub Vietsub dịch mượt lắm, cảm ơn team đã làm việc chăm chỉ ❤️🙏',
-    likes: 61,
-  },
+  { id: 1, avatar: '🧑‍💻', name: 'minhduc.99', time: '2 giờ trước', text: 'Phim hay vãi, tập này căng thẳng quá xem mà tim đập loạn 😭🔥' },
+  { id: 2, avatar: '👩‍🦰', name: 'linh_xinh_gai', time: '5 giờ trước', text: 'Ôi trời diễn xuất của nam chính ở tập này đỉnh thật sự, xúc động đến chảy nước mắt luôn 😢❤️' },
+  { id: 3, avatar: '🎬', name: 'phimmaniac', time: '1 ngày trước', text: 'Đã xem đi xem lại 3 lần rồi mà vẫn không chán. Đỉnh nóc kịch trần!' },
+  { id: 4, avatar: '🕵️', name: 'anonymous_kun', time: '2 ngày trước', text: 'Plot twist tập 12 ai đoán được không? Mình bị sốc hoàn toàn 😤' },
+  { id: 5, avatar: '🌸', name: 'hana.watch', time: '3 ngày trước', text: 'Sub Vietsub dịch mượt lắm, cảm ơn team đã làm việc chăm chỉ ❤️🙏' },
 ];
 
-// ── Component Sóng nhạc nhấp nháy khi đang phát ──────────────────
+// ── Component Sóng nhạc nhấp nháy màu vàng Moonlight Gold ──
 function PlaybackIndicator() {
   return (
-    <span className="flex items-end gap-[2px] h-3 shrink-0">
-      <span className="w-[2px] rounded-full bg-red-500 animate-[sb_0.8s_ease-in-out_infinite]" style={{ height: '100%' }} />
-      <span className="w-[2px] rounded-full bg-red-500 animate-[sb_0.8s_ease-in-out_0.2s_infinite]" style={{ height: '60%' }} />
-      <span className="w-[2px] rounded-full bg-red-500 animate-[sb_0.8s_ease-in-out_0.4s_infinite]" style={{ height: '80%' }} />
+    <span className="flex items-end gap-[2px] h-2.5 shrink-0 pt-0.5">
+      <span className="w-[1.5px] rounded-full bg-[#E6C687] shadow-[0_0_8px_#E6C687] animate-[sb_0.8s_ease-in-out_infinite]" style={{ height: '100%' }} />
+      <span className="w-[1.5px] rounded-full bg-[#E6C687] shadow-[0_0_8px_#E6C687] animate-[sb_0.8s_ease-in-out_0.2s_infinite]" style={{ height: '60%' }} />
+      <span className="w-[1.5px] rounded-full bg-[#E6C687] shadow-[0_0_8px_#E6C687] animate-[sb_0.8s_ease-in-out_0.4s_infinite]" style={{ height: '80%' }} />
     </span>
   );
 }
@@ -94,96 +58,101 @@ export default function WatchTabs({
   const [isProviderMenuOpen, setIsProviderMenuOpen] = useState(false);
 
   const TABS = [
-    { id: 'episodes', label: 'Tập phim', icon: '🎬' },
-    { id: 'comments', label: 'Bình luận', icon: '💬', badge: 128 },
+    { id: 'episodes', label: 'Tập phim', icon: <Film className="w-3.5 h-3.5" /> },
+    { id: 'comments', label: 'Bình luận', icon: <MessageSquare className="w-3.5 h-3.5" />, badge: 128 },
   ];
 
   const displayEpisodes = episodeChunks[activeChunk] || currentEpisodes;
 
   return (
-    <div className="space-y-4">
-      {/* ── TAB BAR ── */}
-      <div className="flex items-center gap-1 border-b border-white/[0.04]">
+    <div className="space-y-5 font-sans select-none" style={{ fontFamily: "'Be Vietnam Pro', sans-serif" }}>
+      
+      {/* ── HIGH-END TAB BAR ── */}
+      <div className="flex items-center gap-2 border-b border-white/5">
         {TABS.map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`relative flex items-center gap-1.5 px-4 pb-3 pt-1 text-[11px] font-black uppercase tracking-widest transition-all duration-300 ${activeTab === tab.id ? 'text-white' : 'text-zinc-600 hover:text-zinc-400'
-              }`}
+            className={`relative flex items-center gap-2 px-4 pb-3 pt-1 text-[11px] font-bold uppercase tracking-widest transition-all duration-300 cursor-pointer focus:outline-none ${
+              activeTab === tab.id ? 'text-[#ffe3ae]' : 'text-[#d0c5b5]/30 hover:text-[#e8e1da]'
+            }`}
           >
-            <span className="text-xs">{tab.icon}</span>
+            <span className={activeTab === tab.id ? 'text-[#E6C687]' : 'opacity-50'}>{tab.icon}</span>
             <span>{tab.label}</span>
             {tab.badge && (
-              <span className={`px-1.5 py-0.5 rounded-md text-[8px] font-black ${activeTab === tab.id ? 'bg-red-600 text-white' : 'bg-white/5 text-zinc-600'
-                }`}>{tab.badge}</span>
+              <span className={`px-1.5 py-0.5 rounded-md text-[8px] font-mono font-bold transition-colors ${
+                activeTab === tab.id ? 'bg-[#E6C687]/20 text-[#ffe3ae] border border-[#E6C687]/30' : 'bg-white/5 text-[#d0c5b5]/30'
+              }`}>{tab.badge}</span>
             )}
             {activeTab === tab.id && (
-              <span className="absolute bottom-0 inset-x-3 h-[2px] bg-red-500 rounded-full shadow-[0_-2px_10px_rgba(220,38,38,0.5)]" />
+              <span className="absolute bottom-0 inset-x-2 h-px bg-[#E6C687] shadow-[0_0_10px_#E6C687]" />
             )}
           </button>
         ))}
       </div>
 
       {/* ══════════════════════════════════════════
-    TAB: TẬP PHIM (GIAO DIỆN THẺ THUMBNAIL CUỘN NGANG)
-    ══════════════════════════════════════════ */}
+          TAB: TẬP PHIM (GIAO DIỆN THỂ NGANG CAO CẤP)
+          ══════════════════════════════════════════ */}
       {activeTab === 'episodes' && (
-        <div className="space-y-4 w-full">
+        <div className="space-y-4 w-full animate-in fade-in duration-300">
 
-          {/* Top Toolbar gọn gàng căn góc trái */}
-          <div className="flex flex-wrap items-center gap-3 w-full border-b border-white/[0.02] pb-3">
+          {/* Top Toolbar căn góc trái mượt mà */}
+          <div className="flex flex-wrap items-center gap-2 w-full border-b border-white/5 pb-3">
 
-            <div className="relative shrink-0">
+            {/* Bộ chọn nguồn phát (Provider) */}
+            <div className="relative">
               <button
                 type="button"
                 onClick={() => setIsProviderMenuOpen((prev) => !prev)}
-                className="bg-[#141417] border border-white/5 hover:border-white/10 px-3.5 py-1.5 rounded-xl text-[10px] font-black text-zinc-400 flex items-center gap-1.5 cursor-pointer transition-all duration-300"
+                className="bg-[#0F1326]/40 border border-white/10 px-3.5 py-1.5 rounded-xl text-[10px] font-bold text-[#d0c5b5]/70 hover:text-[#ffe3ae] flex items-center gap-2 cursor-pointer transition-all duration-300 focus:outline-none hover:border-[#E6C687]/30"
               >
-                <span className="w-1 h-1 rounded-full bg-red-500 animate-pulse" />
+                <span className="w-1 h-1 rounded-full bg-[#E6C687] shadow-[0_0_6px_#E6C687] animate-pulse" />
                 <span>{selectedProvider === 'nguonc' ? 'Nguồn C' : selectedProvider === 'kkphim' ? 'KKPhim' : 'Tự động'}</span>
-                <span className="text-zinc-600 text-[8px] ml-0.5 tracking-none transition-transform duration-300">▼</span>
+                <ChevronDown className={`w-3 h-3 text-[#d0c5b5]/40 transition-transform duration-300 ${isProviderMenuOpen ? 'rotate-180' : ''}`} />
               </button>
 
-              <div className={`absolute left-0 top-full mt-1.5 w-40 bg-[#111114]/95 backdrop-blur-xl border border-white/5 rounded-2xl p-1 shadow-2xl transition-all duration-200 z-50 origin-top ${isProviderMenuOpen ? 'opacity-100 visible scale-100' : 'opacity-0 invisible scale-95'}`}>
-                <div className="max-h-48 overflow-y-auto custom-scrollbar space-y-0.5">
-                  {[
-                    { value: 'auto', label: 'Tự động' },
-                    { value: 'nguonc', label: 'Nguồn C' },
-                    { value: 'kkphim', label: 'KKPhim' },
-                  ].map((option) => (
-                    <button
-                      key={option.value}
-                      type="button"
-                      onClick={() => {
-                        setSelectedProvider(option.value);
-                        setIsProviderMenuOpen(false);
-                      }}
-                      className={`w-full text-left px-3 py-2 rounded-xl text-[10px] font-bold transition-all flex items-center justify-between ${selectedProvider === option.value
-                          ? 'bg-red-600 text-white font-black'
-                          : 'text-zinc-400 hover:bg-white/[0.04] hover:text-white'
-                        }`}
-                    >
-                      <span>{option.label}</span>
-                      {selectedProvider === option.value && <span className="text-[8px]">●</span>}
-                    </button>
-                  ))}
-                </div>
+              <div className={`absolute left-0 top-full mt-2 w-40 bg-[#0F1326]/95 backdrop-blur-2xl border border-white/10 rounded-2xl p-1 shadow-2xl transition-all duration-200 z-50 origin-top-left ${isProviderMenuOpen ? 'opacity-100 visible scale-100' : 'opacity-0 invisible scale-95'}`}>
+                {/* Options bọc kính mờ */}
+                {[
+                  { value: 'auto', label: 'Tự động' },
+                  { value: 'nguonc', label: 'Nguồn C' },
+                  { value: 'kkphim', label: 'KKPhim' },
+                ].map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => {
+                      setSelectedProvider(option.value);
+                      setIsProviderMenuOpen(false);
+                    }}
+                    className={`w-full text-left px-3 py-2 rounded-xl text-[10px] font-bold uppercase transition-all duration-300 flex items-center justify-between cursor-pointer focus:outline-none ${
+                      selectedProvider === option.value
+                        ? 'bg-[#E6C687]/10 text-[#ffe3ae] border border-[#E6C687]/20 shadow-[0_0_10px_rgba(230,198,135,0.15)]'
+                        : 'text-[#d0c5b5]/50 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    <span>{option.label}</span>
+                    {selectedProvider === option.value && <span className="text-[#E6C687] text-[6px]">●</span>}
+                  </button>
+                ))}
               </div>
             </div>
 
+            {/* Bộ chọn Mùa / Server */}
             {servers.length > 1 && (
-              <div className="relative shrink-0">
+              <div className="relative">
                 <button
                   type="button"
                   onClick={() => setIsServerMenuOpen((prev) => !prev)}
-                  className="bg-[#141417] border border-white/5 hover:border-white/10 px-3.5 py-1.5 rounded-xl text-[10px] font-black text-zinc-400 flex items-center gap-1.5 cursor-pointer transition-all duration-300"
+                  className="bg-[#0F1326]/40 border border-white/10 px-3.5 py-1.5 rounded-xl text-[10px] font-bold text-[#d0c5b5]/70 hover:text-[#ffe3ae] flex items-center gap-2 cursor-pointer transition-all duration-300 focus:outline-none hover:border-[#E6C687]/30"
                 >
-                  <span className="w-1 h-1 rounded-full bg-red-500 animate-pulse" />
+                  <span className="w-1 h-1 rounded-full bg-[#E6C687] shadow-[0_0_6px_#E6C687] animate-pulse" />
                   <span>{servers[selectedServer]?.server_name || `Mùa ${selectedServer + 1}`}</span>
-                  <span className="text-zinc-600 text-[8px] ml-0.5 tracking-none transition-transform duration-300">▼</span>
+                  <ChevronDown className={`w-3 h-3 text-[#d0c5b5]/40 transition-transform duration-300 ${isServerMenuOpen ? 'rotate-180' : ''}`} />
                 </button>
 
-                <div className={`absolute left-0 top-full mt-1.5 w-40 bg-[#111114]/95 backdrop-blur-xl border border-white/5 rounded-2xl p-1 shadow-2xl transition-all duration-200 z-50 origin-top ${isServerMenuOpen ? 'opacity-100 visible scale-100' : 'opacity-0 invisible scale-95'}`}>
+                <div className={`absolute left-0 top-full mt-2 w-40 bg-[#0F1326]/95 backdrop-blur-2xl border border-white/10 rounded-2xl p-1 shadow-2xl transition-all duration-200 z-50 origin-top-left ${isServerMenuOpen ? 'opacity-100 visible scale-100' : 'opacity-0 invisible scale-95'}`}>
                   <div className="max-h-48 overflow-y-auto custom-scrollbar space-y-0.5">
                     {servers.map((s, i) => {
                       const isSelected = selectedServer === i;
@@ -195,13 +164,14 @@ export default function WatchTabs({
                             handleServerChange(i);
                             setIsServerMenuOpen(false);
                           }}
-                          className={`w-full text-left px-3 py-2 rounded-xl text-[10px] font-bold transition-all flex items-center justify-between ${isSelected
-                              ? 'bg-red-600 text-white font-black shadow-[0_4px_12px_rgba(220,38,38,0.2)]'
-                              : 'text-zinc-400 hover:bg-white/[0.04] hover:text-white'
-                            }`}
+                          className={`w-full text-left px-3 py-2 rounded-xl text-[10px] font-bold uppercase transition-all duration-300 flex items-center justify-between cursor-pointer focus:outline-none ${
+                            isSelected
+                              ? 'bg-[#E6C687]/10 text-[#ffe3ae] border border-[#E6C687]/20 shadow-[0_0_10px_rgba(230,198,135,0.15)]'
+                              : 'text-[#d0c5b5]/50 hover:text-white hover:bg-white/5'
+                          }`}
                         >
                           <span>{s.server_name || `Mùa ${i + 1}`}</span>
-                          {isSelected && <span className="text-[8px]">●</span>}
+                          {isSelected && <span className="text-[#E6C687] text-[6px]">●</span>}
                         </button>
                       );
                     })}
@@ -210,17 +180,18 @@ export default function WatchTabs({
               </div>
             )}
 
-            {/* Cụm nút chọn nhóm tập (GIỮ NGUYÊN BẢN GỐC HOẠT ĐỘNG TỐT CỦA ANH) */}
+            {/* Cụm nút chọn nhóm tập phân mảnh */}
             {episodeChunks.length > 1 && (
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap gap-1">
                 {episodeChunks.map((chunk, i) => (
                   <button
                     key={i}
                     onClick={() => setActiveChunk(i)}
-                    className={`px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all border ${activeChunk === i
-                        ? 'bg-red-600 border-red-600 text-white shadow-lg shadow-red-600/10'
-                        : 'bg-white/[0.01] border-white/[0.04] text-zinc-500 hover:text-zinc-300'
-                      }`}
+                    className={`px-3 py-1.5 rounded-xl text-[9px] font-bold uppercase tracking-wider transition-all duration-300 border cursor-pointer focus:outline-none ${
+                      activeChunk === i
+                        ? 'bg-[#E6C687]/10 border-[#E6C687]/40 text-[#ffe3ae] shadow-[0_0_12px_rgba(230,198,135,0.15)]'
+                        : 'bg-white/[0.01] border-white/5 text-[#d0c5b5]/30 hover:text-[#e8e1da] hover:bg-white/5'
+                    }`}
                   >
                     {chunk[0].name}–{chunk[chunk.length - 1].name}
                   </button>
@@ -229,12 +200,9 @@ export default function WatchTabs({
             )}
           </div>
 
-          {/* KHO LƯU TRÚ DẠNG THẺ CUỘN NGANG (GIỮ NGUYÊN VẸN 100% TOÀN BỘ CODE DƯỚI CỦA ANH) */}
+          {/* KHO LƯU TRÚ DẠNG THÈ THUMBNAIL NGANG MƯỢT MÀ */}
           <div className="w-full relative">
-            <div
-              className="w-full overflow-x-auto flex items-center gap-3 pb-4 pt-1 custom-scrollbar scroll-smooth"
-              style={{ scrollbarWidth: 'thin' }}
-            >
+            <div className="w-full overflow-x-auto flex items-center gap-4 pb-3 pt-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden scroll-smooth">
               {displayEpisodes.map((ep) => {
                 const idx = currentEpisodes.indexOf(ep);
                 const isActive = selectedEpisode === idx;
@@ -244,29 +212,33 @@ export default function WatchTabs({
                   <button
                     key={idx}
                     onClick={() => handleEpisodeChange(idx, ep.name)}
-                    className={`shrink-0 w-[150px] sm:w-[170px] aspect-[16/10] rounded-xl overflow-hidden relative border transition-all duration-300 group flex flex-col justify-end text-left ${isActive
-                        ? 'border-red-500 shadow-[0_4px_24px_rgba(220,38,38,0.25)] ring-1 ring-red-500'
-                        : 'border-white/[0.05] hover:border-white/20'
-                      }`}
+                    className={`shrink-0 w-[140px] sm:w-[160px] aspect-[16/10] rounded-xl overflow-hidden relative border transition-all duration-400 group flex flex-col justify-end text-left focus:outline-none cursor-pointer ${
+                      isActive
+                        ? 'border-[#E6C687]/50 shadow-[0_4px_25px_rgba(230,198,135,0.2)]'
+                        : 'border-white/5 hover:border-white/20'
+                    }`}
                   >
                     <img
                       src={movie?.poster_url || movie?.thumb_url}
                       alt=""
-                      className="absolute inset-0 w-full h-full object-cover opacity-35 group-hover:opacity-50 group-hover:scale-105 transition-all duration-500 pointer-events-none"
+                      className="absolute inset-0 w-full h-full object-cover opacity-25 group-hover:opacity-40 group-hover:scale-105 transition-all duration-500 pointer-events-none"
+                      loading="lazy"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-0" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0F1326] via-[#0F1326]/40 to-transparent z-0" />
 
-                    <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/60 backdrop-blur-md border border-white/10 flex items-center justify-center transition-all duration-300 z-10 ${isActive ? 'opacity-100 scale-100 bg-red-600/20 border-red-500/30' : 'opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100'
-                      }`}>
-                      {isActive ? <PlaybackIndicator /> : <span className="text-[10px] text-white pl-[2px]">▶</span>}
+                    {/* Biểu tượng Play / Sóng âm kính mờ lơ lửng tâm card */}
+                    <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-[#0F1326]/80 backdrop-blur-md border border-white/10 flex items-center justify-center transition-all duration-300 z-10 ${
+                      isActive ? 'opacity-100 scale-100 bg-[#E6C687]/20 border-[#E6C687]/30' : 'opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100'
+                    }`}>
+                      {isActive ? <PlaybackIndicator /> : <Play className="w-2.5 h-2.5 text-white fill-current pl-[1px]" />}
                     </div>
 
-                    <div className="relative z-10 p-3 w-full bg-gradient-to-t from-black/90 to-transparent">
-                      <p className={`text-[12px] font-black tracking-wide leading-none ${isActive ? 'text-red-400' : 'text-white'}`}>
+                    <div className="relative z-10 p-3 w-full">
+                      <p className={`text-[11px] font-bold tracking-wide leading-none ${isActive ? 'text-[#ffe3ae]' : 'text-[#e8e1da]'}`}>
                         {label}
                       </p>
-                      <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider mt-1 truncate">
-                        {label} • 45 phút
+                      <p className="text-[9px] font-semibold text-[#d0c5b5]/30 uppercase tracking-wider mt-1 truncate">
+                        {label} · 45 phút
                       </p>
                     </div>
                   </button>
@@ -275,11 +247,11 @@ export default function WatchTabs({
             </div>
           </div>
 
-          {/* Ghi chú trạng thái tinh tế dưới khay thẻ (GIỮ NGUYÊN CỦA ANH) */}
+          {/* Ghi chú trạng thái tinh tế dưới chân khay thẻ */}
           {selectedEpisode !== null && currentEpisodes[selectedEpisode] && (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-red-500/5 border border-red-500/10 w-fit">
-              <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse shrink-0" />
-              <p className="text-[9px] font-black text-red-400/80 uppercase tracking-widest">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#E6C687]/5 border border-[#E6C687]/10 w-fit">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#E6C687] shadow-[0_0_8px_#E6C687] animate-pulse shrink-0" />
+              <p className="text-[9px] font-bold text-[#ffe3ae]/80 uppercase tracking-widest">
                 Đang phát: {formatEpisodeLabel(currentEpisodes[selectedEpisode].name)}
               </p>
             </div>
@@ -287,30 +259,51 @@ export default function WatchTabs({
         </div>
       )}
 
-      {/* ══════════════════════════════════════════
-          TAB: BÌNH LUẬN (Giữ nguyên vẹn của anh)
-      ══════════════════════════════════════════ */}
+      {/* ── TAB: BÌNH LUẬN KÍNH MỜ SANG TRỌNG ── */}
       {activeTab === 'comments' && (
-        <div className="space-y-1">
-          <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-[#111114]/60 border border-white/[0.04] mb-4">
-            <span className="text-base">😊</span>
-            <input type="text" placeholder="Viết bình luận..." className="flex-1 bg-transparent text-[12px] text-zinc-300 placeholder-zinc-600 outline-none" />
-            <button className="shrink-0 px-3 py-1.5 rounded-xl bg-red-600 hover:bg-red-500 transition-all text-[10px] font-black text-white uppercase tracking-wider">Gửi</button>
+        <div className="space-y-2.5 animate-in fade-in duration-300">
+          
+          {/* Ô nhập bình luận */}
+          <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-[#0F1326]/40 border border-white/5 mb-4 focus-within:border-[#E6C687]/30 transition-colors">
+            <span className="text-sm">😊</span>
+            <input 
+              type="text" 
+              placeholder="Viết bình luận..." 
+              className="flex-1 bg-transparent text-xs text-[#e8e1da] placeholder-[#d0c5b5]/20 outline-none font-medium" 
+            />
+            <button className="shrink-0 w-7 h-7 flex items-center justify-center rounded-xl bg-[#E6C687]/10 hover:bg-[#E6C687] border border-[#E6C687]/20 text-[#E6C687] hover:text-[#402d00] transition-all duration-300 active:scale-95 cursor-pointer focus:outline-none">
+              <Send className="w-3 h-3" />
+            </button>
           </div>
-          {MOCK_COMMENTS.map(c => (
-            <div key={c.id} className="group flex items-start gap-3 px-3 py-3 rounded-2xl hover:bg-white/[0.02] transition-colors">
-              <div className="shrink-0 w-9 h-9 rounded-full bg-white/[0.02] border border-white/[0.04] flex items-center justify-center text-base">{c.avatar}</div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-baseline gap-2 mb-1">
-                  <span className="text-[11px] font-black text-zinc-200">{c.name}</span>
-                  <span className="text-[9px] text-zinc-600">{c.time}</span>
+
+          {/* Khay danh sách các bình luận */}
+          <div className="space-y-1">
+            {MOCK_COMMENTS.map(c => (
+              <div key={c.id} className="group flex items-start gap-3.5 px-3 py-3 rounded-2xl hover:bg-white/[0.02] border border-transparent hover:border-white/5 transition-all duration-300">
+                <div className="shrink-0 w-9 h-9 rounded-full bg-[#0F1326]/60 border border-white/5 flex items-center justify-center text-base shadow-inner">
+                  {c.avatar}
                 </div>
-                <p className="text-[11px] text-zinc-400 leading-relaxed font-medium">{c.text}</p>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-baseline gap-2 mb-1">
+                    <span className="text-[11px] font-bold text-[#e8e1da]">{c.name}</span>
+                    <span className="text-[9px] text-[#d0c5b5]/30 font-semibold uppercase font-mono tracking-wider">{c.time}</span>
+                  </div>
+                  <p className="text-xs text-[#d0c5b5]/70 leading-relaxed font-medium">{c.text}</p>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+
         </div>
       )}
+
+      {/* ANIMATION SÓNG NHẠC CHỐNG LỖI COMPILER TRÊN NHIỀU TRÌNH DUYỆT */}
+      <style jsx global>{`
+        @keyframes sb {
+          0%, 100% { transform: scaleY(0.3); }
+          50% { transform: scaleY(1); }
+        }
+      `}</style>
     </div>
   );
 }

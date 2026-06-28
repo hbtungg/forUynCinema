@@ -1,90 +1,111 @@
-/* DÒNG SỐ 1 - KHÔNG ĐƯỢC CÓ GÌ Ở TRÊN DÒNG NÀY */
-@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,100;0,300;0,400;0,500;0,700;0,800;0,900&display=swap');
+/* DÒNG SỐ 1 - NHẬP FONT CHỮ CHÍNH THỨC TỪ DESIGN SYSTEM */
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,100;0,300;0,400;0,500;0,600;0,700;0,800;0,900&display=swap');
 @import "tailwindcss";
 
-/* 🚀 1. ĐÃ CHÈN THÊM CẤU HÌNH VIP CHO TAILWIND v4: 
-   Báo hiệu hệ thống bẫy lớp class từ thẻ <html> để đảo màu */
-@variant dark (&:where(.dark, .dark *));
-
-:root {
-  --background: #000000;
-  --foreground: #ffffff;
+@theme {
+  /* ── 🚀 TYPOGRAPHY CINEMATIC ── */
   --font-main: 'Be Vietnam Pro', sans-serif;
+
+  /* ── 🎨 PALETTE MÀU TRONG FILE DESIGN.MD MỞ RỘNG ── */
+  --color-midnight-bg: #060814; /* Deep Night gốc cho màn hình OLED */
+  --color-surface: #15130f;
+  --color-surface-dim: #15130f;
+  --color-surface-bright: #3c3934;
+  
+  /* Cấp độ container theo kiến trúc Material Midnight */
+  --color-surface-lowest: #100e0a;
+  --color-surface-low: #1e1b17;
+  --color-surface-container: #221f1b;
+  --color-surface-high: #2d2a25;
+  --color-surface-highest: #38342f;
+
+  /* Chữ nghĩa tối ưu chống mỏi mắt */
+  --color-on-surface: #e8e1da;
+  --color-on-surface-variant: #d0c5b5;
+  
+  /* Ánh vàng mặt trăng (Moonlight Gold) */
+  --color-primary: #ffe3ae;
+  --color-on-primary: #402d00;
+  --color-primary-container: #e6c687;
+  --color-on-primary-container: #68511e;
+  --color-primary-glow: rgba(230, 198, 135, 0.25);
+
+  /* Xanh tinh vân (Nebula Blue) */
+  --color-secondary: #bac3ff;
+  --color-on-secondary: #14277a;
+  --color-secondary-container: #2f3f91;
+  --color-on-secondary-container: #a3b0ff;
+  --color-secondary-accent: #5B6BBF;
+
+  /* Đường viền mảnh */
+  --color-outline: #998f81;
+  --color-outline-variant: #4d463a;
+  --color-border-subtle: rgba(148, 163, 184, 0.1);
+
+  /* ── 📐 SHAPES BO GÓC SOFT GEOMETRIC ── */
+  --radius-sm: 0.25rem;
+  --radius-default: 0.5rem;
+  --radius-md: 0.75rem;  /* Standard Containers (12px) */
+  --radius-lg: 1rem;    /* Feature Cards / Thumbnails (16px) */
+  --radius-xl: 1.5rem;   /* Interactive Buttons/Inputs (24px) */
+}
+
+/* Ép cấu hình font chữ tổng thể */
+* {
+  font-family: var(--font-main) !important;
 }
 
 body {
-  background-color: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-main) !important;
+  /* Nền tảng Deep Night nằm dưới cùng làm bệ đỡ cho Shader */
+  background-color: #060814; 
+  color: #e8e1da;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
   margin: 0;
   padding: 0;
+  overflow-x: hidden;
 }
 
-/* ÉP FONT CHO TẤT CẢ - TRỊ DỨT ĐIỂM LỖI CHỮ "Ơ, Â, Ư" */
+/* ── Ẩn toàn bộ scrollbar hệ thống nhưng giữ chức năng cuộn mượt ── */
 * {
-  font-family: var(--font-main) !important;
-}
-
-/* Ẩn thanh cuộn cho các danh sách phim cuộn ngang */
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-.scrollbar-hide {
-  -ms-overflow-style: none;
   scrollbar-width: none;
-}
-
-/* ── Ẩn scrollbar toàn site — giữ chức năng cuộn ── */
-* {
-  scrollbar-width: none;          /* Firefox */
-  -ms-overflow-style: none;       /* IE / Edge legacy */
+  -ms-overflow-style: none;
 }
 *::-webkit-scrollbar {
-  display: none;                  /* Chrome / Safari / Opera */
-}
-
-/* ── Utility class phòng khi cần dùng riêng lẻ ── */
-.scrollbar-none {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-.scrollbar-none::-webkit-scrollbar {
   display: none;
 }
 
 /* ==========================================================================
-   ── 🚀 TÂN TRANG THANH CUỘN SIÊU MẢNH CHO KHAY TẬP PHIM CUỘN NGANG ──
+   ── 🧪 CÁC THÀNH PHẦN HIỆU ỨNG TRONG SUỐT (MIDNIGHT UTILITIES) ──
    ========================================================================== */
+@layer utilities {
+  /* Lớp phủ Glassmorphism chuẩn chỉ đón Shader */
+  .midnight-glass {
+    background-color: rgba(24, 29, 56, 0.45) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(148, 163, 184, 0.08) !important;
+    box-shadow: inset 0 0.5px 0 rgba(255, 255, 255, 0.03);
+  }
 
-/* Thiết lập độ mỏng và màu sắc cho trình duyệt Firefox */
-.custom-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.08) transparent !important;
-}
+  /* Nút bấm Moonlight Gold phát sáng mềm mại */
+  .btn-moonlight {
+    background-color: #e6c687 !important;
+    color: #402d00 !important;
+    border-radius: 24px !important;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    transition: all 400ms ease-in-out;
+  }
+  .btn-moonlight:hover {
+    box-shadow: 0 0 20px rgba(230, 198, 135, 0.4);
+    transform: translateY(-2px);
+  }
 
-/* Định dạng độ dày cho Chrome, Safari, Edge... (Ép hiển thị đè lên lệnh ẩn toàn cục) */
-.custom-scrollbar::-webkit-scrollbar {
-  display: block !important; /* Buộc phải hiển thị riêng cho khay này */
-  height: 4px !important;    /* Thanh cuộn ngang siêu mảnh chỉ 4px cực tinh tế */
-  width: 4px !important;
-}
-
-/* Đường ray chạy ngầm dưới gầm - Để suốt đời trong suốt cho sạch layout */
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent !important;
-}
-
-/* Cục con cuộn di chuyển (Thumb) - Bo góc tròn xịn mịn, kính mờ sang trọng */
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.08) !important;
-  border-radius: 99px !important;
-  border: none !important;
-  transition: background 0.3s ease-in-out !important;
-}
-
-/* Hiệu ứng nẩy ánh đỏ mờ ma mị khi người dùng di chuột vào tương tác */
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(220, 38, 38, 0.4) !important; /* Ánh đỏ mờ chuẩn tông rạp phim */
+  /* Hover nhấc nhẹ tấm phimstrip */
+  .hover-float {
+    transition: transform 400ms ease-in-out !important;
+  }
+  .hover-float:hover {
+    transform: translateY(-4px) !important;
+  }
 }
