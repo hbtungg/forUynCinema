@@ -72,15 +72,31 @@ export default function ContinueWatching() {
 
   if (status !== "authenticated" || history.length === 0) return null;
 
+  // Định nghĩa chuỗi tiêu đề cố định để tách mảng nhuộm màu đồng bộ
+  const titleText = "Phim Đang Xem";
+
   return (
     <section className="mt-12 md:mt-16 group/section font-sans select-none" style={{ fontFamily: "'Be Vietnam Pro', sans-serif" }}>
       
-      {/* TIÊU ĐỀ KHAY PHIM ĐANG XEM CHUẨN MOONLIGHT GOLD */}
+      {/* TIÊU ĐỀ KHAY PHIM ĐANG XEM CHUẨN ĐỒNG BỘ MOONLIGHT HIGHLIGHT */}
       <div className="flex items-center justify-between mb-6 md:mb-8 pr-4">
         <div className="flex items-center gap-3">
-          <div className="w-1 h-7 bg-[#E6C687] rounded-full shadow-[0_0_15px_rgba(230,198,135,0.6)]"></div>
+          {/* Thanh dọc phát sáng tinh tế */}
+          <div className="w-1 h-6 md:h-7 bg-[#E6C687] rounded-full shadow-[0_0_15px_rgba(230,198,135,0.6)] shrink-0"></div>
+          
+          {/* 🚀 ĐÃ SỬA: Nhuộm sắc vàng Moonlight Gold cho chữ thứ 2 (chữ "Đang") khớp 100% với MovieSection */}
           <h2 className="text-lg md:text-xl font-bold text-white uppercase tracking-wider flex items-center gap-2">
-            Phim Đang Xem <Sparkles className="w-4 h-4 text-[#E6C687] animate-pulse" />
+            <span className="inline">
+              {titleText.split(' ').map((word, i) => (
+                <span 
+                  key={i} 
+                  className={`${i === 1 ? 'text-[#E6C687] drop-shadow-[0_0_10px_rgba(230,198,135,0.25)]' : ''} inline`}
+                >
+                  {word}{' '}
+                </span>
+              ))}
+            </span>
+            <Sparkles className="w-4 h-4 text-[#E6C687] animate-pulse shrink-0" />
           </h2>
         </div>
       </div>
@@ -89,7 +105,6 @@ export default function ContinueWatching() {
       <div ref={scrollRef} className="overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden touch-pan-x scroll-smooth px-1">
         <div className="flex gap-4 md:gap-6 pb-4" style={{ width: 'max-content' }}>
           {history.map((item) => (
-            /* 🚀 FIX RESPONSIVE: Hạ chiều rộng w-[280px] cũ xuống w-[240px] trên di động chống thô cứng dính sát */
             <div key={item.slug} className="w-[240px] md:w-[320px] flex-shrink-0 relative group/card animate-in fade-in duration-500">
               
               {/* NÚT XÓA LỊCH SỬ PHA LÊ TĂNG VÙNG BẤM TRÊN MOBILE */}
@@ -111,7 +126,7 @@ export default function ContinueWatching() {
                 className="block relative aspect-video rounded-[1.5rem] md:rounded-[1.8rem] overflow-hidden border border-white/5 shadow-2xl bg-[#0F1326]/40 transition-all duration-500 group-hover/card:border-[#E6C687]/30"
               >
                 <img 
-                  src={item.thumb_url} 
+                  src={item.poster_url || item.thumb_url} 
                   alt={item.name} 
                   className="w-full h-full object-cover opacity-40 group-hover/card:opacity-85 transition-all duration-700 pointer-events-none" 
                   loading="lazy"
@@ -122,7 +137,7 @@ export default function ContinueWatching() {
                   <h3 className="text-white font-bold text-xs md:text-sm truncate tracking-wide uppercase">{item.name}</h3>
                   
                   <span className="text-[#ffe3ae] text-[9px] md:text-[10px] font-bold uppercase tracking-widest mt-1 block font-mono">
-                    ● Tiến trình: Tập {String(item.episode || '1').replace(/^(tập|tập|tâp|tap|ep|episode)\s*/i, '').trim()}
+                    ● Progress: Tập {String(item.episode || '1').replace(/^(tập|tập|tâp|tap|ep|episode)\s*/i, '').trim()}
                   </span>
                   
                   {/* THANH TIMELINE TIẾN TRÌNH GIẢ LẬP CAO CẤP */}

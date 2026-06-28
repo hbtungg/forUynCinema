@@ -17,20 +17,25 @@ export default function MovieSection({ title, movies, viewAllLink }) {
       style={{ fontFamily: "'Be Vietnam Pro', sans-serif" }}
     >
       
-      {/* ── 🚀 TẦNG 1: CỘT TIÊU ĐỀ NẰM NGANG (Phía trên) ── */}
-      <div className="w-full flex flex-row items-end justify-between pb-2 border-b border-white/5 px-2 md:px-0">
+      {/* ── 🚀 TẦNG 1: CỘT TIÊU ĐỀ NẰM NGANG (ĐÃ THÊM THANH DỌC PHÁT SÁNG ĐỒNG BỘ) ── */}
+      <div className="w-full flex flex-row items-center justify-between pb-2 border-b border-white/5 px-2 md:px-0">
         
-        {/* TIÊU ĐỀ H2 (Đã đổi từ Đỏ sang Vàng Moonlight Gold sang trọng) */}
-        <h2 className="text-lg md:text-xl font-bold text-[#e8e1da] uppercase tracking-wider whitespace-nowrap">
-          {title.split(' ').map((word, i) => (
-            <span 
-              key={i} 
-              className={`${i === 1 ? 'text-[#E6C687] drop-shadow-[0_0_10px_rgba(230,198,135,0.25)]' : ''} inline`}
-            >
-              {word}{' '}
-            </span>
-          ))}
-        </h2>
+        {/* CỤM TIÊU ĐỀ H2 KÈM THANH GỜ CHỈ VÀNG MOONLIGHT */}
+        <div className="flex items-center gap-3">
+          {/* 🚀 Ổn định thanh dọc phát sáng chuẩn đét từ ContinueWatching */}
+          <div className="w-1 h-6 md:h-7 bg-[#E6C687] rounded-full shadow-[0_0_15px_rgba(230,198,135,0.6)] shrink-0"></div>
+          
+          <h2 className="text-lg md:text-xl font-bold text-[#e8e1da] uppercase tracking-wider whitespace-nowrap">
+            {title.split(' ').map((word, i) => (
+              <span 
+                key={i} 
+                className={`${i === 1 ? 'text-[#E6C687] drop-shadow-[0_0_10px_rgba(230,198,135,0.25)]' : ''} inline`}
+              >
+                {word}{' '}
+              </span>
+            ))}
+          </h2>
+        </div>
 
         {/* NÚT XEM TOÀN BỘ CHUẨN PHA LÊ */}
         {viewAllLink && (
@@ -60,7 +65,7 @@ export default function MovieSection({ title, movies, viewAllLink }) {
             640: { slidesPerView: 3.2 },
             1024: { slidesPerView: 4.2 },
             1280: { slidesPerView: 5.2 },
-            1536: { slidesPerView: 6.2 }, // Tối ưu thêm cho màn hình siêu rộng
+            1536: { slidesPerView: 6.2 }, 
           }}
           className="mySwiper !overflow-visible"
         >
