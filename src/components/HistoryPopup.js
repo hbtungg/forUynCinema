@@ -69,7 +69,7 @@ export default function HistoryPopup() {
             <div className="flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-[#E6C687] shadow-[0_0_8px_#E6C687] animate-pulse" />
               <h3 className="text-[#E6C687] text-[9px] md:text-[10px] font-bold uppercase tracking-[0.25em]" style={{ textShadow: '0 0 10px rgba(230,198,135,0.2)' }}>
-                Xem tiếp chứ anh?
+                Xem tiếp chứ?
               </h3>
             </div>
             <button 
@@ -84,7 +84,7 @@ export default function HistoryPopup() {
           {/* NỘI DUNG THÔNG BÁO TINH TẾ */}
           <div className="mb-4 md:mb-5 space-y-1">
             <p className="text-[#d0c5b5]/60 text-xs leading-relaxed font-medium">
-              Lần trước anh đang xem dở bộ phim <br className="hidden md:inline" />
+              Lần trước em đang xem dở bộ phim <br className="hidden md:inline" />
               <span className="text-white font-bold italic text-sm group-hover:text-[#ffe3ae] transition-colors">&ldquo;{lastMovie.name}&rdquo;</span>
             </p>
             <p className="text-[#d0c5b5]/30 text-[9px] md:text-[10px] font-bold uppercase tracking-wide">
