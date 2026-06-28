@@ -9,6 +9,7 @@ import Footer from "@/components/Footer";
 import HistoryPopup from "@/components/HistoryPopup";
 import HeroSlider from "@/components/HeroSlider";
 import MovieSection from "@/components/MovieSection";
+import ContinueWatching from "@/components/ContinueWatching";
 
 export default function HomePageClient({
   allMovies,
