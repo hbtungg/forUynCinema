@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { getMovies, getMoviesByCountry, getMoviesByCategory } from '@/lib/clientMovies';
 import HomePageClient from './HomePageClient';
+import IOSInstallPrompt from '@/components/IOSInstallPrompt';
 
 const CACHE_KEY = 'foruyn_home_cache';
 const CACHE_TTL = 5 * 60 * 1000; // 5 phút
@@ -141,15 +142,18 @@ export default function HomePage() {
   }
 
   return (
-    <HomePageClient
-      allMovies={data.allMovies}
-      koreaMovies={data.koreaMovies}
-      actionMovies={data.actionMovies}
-      chinaMovies={data.chinaMovies}
-      animeMovies={data.animeMovies}
-      topRated={data.topRated}
-      continueItems={data.continueItems}
-      genres={genres}
-    />
+    <>
+      <HomePageClient
+        allMovies={data.allMovies}
+        koreaMovies={data.koreaMovies}
+        actionMovies={data.actionMovies}
+        chinaMovies={data.chinaMovies}
+        animeMovies={data.animeMovies}
+        topRated={data.topRated}
+        continueItems={data.continueItems}
+        genres={genres}
+      />
+      <IOSInstallPrompt />
+    </>
   );
 }
