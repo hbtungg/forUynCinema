@@ -10,6 +10,12 @@ import HeroSlider from "@/components/HeroSlider";
 import MovieSection from "@/components/MovieSection";
 import ContinueWatching from "@/components/ContinueWatching";
 
+
+export const metadata = {
+  title: 'Trang chủ - Uynflix',
+  description: 'Watch series online, watch films online free',
+};
+
 export default function HomePageClient({
   allMovies,
   koreaMovies,
@@ -85,9 +91,9 @@ export default function HomePageClient({
           <MovieSection title="Phim Hàn Quốc" movies={koreaMovies.slice(0, 12)} viewAllLink="/danh-sach?type=han-quoc" />
           <MovieSection title="Phim Hoạt Hình" movies={animeMovies.slice(0, 12)} viewAllLink="/danh-sach?type=hoat-hinh" />
 
-          <div className="pt-4">
+          {/* <div className="pt-4">
             <HistoryPopup />
-          </div>
+          </div> */}
         </div>
       </div>
 
@@ -100,9 +106,9 @@ export default function HomePageClient({
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#d0c5b5]/80 flex items-center gap-1.5">
-              <Compass className="w-3.5 h-3.5 text-[#E6C687]" /> Thể loại phổ biến
+              <Compass className="w-3.5 h-3.5 text-[#E6C687]" /> Danh sách phổ biến
             </h3>
-            <Link href="/the-loai" className="text-[9px] font-bold text-[#d0c5b5]/40 hover:text-[#ffe3ae] uppercase tracking-wider transition-colors duration-300">
+            <Link href="/danh-sach" className="text-[9px] font-bold text-[#d0c5b5]/40 hover:text-[#ffe3ae] uppercase tracking-wider transition-colors duration-300">
               Xem tất cả
             </Link>
           </div>
@@ -127,9 +133,9 @@ export default function HomePageClient({
               <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#d0c5b5]/80 flex items-center gap-1.5">
                 <Star className="w-3.5 h-3.5 text-[#E6C687]" /> Top Đánh Giá
               </h3>
-              <Link href="/top-rated" className="text-[9px] font-bold text-[#d0c5b5]/40 hover:text-[#ffe3ae] uppercase tracking-wider transition-colors duration-300">
+              {/* <Link href="/top-rated" className="text-[9px] font-bold text-[#d0c5b5]/40 hover:text-[#ffe3ae] uppercase tracking-wider transition-colors duration-300">
                 Xem tất cả
-              </Link>
+              </Link> */}
             </div>
             <div className="space-y-1">
               {topRated.slice(0, 5).map((movie, i) => (

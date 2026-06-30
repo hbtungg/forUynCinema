@@ -4,11 +4,11 @@ import { useState, useRef, useEffect } from 'react';
 import { useSession } from "next-auth/react";
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { Bell, Heart } from 'lucide-react';
+import { Bell, Heart, User } from 'lucide-react'; // 🚀 ĐÃ THÊM: Icon User cho chế độ ẩn danh sang chảnh
 import SecretChat from './SecretChat';
 import EventButton from './EventButton';
-import SearchBox from './SearchBox'; 
-import UserMenu from './UserMenu'; // 🚀 1. ĐÃ IMPORT COMPONENT USERMENU CAO CẤP CỦA ANH
+import SearchBox from './SearchBox';
+import UserMenu from './UserMenu';
 
 export default function Header() {
   const { data: session, status } = useSession();
@@ -41,13 +41,30 @@ export default function Header() {
 
         {/* KHỐI TRÁI: LOGO ĐỊNH DANH */}
         <div className="flex items-center gap-12">
-          <div
-            onClick={() => router.push('/home')}
-            className="hover:scale-105 transition-transform duration-300 cursor-pointer flex items-center gap-2"
-          >
-            <span className="text-2xl font-bold tracking-[0.2em] text-[#E6C687] font-sans" style={{ textShadow: '0 0 12px rgba(230,198,135,0.3)' }}>
-              UYNFLIX
-            </span>
+          {/* KHỐI TRÁI: LOGO ĐỊNH DANH - Premium Version */}
+          <div className="flex items-center gap-12">
+            <div
+              onClick={() => router.push('/home')}
+              className="group hover:scale-105 transition-all duration-500 cursor-pointer flex items-center gap-3 relative"
+            >
+
+
+              {/* Chữ UYNFLIX với hiệu ứng cao cấp */}
+              <div className="relative">
+                <span
+                  className="text-2xl font-bold tracking-[0.25em] text-[#E6C687] font-sans transition-all duration-300"
+                  style={{
+                    textShadow: '0 0 20px rgba(230,198,135,0.2), 0 0 60px rgba(230,198,135,0.05)',
+                    letterSpacing: '0.25em'
+                  }}
+                >
+                  UYNFLIX
+                </span>
+
+                {/* Đường gạch chân animation */}
+                <div className="absolute -bottom-1 left-0 w-0 h-[2px] bg-gradient-to-r from-transparent via-[#E6C687] to-transparent transition-all duration-700 group-hover:w-full" />
+              </div>
+            </div>
           </div>
 
           <div className="hidden lg:flex items-center gap-6 text-xs font-bold tracking-wider uppercase">
@@ -59,15 +76,14 @@ export default function Header() {
 
         {/* KHỐI PHẢI: SEARCHBOX & ACCOUNT */}
         <div className="flex items-center gap-4">
-          
-          {/* Găm thẳng SearchBox độc lập phẳng lỳ */}
+
           <div className="hidden sm:block">
             <SearchBox />
           </div>
 
           <div className="hidden sm:flex items-center gap-1">
             <SecretChat />
-            <EventButton />
+            {/* <EventButton /> */}
           </div>
 
           {/* Chuông Thông Báo */}
@@ -81,7 +97,7 @@ export default function Header() {
               <div className="absolute right-0 mt-3 w-64 bg-[#0F1326]/90 backdrop-blur-2xl border border-white/10 rounded-2xl p-1 shadow-2xl z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                 <div className="px-4 py-2.5 border-b border-white/5 bg-white/[0.02] rounded-t-xl flex items-center gap-1.5">
                   <span className="text-[#e6c687] text-xs">🌙</span>
-                  <p className="text-[9px] font-bold text-[#d0c5b5]/40 uppercase tracking-[0.25em]">hb.tungg nhắn nhủ</p>
+                  <p className="text-[9px] font-bold text-[#d0c5b5]/40 uppercase tracking-[0.25em]">Anh Tùng có đôi lời</p>
                 </div>
                 <div className="p-4 text-[11px] font-medium text-[#d0c5b5]/80">
                   {session && (session.user?.email === 'thuuyen009900@gmail.com' || session.user?.email === 'hb.tungg@gmail.com') ? (
@@ -97,7 +113,7 @@ export default function Header() {
             )}
           </div>
 
-          {/* 🚀 Profile User Dropdown - Đã nhúng cấu phần UserMenu bọc thép độc lập */}
+          {/* Profile User Dropdown hoặc Nút đăng nhập pha lê tối ưu UI */}
           {status !== "loading" && session ? (
             <div className="relative" ref={userMenuRef}>
               <button onClick={() => setShowDropdown(!showDropdown)} className="p-0.5 text-[#e8e1da] hover:ring-2 ring-[#E6C687]/40 rounded-full transition-all duration-300 border border-white/5 flex items-center justify-center bg-[#181D38]/60 focus:outline-none cursor-pointer">
@@ -109,14 +125,24 @@ export default function Header() {
               </button>
 
               {showDropdown && (
-                /* 🚀 ĐÃ THAY THẾ: Gọi thẳng <UserMenu /> vào lòng hộp thả xuống kính mờ */
                 <div className="absolute right-0 mt-3 w-56 bg-[#0F1326]/95 backdrop-blur-2xl border border-white/10 rounded-2xl p-4 shadow-[0_20px_50px_rgba(0,0,0,0.7)] z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                   <UserMenu isMobile={false} />
                 </div>
               )}
             </div>
           ) : status !== "loading" && (
-            <button onClick={() => router.push('/login')} className="px-5 py-1.5 bg-[#E6C687]/10 hover:bg-[#E6C687] text-[#E6C687] hover:text-[#402d00] font-bold text-xs rounded-full border border-[#E6C687]/30 transition-all cursor-pointer focus:outline-none shadow-sm">Đăng Nhập</button>
+            /* 🚀 FIX CHÍ MẠNG: Nút Đăng nhập dạng Avatar Pha Lê Ẩn Danh - Siêu gọn trên Mobile, Đẳng cấp trên Desktop */
+            <button
+              onClick={() => router.push('/login')}
+              className="group/login p-1 flex items-center gap-2 rounded-full border border-dashed border-[#E6C687]/30 bg-[#E6C687]/5 hover:bg-[#E6C687] text-[#E6C687] hover:text-[#402d00] transition-all duration-300 focus:outline-none cursor-pointer"
+            >
+              <div className="w-7 h-7 rounded-full bg-[#E6C687]/10 group-hover/login:bg-black/10 flex items-center justify-center text-[#E6C687] group-hover/login:text-[#402d00] transition-colors">
+                <User className="w-3.5 h-3.5" />
+              </div>
+              <span className="hidden md:inline pr-3 text-[11px] font-black tracking-widest uppercase font-sans">
+                Login
+              </span>
+            </button>
           )}
 
         </div>

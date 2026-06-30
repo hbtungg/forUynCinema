@@ -271,8 +271,8 @@ export default function MovieDetailPage({ params: paramsPromise }) {
                             setActiveRangeTab(0);
                           }}
                           className={`px-3 py-1.5 rounded-lg text-[11px] font-bold tracking-wide uppercase border transition-all duration-300 focus:outline-none cursor-pointer ${activeServerIdx === sIdx
-                              ? 'bg-[#E6C687]/10 border-[#E6C687] text-[#ffe3ae] shadow-md shadow-[#E6C687]/5'
-                              : 'bg-white/[0.02] border-white/5 text-[#d0c5b5]/50 hover:text-[#e8e1da] hover:border-white/10'
+                            ? 'bg-[#E6C687]/10 border-[#E6C687] text-[#ffe3ae] shadow-md shadow-[#E6C687]/5'
+                            : 'bg-white/[0.02] border-white/5 text-[#d0c5b5]/50 hover:text-[#e8e1da] hover:border-white/10'
                             }`}
                         >
                           {server?.server_name?.replace('Vietsub', '').replace('Thuyết minh', '').trim() || `#${sIdx + 1}`}
@@ -292,8 +292,8 @@ export default function MovieDetailPage({ params: paramsPromise }) {
                             key={chunkIdx}
                             onClick={() => setActiveRangeTab(chunkIdx)}
                             className={`flex-1 min-w-[70px] text-center py-1 rounded-lg text-[10px] font-bold tracking-wide transition-all focus:outline-none cursor-pointer ${activeRangeTab === chunkIdx
-                                ? 'bg-[#E6C687] text-[#402d00]'
-                                : 'text-[#d0c5b5]/60 hover:bg-white/5 hover:text-white'
+                              ? 'bg-[#E6C687] text-[#402d00]'
+                              : 'text-[#d0c5b5]/60 hover:bg-white/5 hover:text-white'
                               }`}
                           >
                             {startEp} - {endEp}
@@ -315,7 +315,7 @@ export default function MovieDetailPage({ params: paramsPromise }) {
                           className="bg-white/[0.02] border border-white/5 p-2 md:p-2.5 rounded-xl flex items-center justify-center relative group cursor-pointer hover:border-[#E6C687]/50 hover:bg-[#E6C687]/5 transition-all duration-300 hover:shadow-[0_0_15px_rgba(230,198,135,0.08)] active:scale-95"
                         >
                           <span className="text-[11px] md:text-xs font-bold text-[#e8e1da] group-hover:text-[#ffe3ae] transition-colors truncate px-1.5 md:px-2">
-                            {ep?.name}
+                            {/^t[aậ]p\s/i.test(ep?.name?.trim() || '') ? ep.name : `Tập ${ep?.name}`}
                           </span>
                           <div className="absolute right-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-1 group-hover:translate-x-0">
                             <Play className="w-2.5 h-2.5 text-[#E6C687] fill-current" />
