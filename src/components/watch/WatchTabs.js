@@ -221,7 +221,7 @@ export default function WatchTabs({
                     <img
                       src={movie?.poster_url || movie?.thumb_url}
                       alt=""
-                      className="absolute inset-0 w-full h-full object-cover opacity-25 group-hover:opacity-40 group-hover:scale-105 transition-all duration-500 pointer-events-none"
+                      className="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:opacity-70 group-hover:scale-105 transition-all duration-500 pointer-events-none"
                       loading="lazy"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#0F1326] via-[#0F1326]/40 to-transparent z-0" />

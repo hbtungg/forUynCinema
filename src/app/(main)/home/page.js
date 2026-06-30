@@ -18,73 +18,80 @@ const genres = [
   { label: 'Tài liệu',   icon: '📽️', href: '/danh-sach?type=tai-lieu' },
 ];
 
-/* ── 🚀 SKELETON CHUẨN MIDNIGHT SHADER-READY ──
-   Được gọt sạch Header, Sidebar và các lớp flex bao phủ cứng, 
-   chỉ giữ lại những ô vuông lấp lánh xuyên thấu lơ lửng trên phông nền vũ trụ! */
+// 🚀 ĐÃ SỬA CHÍ MẠNG: Khung xương cấu trúc 2 cột khớp 100% với HomePageClient để triệt tiêu Hydration Mismatch
 function HomeSkeleton() {
   return (
-    <div className="w-full h-full overflow-y-auto pb-20 custom-scrollbar animate-pulse">
-      <div className="w-full aspect-[21/9] bg-white/5 midnight-glass" />
-      <div className="px-5 xl:px-16 py-8 space-y-12">
-        {Array.from({ length: 3 }).map((_, si) => (
-          <div key={si} className="space-y-4">
-            <div className="h-6 w-48 bg-white/10 rounded-md" />
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="space-y-3">
-                  <div className="w-full aspect-[2/3] bg-white/5 rounded-lg midnight-glass" />
-                  <div className="h-4 w-3/4 bg-white/10 rounded" />
-                </div>
-              ))}
+    <div className="w-full flex flex-row min-w-0 min-h-screen select-none font-sans items-start animate-pulse">
+      {/* KHỐI TRÁI SKELETON */}
+      <div className="flex-1 min-w-0 pb-24">
+        <div className="px-5 xl:px-12 pt-4">
+          <div className="w-full aspect-[21/9] bg-white/5 rounded-[2rem] midnight-glass" />
+        </div>
+        <div className="px-5 xl:px-12 py-8 space-y-12">
+          {Array.from({ length: 2 }).map((_, si) => (
+            <div key={si} className="space-y-4">
+              <div className="h-6 w-48 bg-white/10 rounded-md" />
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="space-y-3">
+                    <div className="w-full aspect-[2/3] bg-white/5 rounded-2xl midnight-glass" />
+                    <div className="h-4 w-3/4 bg-white/10 rounded" />
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
+      </div>
+      {/* ASIDE PHẢI SKELETON */}
+      <div className="hidden xl:flex flex-col w-[300px] 2xl:w-[320px] flex-shrink-0 my-4 mr-6 rounded-[32px] border border-white/5 bg-[#0F1326]/20 p-5 space-y-6 h-[80vh]">
+        <div className="h-5 w-1/2 bg-white/10 rounded" />
+        <div className="grid grid-cols-2 gap-2">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-10 bg-white/5 rounded-xl" />
+          ))}
+        </div>
+        <div className="h-5 w-1/2 bg-white/10 rounded pt-4" />
+        <div className="space-y-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="flex gap-3 items-center">
+              <div className="w-9 h-12 bg-white/5 rounded-xl shrink-0" />
+              <div className="flex-1 h-4 bg-white/10 rounded" />
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
 }
 
 export default function HomePage() {
-  // Gài Cache đồng bộ ngay từ vòng khởi tạo State ban đầu
-  const [data, setData] = useState(() => {
-    const defaultData = {
-      allMovies: [], koreaMovies: [], actionMovies: [],
-      chinaMovies: [], animeMovies: [], topRated: [], continueItems: []
-    };
-    
-    if (typeof window !== "undefined") {
-      try {
-        const raw = sessionStorage.getItem(CACHE_KEY);
-        if (raw) {
-          const { ts, payload } = JSON.parse(raw);
-          if (Date.now() - ts < CACHE_TTL) return payload; 
-        }
-      } catch (_) {}
-    }
-    return defaultData;
+  const [mounted, setMounted] = useState(false);
+  const [data, setData] = useState({
+    allMovies: [], koreaMovies: [], actionMovies: [],
+    chinaMovies: [], animeMovies: [], topRated: [], continueItems: []
   });
-
-  const [loading, setLoading] = useState(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const raw = sessionStorage.getItem(CACHE_KEY);
-        if (raw) {
-          const { ts } = JSON.parse(raw);
-          if (Date.now() - ts < CACHE_TTL) return false;
-        }
-      } catch (_) {}
-    }
-    return true;
-  });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     document.title = "Uynflix Vietnam - Watch series online, watch films online free";
+    setMounted(true);
 
-    if (!loading && data.allMovies.length > 0) return;
+    // 🚀 ĐÃ SỬA: Kiểm tra Cache an toàn bên trong useEffect (Môi trường Client thuần túy)
+    try {
+      const raw = sessionStorage.getItem(CACHE_KEY);
+      if (raw) {
+        const { ts, payload } = JSON.parse(raw);
+        if (Date.now() - ts < CACHE_TTL) {
+          setData(payload);
+          setLoading(false);
+          return;
+        }
+      }
+    } catch (_) {}
 
     async function fetchCoreData() {
       try {
-        // LUỒNG 1: Kéo danh sách phim Slider chính
         const resAll = await getMovies(1);
         const all = resAll?.items || [];
         
@@ -98,7 +105,7 @@ export default function HomePage() {
         setData(corePayload);
         setLoading(false);
 
-        // LUỒNG 2: Kéo ngầm bất đồng bộ các hàng phim phụ dưới nền
+        // Kéo ngầm danh sách bổ trợ dưới nền
         Promise.all([
           getMoviesByCountry('han-quoc', 1).then(r => r?.items || []).catch(() => []),
           getMoviesByCategory('hanh-dong', 1).then(r => r?.items || []).catch(() => []),
@@ -126,9 +133,12 @@ export default function HomePage() {
     }
 
     fetchCoreData();
-  }, [loading, data.allMovies.length]);
+  }, []);
 
-  if (loading && data.allMovies.length === 0) return <HomeSkeleton />;
+  // Ép đồng bộ hiển thị khung xương ở lượt First-Paint đầu tiên
+  if (!mounted || (loading && data.allMovies.length === 0)) {
+    return <HomeSkeleton />;
+  }
 
   return (
     <HomePageClient

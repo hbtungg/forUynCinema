@@ -11,18 +11,43 @@ export default function MovieSection({ title, movies, viewAllLink }) {
   // Tạo một class name duy nhất cho mỗi section để tránh xung đột navigation
   const sectionId = title.replace(/\s+/g, '').toLowerCase();
 
+  // 🚀 HÀM BỌC THÉP: Chuẩn hóa URL ảnh tuyệt đối dựa trên nhà cung cấp API
+  const normalizeMovieImages = (movie) => {
+    if (!movie) return movie;
+
+    // Bản sao để tránh đột biến dữ liệu gốc (mutation)
+    const clonedMovie = { ...movie };
+
+    // Tự động đoán provider nếu không có sẵn trường movie.provider
+    // Thường link thumb của KKPhim chứa từ khóa 'phimapi'
+    const isKKPhim = clonedMovie.provider === 'kkphim' || 
+                     (clonedMovie.thumb_url && clonedMovie.thumb_url.includes('phimapi.com'));
+    
+    const baseDomain = isKKPhim ? 'https://img.phimapi.com' : 'https://phim.nguonc.com';
+
+    // Chuẩn hóa thumb_url
+    if (clonedMovie.thumb_url && !clonedMovie.thumb_url.startsWith('http://') && !clonedMovie.thumb_url.startsWith('https://')) {
+      clonedMovie.thumb_url = `${baseDomain}/${clonedMovie.thumb_url.replace(/^\//, '')}`;
+    }
+
+    // Chuẩn hóa poster_url
+    if (clonedMovie.poster_url && !clonedMovie.poster_url.startsWith('http://') && !clonedMovie.poster_url.startsWith('https://')) {
+      clonedMovie.poster_url = `${baseDomain}/${clonedMovie.poster_url.replace(/^\//, '')}`;
+    }
+
+    return clonedMovie;
+  };
+
   return (
     <div 
       className="flex flex-col gap-4 group/section py-4 w-full select-none"
       style={{ fontFamily: "'Be Vietnam Pro', sans-serif" }}
     >
       
-      {/* ── 🚀 TẦNG 1: CỘT TIÊU ĐỀ NẰM NGANG (ĐÃ THÊM THANH DỌC PHÁT SÁNG ĐỒNG BỘ) ── */}
+      {/* ── 🚀 TẦNG 1: CỘT TIÊU ĐỀ NẰM NGANG ── */}
       <div className="w-full flex flex-row items-center justify-between pb-2 border-b border-white/5 px-2 md:px-0">
         
-        {/* CỤM TIÊU ĐỀ H2 KÈM THANH GỜ CHỈ VÀNG MOONLIGHT */}
         <div className="flex items-center gap-3">
-          {/* 🚀 Ổn định thanh dọc phát sáng chuẩn đét từ ContinueWatching */}
           <div className="w-1 h-6 md:h-7 bg-[#E6C687] rounded-full shadow-[0_0_15px_rgba(230,198,135,0.6)] shrink-0"></div>
           
           <h2 className="text-lg md:text-xl font-bold text-[#e8e1da] uppercase tracking-wider whitespace-nowrap">
@@ -37,21 +62,18 @@ export default function MovieSection({ title, movies, viewAllLink }) {
           </h2>
         </div>
 
-        {/* NÚT XEM TOÀN BỘ CHUẨN PHA LÊ */}
         {viewAllLink && (
           <Link 
             href={viewAllLink} 
             className="text-[#d0c5b5]/50 hover:text-[#ffe3ae] transition-colors duration-300 inline-flex items-center text-[10px] md:text-xs font-bold uppercase tracking-widest gap-0.5"
           >
-            <span className="hidden md:inline">
-              Xem toàn bộ
-            </span>
+            <span className="hidden md:inline">Xem toàn bộ</span>
             <ChevronRight className="w-3.5 h-3.5" />
           </Link>
         )}
       </div>
 
-      {/* ── 🚀 TẦNG 2: THANH TRƯỢT PHIM (Kính mờ lướt 120Hz) ── */}
+      {/* ── 🚀 TẦNG 2: THANH TRƯỢT PHIM ── */}
       <div className="flex-1 w-full relative overflow-hidden group/slider">
         <Swiper
           modules={[Navigation]}
@@ -69,14 +91,18 @@ export default function MovieSection({ title, movies, viewAllLink }) {
           }}
           className="mySwiper !overflow-visible"
         >
-          {movies && movies.map((movie) => (
-            <SwiperSlide key={movie.slug} className="pb-2">
-              <MovieCard movie={movie} />
-            </SwiperSlide>
-          ))}
+          {movies && movies.map((movie) => {
+            // 🚀 ĐÃ SỬA: Chuẩn hóa sạch sẽ đường dẫn ảnh lỗi trước khi truyền cho MovieCard
+            const cleanMovie = normalizeMovieImages(movie);
+            return (
+              <SwiperSlide key={movie.slug} className="pb-2">
+                <MovieCard movie={cleanMovie} />
+              </SwiperSlide>
+            );
+          })}
         </Swiper>
 
-        {/* ── 🚀 NÚT MŨI TÊN ĐIỀU HƯỚNG TRÁI PHONG CÁCH CELESTIAL GLASS ── */}
+        {/* NÚT MŨI TÊN ĐIỀU HƯỚNG TRÁI */}
         <button 
           className={`prev-${sectionId} absolute left-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-[#0F1326]/60 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center text-[#d0c5b5] opacity-0 group-hover/slider:opacity-100 transition-all duration-300 hover:border-[#E6C687]/40 hover:text-[#ffe3ae] hover:bg-[#0F1326]/90 shadow-[0_4px_20px_rgba(0,0,0,0.5)] active:scale-90 select-none cursor-pointer focus:outline-none`}
           onMouseDown={(e) => e.preventDefault()}
@@ -85,7 +111,7 @@ export default function MovieSection({ title, movies, viewAllLink }) {
           <ChevronLeft className="w-5 h-5 shrink-0" />
         </button>
 
-        {/* ── 🚀 NÚT MŨI TÊN ĐIỀU HƯỚNG PHẢI PHONG CÁCH CELESTIAL GLASS ── */}
+        {/* NÚT MŨI TÊN ĐIỀU HƯỚNG PHẢI */}
         <button 
           className={`next-${sectionId} absolute right-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-[#0F1326]/60 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center text-[#d0c5b5] opacity-0 group-hover/slider:opacity-100 transition-all duration-300 hover:border-[#E6C687]/40 hover:text-[#ffe3ae] hover:bg-[#0F1326]/90 shadow-[0_4px_20px_rgba(0,0,0,0.5)] active:scale-90 select-none cursor-pointer focus:outline-none`}
           onMouseDown={(e) => e.preventDefault()}

@@ -3,9 +3,8 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { Play, History, Compass, Star, PlayCircle } from "lucide-react";
+import { Compass, Star } from "lucide-react";
 
-import Footer from "@/components/Footer";
 import HistoryPopup from "@/components/HistoryPopup";
 import HeroSlider from "@/components/HeroSlider";
 import MovieSection from "@/components/MovieSection";
@@ -14,15 +13,13 @@ import ContinueWatching from "@/components/ContinueWatching";
 export default function HomePageClient({
   allMovies,
   koreaMovies,
-  actionMovies, // Giữ nguyên prop để tránh lỗi map dữ liệu từ page.js
-  chinaMovies,  // Giữ nguyên prop để tránh lỗi map dữ liệu từ page.js
+  actionMovies, 
+  chinaMovies,  
   animeMovies,
   topRated,
   genres,
 }) {
   const { data: session, status } = useSession();
-  
-  // 🚀 ĐỒNG BỘ DATA THẬT: Quản lý danh sách lịch sử xem tiếp động
   const [liveContinueItems, setLiveContinueItems] = useState([]);
 
   const loadRightPanelHistory = async () => {
@@ -31,7 +28,6 @@ export default function HomePageClient({
         const res = await fetch(`/api/history?userEmail=${session.user.email}`);
         if (res.ok) {
           const data = await res.json();
-          // 🚀 FIX LỖI TYPO CHÍ MẠNG: Đã dọn sạch ký tự lạ gây lỗi cú pháp build
           setLiveContinueItems(data.slice(0, 4));
         }
       } catch (error) {
@@ -52,6 +48,23 @@ export default function HomePageClient({
     return () => window.removeEventListener('historyUpdated', loadRightPanelHistory);
   }, [status, session]);
 
+  // 🚀 SỬA CHÍ MẠNG DI CHỨNG 404: Hàm bọc bảo vệ đường dẫn ảnh cho mục Top Rated Aside
+  const getAsideCleanImage = (movie) => {
+    if (!movie) return '';
+    const isKKPhim = movie.provider === 'kkphim' || 
+                     (movie.thumb_url && movie.thumb_url.includes('phimapi.com'));
+    
+    let rawUrl = isKKPhim 
+      ? (movie.thumb_url || movie.poster_url || '')
+      : (movie.poster_url || movie.thumb_url || '');
+
+    if (!rawUrl) return '';
+    if (rawUrl.startsWith('http://') || rawUrl.startsWith('https://')) return rawUrl;
+
+    const baseDomain = isKKPhim ? 'https://img.phimapi.com' : 'https://phim.nguonc.com';
+    return `${baseDomain}/${rawUrl.replace(/^\//, '')}`;
+  };
+
   return (
     <div className="w-full flex flex-row min-w-0 min-h-screen select-none font-sans items-start">
       
@@ -68,7 +81,6 @@ export default function HomePageClient({
           
           <ContinueWatching />
 
-          {/* 🚀 ĐÃ SỬA: Chỉ giữ lại Mới cập nhật, Hàn Quốc, Hoạt hình. Đã xóa Hành động và Trung Quốc theo ý anh */}
           <MovieSection title="Phim Mới Cập Nhật" movies={allMovies.slice(0, 12)} viewAllLink="/danh-sach?type=phim-moi-cap-nhat" />
           <MovieSection title="Phim Hàn Quốc" movies={koreaMovies.slice(0, 12)} viewAllLink="/danh-sach?type=han-quoc" />
           <MovieSection title="Phim Hoạt Hình" movies={animeMovies.slice(0, 12)} viewAllLink="/danh-sach?type=hoat-hinh" />
@@ -133,8 +145,9 @@ export default function HomePageClient({
                   </span>
                   
                   <div className="w-9 h-12 flex-shrink-0 rounded-xl overflow-hidden bg-[#0F1326] border border-white/5">
+                    {/* 🚀 ĐÃ VÁ: Khớp hàm getAsideCleanImage loại bỏ hoàn toàn 404 ảnh nhỏ */}
                     <img 
-                      src={movie.thumb_url} 
+                      src={getAsideCleanImage(movie)} 
                       alt={movie.name} 
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
                     />

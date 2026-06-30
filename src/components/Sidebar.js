@@ -24,7 +24,7 @@ export default function Sidebar({ collapsed, onToggleSidebar }) {
     { href: '/home',       label: 'Trang Chủ', icon: Moon,        desc: 'New Moon' },
     { href: '/danh-sach',  label: 'Thể Loại',  icon: Compass,     desc: 'Crescent Moon' },
     { href: '/search',     label: 'Tìm Kiếm',  icon: Search,      desc: 'Half Moon' },
-    { href: '/history',    label: 'Cá Nhân',   icon: User,        desc: 'Full Moon' },
+    { href: '/account',    label: 'Cá Nhân',   icon: User,        desc: 'Full Moon' },
   ];
 
   const isLoggedIn = !!session;

@@ -9,7 +9,7 @@ import MovieCard from '@/components/MovieCard';
 export default function MovieDetailPage({ params: paramsPromise }) {
   const params = use(paramsPromise);
   const movieSlug = params.slug;
-  
+
   const router = useRouter();
   const [movieData, setMovieData] = useState(null);
   const [relatedMovies, setRelatedMovies] = useState([]);
@@ -36,8 +36,9 @@ export default function MovieDetailPage({ params: paramsPromise }) {
         const data = await getMovieDetail(movieSlug);
         if (data && data.movie) {
           setMovieData(data);
-          
-          const firstGenre = data.movie.category?.['2']?.list?.[0]?.name;
+
+          // 🚀 SỬA CHÍ MẠNG: Đổi từ .name thành .slug để truyền tham số sạch (Ví dụ: "chinh-kich")
+          const firstGenre = data.movie.category?.['2']?.list?.[0]?.slug;
           if (firstGenre) {
             const related = await getRelatedMovies(firstGenre, 4);
             setRelatedMovies(related);
@@ -71,7 +72,7 @@ export default function MovieDetailPage({ params: paramsPromise }) {
 
   const { movie, episodes } = movieData;
 
-  const allCategoryTags = movie.category 
+  const allCategoryTags = movie.category
     ? Object.values(movie.category).flatMap(group => group.list?.map(item => item.name) || [])
     : [];
 
@@ -80,7 +81,7 @@ export default function MovieDetailPage({ params: paramsPromise }) {
   const releaseYear = movie.category?.['3']?.list?.map(item => item.name)[0] || movie.year || 'N/A';
   const countriesList = movie.category?.['4']?.list?.map(item => item.name).join(', ') || 'N/A';
 
-  const formattedModifiedDate = movie.modified 
+  const formattedModifiedDate = movie.modified
     ? new Date(movie.modified).toLocaleDateString('vi-VN', { year: 'numeric', month: 'long', day: 'numeric' })
     : 'N/A';
 
@@ -89,7 +90,7 @@ export default function MovieDetailPage({ params: paramsPromise }) {
   const allEpisodes = currentServer?.server_data || currentServer?.items || [];
 
   // Lọc theo thanh tìm kiếm
-  const filteredEpisodes = allEpisodes.filter(ep => 
+  const filteredEpisodes = allEpisodes.filter(ep =>
     ep?.name?.toLowerCase().includes(searchEpisode.trim().toLowerCase())
   );
 
@@ -97,22 +98,22 @@ export default function MovieDetailPage({ params: paramsPromise }) {
   const ITEMS_PER_RANGE = 40;
   const totalEpisodesCount = filteredEpisodes.length;
   const rangeChunks = [];
-  
+
   if (totalEpisodesCount > ITEMS_PER_RANGE && searchEpisode === '') {
     for (let i = 0; i < totalEpisodesCount; i += ITEMS_PER_RANGE) {
       rangeChunks.push(filteredEpisodes.slice(i, i + ITEMS_PER_RANGE));
     }
   }
 
-  const displayedEpisodes = rangeChunks.length > 0 
-    ? rangeChunks[activeRangeTab] || [] 
+  const displayedEpisodes = rangeChunks.length > 0
+    ? rangeChunks[activeRangeTab] || []
     : filteredEpisodes;
 
   return (
     <div className="w-full min-h-screen bg-transparent text-[#e8e1da] select-none pb-24 font-sans" style={{ fontFamily: "'Be Vietnam Pro', sans-serif" }}>
-      
+
       {/* ── 1. CINEMATIC BACKDROP DEEP SPACE ── */}
-      <div 
+      <div
         className="absolute top-0 left-0 right-0 h-[55vh] md:h-[100vh] z-0 pointer-events-none"
         style={{
           maskImage: 'linear-gradient(to bottom, black 0%, black 30%, transparent 75%, transparent 100%)',
@@ -120,10 +121,10 @@ export default function MovieDetailPage({ params: paramsPromise }) {
         }}
       >
         <div className="absolute inset-0 bg-gradient-to-r from-[#060814] via-[#060814]/50 to-transparent z-10" />
-        <img 
-          className="w-full h-full object-cover opacity-20 scale-105 filter blur-[1px]" 
-          src={movie.poster_url || movie.thumb_url} 
-          alt={movie.name} 
+        <img
+          className="w-full h-full object-cover opacity-20 scale-105 filter blur-[1px]"
+          src={movie.poster_url || movie.thumb_url}
+          alt={movie.name}
         />
       </div>
 
@@ -141,12 +142,12 @@ export default function MovieDetailPage({ params: paramsPromise }) {
       {/* ── 2. HERO AREA ── */}
       <section className="relative z-10 pt-6 md:pt-16 max-w-[1600px] mx-auto px-4 sm:px-6 md:px-12">
         <div className="flex flex-row md:flex-row gap-4 md:gap-12 items-start md:items-start text-left md:text-left">
-          
+
           <div className="w-28 sm:w-36 md:w-72 shrink-0 rounded-xl md:rounded-2xl overflow-hidden bg-[#0F1326]/40 border border-white/10 shadow-[0_15px_40px_rgba(0,0,0,0.85)] md:shadow-[0_25px_60px_rgba(0,0,0,0.85)] transition-all duration-500 hover:border-[#E6C687]/30 md:hover:-translate-y-1.5">
-            <img 
-              className="w-full aspect-[2/3] object-cover" 
-              src={movie.thumb_url || movie.poster_url} 
-              alt={movie.name} 
+            <img
+              className="w-full aspect-[2/3] object-cover"
+              src={movie.thumb_url || movie.poster_url}
+              alt={movie.name}
             />
           </div>
 
@@ -184,7 +185,7 @@ export default function MovieDetailPage({ params: paramsPromise }) {
             </div>
 
             <div className="flex flex-wrap justify-start items-center gap-4 pt-2 md:pt-4">
-              <button 
+              <button
                 onClick={() => {
                   const firstEp = allEpisodes?.[0]?.name || '1';
                   router.push(`/watch/${movieSlug}?ep=${firstEp}`);
@@ -201,17 +202,17 @@ export default function MovieDetailPage({ params: paramsPromise }) {
 
       {/* ── 3. KHU VỰC CHI TIẾT NỘI DUNG ── */}
       <section className="px-4 sm:px-6 md:px-12 mt-8 md:mt-20 grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 max-w-[1600px] mx-auto relative z-10">
-        
+
         {/* CỘT TRÁI (8 Cột) */}
         <div className="lg:col-span-8 space-y-8 md:space-y-12">
-          
+
           <div className="space-y-3 md:space-y-4">
             <h2 className="text-xs font-bold text-[#E6C687] border-l-4 border-[#E6C687] pl-3 uppercase tracking-widest">
               The Premise / Tóm tắt
             </h2>
-            <div 
-              className="text-sm md:text-base text-[#d0c5b5]/80 leading-relaxed text-justify html-content" 
-              dangerouslySetInnerHTML={{ __html: movie.description || movie.content }} 
+            <div
+              className="text-sm md:text-base text-[#d0c5b5]/80 leading-relaxed text-justify html-content"
+              dangerouslySetInnerHTML={{ __html: movie.description || movie.content }}
             />
           </div>
 
@@ -230,11 +231,11 @@ export default function MovieDetailPage({ params: paramsPromise }) {
               <h2 className="text-xs font-bold text-[#E6C687] uppercase tracking-widest">
                 Chapters / Danh Sách Tập
               </h2>
-              
+
               {/* Thanh tìm nhanh tập phim (Cực tiện cho phim dài tập) */}
               {allEpisodes.length > 10 && (
                 <div className="relative w-full sm:w-48">
-                  <input 
+                  <input
                     type="text"
                     placeholder="Tìm nhanh tập..."
                     value={searchEpisode}
@@ -248,13 +249,13 @@ export default function MovieDetailPage({ params: paramsPromise }) {
                 </div>
               )}
             </div>
-            
+
             <div className="space-y-4">
               {!episodes || episodes.length === 0 ? (
                 <p className="text-xs text-[#d0c5b5]/30 italic pl-1">Đang cập nhật chòm sao tập phim...</p>
               ) : (
                 <div className="bg-[#0F1326]/40 backdrop-blur-2xl border border-white/5 p-4 md:p-6 rounded-2xl space-y-4 md:space-y-6 shadow-2xl">
-                  
+
                   {/* Gộp Sever thành Tab điều hướng tinh tế */}
                   {episodes.length > 1 && (
                     <div className="flex flex-wrap items-center gap-2 border-b border-white/5 pb-4">
@@ -269,11 +270,10 @@ export default function MovieDetailPage({ params: paramsPromise }) {
                             setSearchEpisode('');
                             setActiveRangeTab(0);
                           }}
-                          className={`px-3 py-1.5 rounded-lg text-[11px] font-bold tracking-wide uppercase border transition-all duration-300 focus:outline-none cursor-pointer ${
-                            activeServerIdx === sIdx
+                          className={`px-3 py-1.5 rounded-lg text-[11px] font-bold tracking-wide uppercase border transition-all duration-300 focus:outline-none cursor-pointer ${activeServerIdx === sIdx
                               ? 'bg-[#E6C687]/10 border-[#E6C687] text-[#ffe3ae] shadow-md shadow-[#E6C687]/5'
                               : 'bg-white/[0.02] border-white/5 text-[#d0c5b5]/50 hover:text-[#e8e1da] hover:border-white/10'
-                          }`}
+                            }`}
                         >
                           {server?.server_name?.replace('Vietsub', '').replace('Thuyết minh', '').trim() || `#${sIdx + 1}`}
                         </button>
@@ -291,11 +291,10 @@ export default function MovieDetailPage({ params: paramsPromise }) {
                           <button
                             key={chunkIdx}
                             onClick={() => setActiveRangeTab(chunkIdx)}
-                            className={`flex-1 min-w-[70px] text-center py-1 rounded-lg text-[10px] font-bold tracking-wide transition-all focus:outline-none cursor-pointer ${
-                              activeRangeTab === chunkIdx
+                            className={`flex-1 min-w-[70px] text-center py-1 rounded-lg text-[10px] font-bold tracking-wide transition-all focus:outline-none cursor-pointer ${activeRangeTab === chunkIdx
                                 ? 'bg-[#E6C687] text-[#402d00]'
                                 : 'text-[#d0c5b5]/60 hover:bg-white/5 hover:text-white'
-                            }`}
+                              }`}
                           >
                             {startEp} - {endEp}
                           </button>
@@ -310,7 +309,7 @@ export default function MovieDetailPage({ params: paramsPromise }) {
                   ) : (
                     <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-5 xl:grid-cols-6 gap-2 md:gap-2.5">
                       {displayedEpisodes.map((ep, eIdx) => (
-                        <div 
+                        <div
                           key={eIdx}
                           onClick={() => router.push(`/watch/${movieSlug}?ep=${ep?.name}`)}
                           className="bg-white/[0.02] border border-white/5 p-2 md:p-2.5 rounded-xl flex items-center justify-center relative group cursor-pointer hover:border-[#E6C687]/50 hover:bg-[#E6C687]/5 transition-all duration-300 hover:shadow-[0_0_15px_rgba(230,198,135,0.08)] active:scale-95"
@@ -338,13 +337,13 @@ export default function MovieDetailPage({ params: paramsPromise }) {
             <h3 className="text-[10px] font-bold text-[#E6C687] tracking-widest uppercase flex items-center gap-2 border-b border-white/5 pb-2">
               <Globe className="w-4 h-4" /> Observatory Logs
             </h3>
-            
+
             <div className="space-y-3 md:space-y-4 text-xs font-semibold uppercase tracking-wide">
               <div className="flex justify-between items-start py-1 border-b border-white/5 gap-4">
                 <span className="text-[#d0c5b5]/30 text-[10px] whitespace-nowrap pt-0.5">Đạo diễn</span>
                 <span className="text-white text-right font-bold normal-case text-xs md:text-sm">{movie.director || 'N/A'}</span>
               </div>
-              
+
               <div className="flex justify-between items-center py-1 border-b border-white/5">
                 <span className="text-[#d0c5b5]/30 text-[10px]">Quốc gia</span>
                 <span className="text-white font-bold normal-case text-xs md:text-sm">{countriesList}</span>
@@ -374,7 +373,7 @@ export default function MovieDetailPage({ params: paramsPromise }) {
                 <span className="text-[#d0c5b5]/30 text-[10px] whitespace-nowrap pt-0.5 flex items-center gap-1"><History className="w-3 h-3" /> Cập nhật</span>
                 <span className="text-[#d0c5b5]/60 font-mono font-bold text-right text-xs normal-case">{formattedModifiedDate}</span>
               </div>
-              
+
               <div className="flex justify-between items-center py-1 border-b border-white/5">
                 <span className="text-[#d0c5b5]/30 text-[10px]">Tình trạng</span>
                 <span className="text-[#ffe3ae] font-bold text-[10px] bg-[#E6C687]/10 px-2.5 py-0.5 rounded border border-[#E6C687]/20">
