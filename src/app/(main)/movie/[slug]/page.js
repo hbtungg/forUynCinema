@@ -5,11 +5,13 @@ import { useRouter } from 'next/navigation';
 import { Star, Play, Globe, CalendarDays, Film, Tv, History, ArrowLeft, PlayCircle } from 'lucide-react';
 import { getMovieDetail, getRelatedMovies } from '@/lib/clientMovies';
 import MovieCard from '@/components/MovieCard';
+import EpisodeList from '@/components/EpisodeList';
+
 
 export default function MovieDetailPage({ params: paramsPromise }) {
   const params = use(paramsPromise);
   const movieSlug = params.slug;
-  
+
   const router = useRouter();
   const [movieData, setMovieData] = useState(null);
   const [relatedMovies, setRelatedMovies] = useState([]);
@@ -32,7 +34,7 @@ export default function MovieDetailPage({ params: paramsPromise }) {
         const data = await getMovieDetail(movieSlug);
         if (data && data.movie) {
           setMovieData(data);
-          
+
           const firstGenre = data.movie.category?.['2']?.list?.[0]?.name;
           if (firstGenre) {
             const related = await getRelatedMovies(firstGenre, 4);
@@ -67,7 +69,7 @@ export default function MovieDetailPage({ params: paramsPromise }) {
 
   const { movie, episodes } = movieData;
 
-  const allCategoryTags = movie.category 
+  const allCategoryTags = movie.category
     ? Object.values(movie.category).flatMap(group => group.list?.map(item => item.name) || [])
     : [];
 
@@ -76,15 +78,15 @@ export default function MovieDetailPage({ params: paramsPromise }) {
   const releaseYear = movie.category?.['3']?.list?.map(item => item.name)[0] || movie.year || 'N/A';
   const countriesList = movie.category?.['4']?.list?.map(item => item.name).join(', ') || 'N/A';
 
-  const formattedModifiedDate = movie.modified 
+  const formattedModifiedDate = movie.modified
     ? new Date(movie.modified).toLocaleDateString('vi-VN', { year: 'numeric', month: 'long', day: 'numeric' })
     : 'N/A';
 
   return (
     <div className="w-full min-h-screen bg-transparent text-[#e8e1da] select-none pb-24 font-sans" style={{ fontFamily: "'Be Vietnam Pro', sans-serif" }}>
-      
+
       {/* ── 1. CINEMATIC BACKDROP DEEP SPACE ── */}
-      <div 
+      <div
         className="absolute top-0 left-0 right-0 h-[85vh] md:h-[100vh] z-0 pointer-events-none"
         style={{
           maskImage: 'linear-gradient(to bottom, black 0%, black 45%, transparent 92%, transparent 100%)',
@@ -92,10 +94,10 @@ export default function MovieDetailPage({ params: paramsPromise }) {
         }}
       >
         <div className="absolute inset-0 bg-gradient-to-r from-[#060814] via-[#060814]/50 to-transparent z-10" />
-        <img 
-          className="w-full h-full object-cover opacity-20 scale-105 filter blur-[1px]" 
-          src={movie.poster_url || movie.thumb_url} 
-          alt={movie.name} 
+        <img
+          className="w-full h-full object-cover opacity-20 scale-105 filter blur-[1px]"
+          src={movie.poster_url || movie.thumb_url}
+          alt={movie.name}
         />
       </div>
 
@@ -113,13 +115,13 @@ export default function MovieDetailPage({ params: paramsPromise }) {
       {/* ── 2. HERO AREA (MỞ RỘNG KỊCH SÀN MAX-W-[1600PX]) ── */}
       <section className="relative z-10 pt-8 md:pt-16 max-w-[1600px] mx-auto px-6 md:px-12">
         <div className="flex flex-col md:flex-row gap-12 items-center md:items-start text-center md:text-left">
-          
+
           {/* Poster phim khổng lồ bọc viền vàng */}
           <div className="w-60 md:w-72 shrink-0 rounded-2xl overflow-hidden bg-[#0F1326]/40 border border-white/10 shadow-[0_25px_60px_rgba(0,0,0,0.85)] transition-all duration-500 hover:border-[#E6C687]/30 hover:-translate-y-1.5">
-            <img 
-              className="w-full aspect-[2/3] object-cover" 
-              src={movie.thumb_url || movie.poster_url} 
-              alt={movie.name} 
+            <img
+              className="w-full aspect-[2/3] object-cover"
+              src={movie.thumb_url || movie.poster_url}
+              alt={movie.name}
             />
           </div>
 
@@ -158,7 +160,7 @@ export default function MovieDetailPage({ params: paramsPromise }) {
             </div>
 
             <div className="flex flex-wrap justify-center md:justify-start items-center gap-4 pt-4">
-              <button 
+              <button
                 onClick={() => {
                   const firstEp = episodes?.[0]?.server_data?.[0]?.name || '1';
                   router.push(`/watch/${movieSlug}?ep=${firstEp}`);
@@ -175,17 +177,17 @@ export default function MovieDetailPage({ params: paramsPromise }) {
 
       {/* ── 3. KHU VỰC CHI TIẾT NỘI DUNG (MỞ RỘNG RỘNG RÃI MAX-W-[1600PX]) ── */}
       <section className="px-6 md:px-12 mt-20 grid grid-cols-1 lg:grid-cols-12 gap-12 max-w-[1600px] mx-auto relative z-10">
-        
+
         {/* CỘT TRÁI (8 Cột): Tóm tắt & Các tập phim */}
         <div className="lg:col-span-8 space-y-12">
-          
+
           <div className="space-y-4">
             <h2 className="text-xs font-bold text-[#E6C687] border-l-4 border-[#E6C687] pl-3 uppercase tracking-widest">
               The Premise / Tóm tắt
             </h2>
-            <div 
-              className="text-sm md:text-base text-[#d0c5b5]/80 leading-relaxed text-justify html-content" 
-              dangerouslySetInnerHTML={{ __html: movie.description || movie.content }} 
+            <div
+              className="text-sm md:text-base text-[#d0c5b5]/80 leading-relaxed text-justify html-content"
+              dangerouslySetInnerHTML={{ __html: movie.description || movie.content }}
             />
           </div>
 
@@ -198,40 +200,11 @@ export default function MovieDetailPage({ params: paramsPromise }) {
             </p>
           </div>
 
-          {/* Chapters List */}
-          <div className="space-y-6">
+          <div className="space-y-4">
             <h2 className="text-xs font-bold text-[#E6C687] uppercase tracking-widest border-b border-white/5 pb-2">
               Chapters / Danh Sách Tập
             </h2>
-            
-            <div className="space-y-6">
-              {!episodes || episodes.length === 0 ? (
-                <p className="text-xs text-[#d0c5b5]/30 italic pl-1">Đang cập nhật chòm sao tập phim...</p>
-              ) : (
-                episodes.map((server, sIdx) => (
-                  <div key={sIdx} className="bg-[#0F1326]/40 backdrop-blur-2xl border border-white/5 p-6 rounded-2xl space-y-4 shadow-2xl">
-                    <p className="text-[10px] font-bold text-[#E6C687] tracking-widest uppercase flex items-center gap-2">
-                      <Tv className="w-3.5 h-3.5" /> Nguồn phát trực tiếp: {server?.server_name || `Server #${sIdx + 1}`}
-                    </p>
-                    
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3">
-                      {server?.items?.map((ep, eIdx) => (
-                        <div 
-                          key={eIdx}
-                          onClick={() => router.push(`/watch/${movieSlug}?ep=${ep?.name}`)}
-                          className="bg-white/[0.02] border border-white/5 p-3.5 rounded-xl flex items-center justify-between group cursor-pointer hover:border-[#E6C687]/40 hover:bg-white/5 transition-all duration-300"
-                        >
-                          <span className="text-xs font-bold text-[#e8e1da] truncate group-hover:text-[#ffe3ae]">
-                            Tập {ep?.name}
-                          </span>
-                          <Play className="w-3 h-3 text-[#E6C687] opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-75 group-hover:scale-100 fill-current" />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
+            <EpisodeList episodes={episodes} slug={slug} />
           </div>
 
         </div>
@@ -242,13 +215,13 @@ export default function MovieDetailPage({ params: paramsPromise }) {
             <h3 className="text-[10px] font-bold text-[#E6C687] tracking-widest uppercase flex items-center gap-2 border-b border-white/5 pb-2">
               <Globe className="w-4 h-4" /> Observatory Logs
             </h3>
-            
+
             <div className="space-y-4 text-xs font-semibold uppercase tracking-wide">
               <div className="flex justify-between items-start py-1 border-b border-white/5 gap-4">
                 <span className="text-[#d0c5b5]/30 text-[10px] whitespace-nowrap pt-0.5">Đạo diễn</span>
                 <span className="text-white text-right font-bold normal-case text-xs md:text-sm">{movie.director || 'N/A'}</span>
               </div>
-              
+
               <div className="flex justify-between items-center py-1 border-b border-white/5">
                 <span className="text-[#d0c5b5]/30 text-[10px]">Quốc gia</span>
                 <span className="text-white font-bold normal-case text-xs md:text-sm">{countriesList}</span>
@@ -278,7 +251,7 @@ export default function MovieDetailPage({ params: paramsPromise }) {
                 <span className="text-[#d0c5b5]/30 text-[10px] whitespace-nowrap pt-0.5 flex items-center gap-1"><History className="w-3 h-3" /> Cập nhật</span>
                 <span className="text-[#d0c5b5]/60 font-mono font-bold text-right text-xs normal-case">{formattedModifiedDate}</span>
               </div>
-              
+
               <div className="flex justify-between items-center py-1 border-b border-white/5">
                 <span className="text-[#d0c5b5]/30 text-[10px]">Tình trạng</span>
                 <span className="text-[#ffe3ae] font-bold text-[10px] bg-[#E6C687]/10 px-2.5 py-0.5 rounded border border-[#E6C687]/20">
