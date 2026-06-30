@@ -52,7 +52,7 @@ export default function IOSInstallPrompt() {
           </div>
 
           <p className="text-xs text-[#d0c5b5]/80 leading-relaxed font-medium">
-            Mang rạp phim <span className="text-[#ffe3ae] font-bold">Uynflix</span> ra màn hình chính của anh để trải nghiệm phát video Full-Screen chuẩn điện ảnh IMAX 120Hz mượt mà nhất nhé!
+            Mang <span className="text-[#ffe3ae] font-bold">Uynflix</span> ra màn hình chính để trải nghiệm mượt mà nhất nhé!
           </p>
 
           {/* Các bước thao tác mô phỏng đúng chuẩn iOS UI */}
