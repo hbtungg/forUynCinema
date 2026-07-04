@@ -97,6 +97,31 @@ function buildNguoncUrl(path, params = {}) {
   return url.toString();
 }
 
+function logProviderInfo(message, payload = {}) {
+  if (typeof window !== "undefined") {
+    console.info(`[Movie API] ${message}`, payload);
+  }
+}
+
+function logProviderWarning(message, payload = {}) {
+  if (typeof window !== "undefined") {
+    console.warn(`[Movie API] ${message}`, payload);
+  }
+}
+
+function hasProviderData(result) {
+  return Boolean(result?.items?.length || result?.movie);
+}
+
+function logNguoncProxyError(data, context = {}) {
+  if (data?._proxyError) {
+    logProviderWarning("NguonC lỗi hoặc bị chặn, chuyển sang nguồn dự phòng.", {
+      ...context,
+      ...data._proxyError,
+    });
+  }
+}
+
 function normalizeEpisode(ep = {}) {
   return {
     ...ep,
@@ -206,13 +231,32 @@ async function fetchKkphim(path, params = {}) {
 
 async function withFallback({ nguonc, kkphim, normalize, empty }) {
   const primary = await nguonc();
+  logNguoncProxyError(primary, { provider: "nguonc" });
   const primaryResult = primary ? normalize(primary, "nguonc") : null;
-  if (primaryResult?.items?.length || primaryResult?.movie) return primaryResult;
+  if (hasProviderData(primaryResult)) {
+    logProviderInfo("Đang dùng API NguonC.", {
+      provider: "nguonc",
+      items: primaryResult.items?.length,
+      movie: Boolean(primaryResult.movie),
+    });
+    return primaryResult;
+  }
 
   const secondary = await kkphim();
   const secondaryResult = secondary ? normalize(secondary, "kkphim") : null;
-  if (secondaryResult?.items?.length || secondaryResult?.movie) return secondaryResult;
+  if (hasProviderData(secondaryResult)) {
+    logProviderInfo("Đang dùng API KKPhim.", {
+      provider: "kkphim",
+      reason: primary ? "NguonC không có dữ liệu hợp lệ." : "NguonC không phản hồi.",
+      items: secondaryResult.items?.length,
+      movie: Boolean(secondaryResult.movie),
+    });
+    return secondaryResult;
+  }
 
+  logProviderWarning("Không có API phim nào trả dữ liệu hợp lệ.", {
+    tried: ["nguonc", "kkphim"],
+  });
   return empty;
 }
 
@@ -227,12 +271,23 @@ async function withPreferredFallback({ preferredProvider, nguonc, kkphim, normal
     const result = provider === "nguonc"
       ? (await nguonc())
       : (await kkphim());
+    if (provider === "nguonc") {
+      logNguoncProxyError(result, { provider });
+    }
     const normalized = result ? normalize(result, provider) : null;
-    if (normalized?.items?.length || normalized?.movie) {
+    if (hasProviderData(normalized)) {
+      logProviderInfo(`Đang dùng API ${provider === "nguonc" ? "NguonC" : "KKPhim"}.`, {
+        provider,
+        items: normalized.items?.length,
+        movie: Boolean(normalized.movie),
+      });
       return normalized;
     }
   }
 
+  logProviderWarning("Không có API phim nào trả dữ liệu hợp lệ.", {
+    tried: providerOrder,
+  });
   return empty;
 }
 

@@ -34,13 +34,29 @@ export async function GET(request) {
 
     if (!res.ok) {
       console.warn(`NguonC proxy upstream failed: ${res.status} ${path}`);
-      return NextResponse.json({ items: [] });
+      return NextResponse.json({
+        items: [],
+        _proxyError: {
+          provider: 'nguonc',
+          status: res.status,
+          statusText: res.statusText,
+          path,
+          url: upstreamUrl.toString(),
+        },
+      });
     }
 
     const data = await res.json();
     return NextResponse.json(data);
   } catch (error) {
     console.error("Lỗi API:", error);
-    return NextResponse.json({ items: [] });
+    return NextResponse.json({
+      items: [],
+      _proxyError: {
+        provider: 'nguonc',
+        message: error instanceof Error ? error.message : 'Unknown proxy error',
+        path,
+      },
+    });
   }
 }
