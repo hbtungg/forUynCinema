@@ -89,7 +89,7 @@ export default function WatchClient({ slug }) {
   const playerRef = useRef(null);
   const historyTimerRef = useRef(null);
   const loadingTimerRef = useRef(null);
-  
+
   const fetchKeyRef = useRef("");
 
   const currentEpisodes = useMemo(() => servers[selectedServer]?.items || [], [servers, selectedServer]);
@@ -123,8 +123,8 @@ export default function WatchClient({ slug }) {
           getMovieDetail(slug, selectedProvider === "auto" ? null : selectedProvider),
           session?.user?.email
             ? fetch(`/api/favorites/check?slug=${slug}&userEmail=${session.user.email}`)
-                .then(r => r.ok ? r.json() : null)
-                .catch(() => null)
+              .then(r => r.ok ? r.json() : null)
+              .catch(() => null)
             : Promise.resolve(null),
         ]);
 
@@ -223,7 +223,8 @@ export default function WatchClient({ slug }) {
         name: movie.name,
         origin_name: movie.origin_name || movie.original_name || "",
         year: movie.year || "",
-        thumb_url: movie.thumb_url,
+        thumb_url: movie.thumb_url || movie.poster_url,
+        poster_url: movie.poster_url || movie.thumb_url,
         time: new Date().toLocaleDateString("vi-VN"),
         episode: currentEp.name || "1",
         episodeIndex: selectedEpisode,
@@ -238,7 +239,7 @@ export default function WatchClient({ slug }) {
         localStorage.setItem("watchHistory", JSON.stringify([item, ...h.filter(x => !sameMovie(x))].slice(0, 10)));
         window.dispatchEvent(new Event("storage"));
         window.dispatchEvent(new Event("historyUpdated"));
-      } catch (_) {}
+      } catch (_) { }
       if (session?.user?.email) {
         try {
           await fetch("/api/history", {
@@ -246,7 +247,7 @@ export default function WatchClient({ slug }) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ movie: item, userEmail: session.user.email }),
           });
-        } catch (_) {}
+        } catch (_) { }
       }
     }, 30000);
     return () => clearTimeout(historyTimerRef.current);
@@ -330,7 +331,7 @@ export default function WatchClient({ slug }) {
   return (
     /* 🚀 ĐÃ CẢI TẠO LUỒNG PHẲNG LỲ: Xóa sạch h-screen bọc ngoài, trong suốt hoàn toàn, items-start */
     <div className="w-full min-h-screen bg-transparent text-[#e8e1da] font-sans antialiased select-none pb-24" style={{ fontFamily: "'Be Vietnam Pro', sans-serif" }}>
-      
+
       {/* NÚT QUAY LẠI PHÍA TRÊN BÊN TRÁI CHUẨN PHA LÊ MOONLIGHT */}
       <div className="max-w-[1800px] mx-auto px-4 md:px-8 xl:px-10 pt-2 pb-4">
         <button
@@ -344,7 +345,7 @@ export default function WatchClient({ slug }) {
 
       {/* KHUNG KHỐI CHÍNH TĂNG ĐỘ RỘNG MAX-W-[1800PX] CHUẨN ĐIỆN ẢNH IMAX */}
       <div className="w-full max-w-[1800px] mx-auto px-4 md:px-8 xl:px-10 grid grid-cols-1 xl:grid-cols-[1fr_300px] 2xl:grid-cols-[1fr_340px] gap-6 items-start">
-        
+
         {/* KHỐI TRÁI: PLAYER CHÍNH VÀ METADATA TẬP PHIM */}
         <div className="min-w-0 w-full space-y-5">
           <div ref={playerRef}>
@@ -400,7 +401,7 @@ export default function WatchClient({ slug }) {
             selectedEpisode={selectedEpisode}
             handleEpisodeChange={handleEpisodeChange}
           />
-          
+
           {/* KHAY ĐỀ XUẤT LIÊN QUAN CHUẨN TINH HỆ MOONLIGHT GOLD */}
           <div className="border-t border-white/5 pt-4">
             <span className="block text-[10px] font-black uppercase tracking-[0.25em] text-[#d0c5b5]/40 px-1 mb-3">
