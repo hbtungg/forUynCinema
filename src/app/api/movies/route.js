@@ -3,15 +3,24 @@ import { NextResponse } from 'next/server';
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const path = searchParams.get('path');
-  const page = searchParams.get('page') || '1';
 
   if (!path) {
     return NextResponse.json({ items: [] }, { status: 400 });
   }
 
   try {
+    const upstreamUrl = new URL(`https://phim.nguonc.com/api/${path}`);
+    searchParams.forEach((value, key) => {
+      if (key !== 'path') {
+        upstreamUrl.searchParams.set(key, value);
+      }
+    });
+    if (!upstreamUrl.searchParams.has('page')) {
+      upstreamUrl.searchParams.set('page', '1');
+    }
+
     // Gọi sang NguồnC từ tầng Server ẩn danh của Vercel
-    const res = await fetch(`https://phim.nguonc.com/api/${path}?page=${page}`, {
+    const res = await fetch(upstreamUrl.toString(), {
       method: 'GET',
       headers: {
         'Accept': 'application/json',

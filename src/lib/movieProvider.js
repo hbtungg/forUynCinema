@@ -82,6 +82,21 @@ function buildUrl(base, path, params = {}) {
   return url.toString();
 }
 
+function buildNguoncUrl(path, params = {}) {
+  if (typeof window === "undefined") {
+    return buildUrl(NGUONC_API, path, params);
+  }
+
+  const url = new URL("/api/movies", window.location.origin);
+  url.searchParams.set("path", path);
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== "") {
+      url.searchParams.set(key, value);
+    }
+  });
+  return url.toString();
+}
+
 function normalizeEpisode(ep = {}) {
   return {
     ...ep,
@@ -180,7 +195,7 @@ function normalizeDetailResponse(data, provider = "nguonc") {
 }
 
 async function fetchNguonc(path, params = {}) {
-  const data = await safeFetchJson(buildUrl(NGUONC_API, path, params));
+  const data = await safeFetchJson(buildNguoncUrl(path, params));
   return data;
 }
 
