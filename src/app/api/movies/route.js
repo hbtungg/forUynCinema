@@ -33,13 +33,14 @@ export async function GET(request) {
     });
 
     if (!res.ok) {
-      return NextResponse.json({ items: [] }, { status: res.status });
+      console.warn(`NguonC proxy upstream failed: ${res.status} ${path}`);
+      return NextResponse.json({ items: [] });
     }
 
     const data = await res.json();
     return NextResponse.json(data);
   } catch (error) {
     console.error("Lỗi API:", error);
-    return NextResponse.json({ items: [] }, { status: 500 });
+    return NextResponse.json({ items: [] });
   }
 }
