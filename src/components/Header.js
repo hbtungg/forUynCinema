@@ -70,7 +70,7 @@ export default function Header() {
           <div className="hidden lg:flex items-center gap-6 text-xs font-bold tracking-wider uppercase">
             <Link href="/home" className={`transition-colors duration-300 ${pathname === '/home' ? 'text-[#E6C687]' : 'text-[#d0c5b5]/40 hover:text-[#E6C687]'}`}>Movies</Link>
             <Link href="/danh-sach" className={`transition-colors duration-300 ${pathname === '/danh-sach' ? 'text-[#E6C687]' : 'text-[#d0c5b5]/40 hover:text-[#E6C687]'}`}>Discover</Link>
-            <Link href="/favorites" className={`transition-colors duration-300 ${pathname === '/favorites' ? 'text-[#E6C687]' : 'text-[#d0c5b5]/40 hover:text-[#E6C687]'}`}>Favorites</Link>
+            <Link href="/history" className={`transition-colors duration-300 ${pathname === '/history' ? 'text-[#E6C687]' : 'text-[#d0c5b5]/40 hover:text-[#E6C687]'}`}>History</Link>
           </div>
         </div>
 
