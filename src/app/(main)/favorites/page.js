@@ -24,7 +24,7 @@ export default function FavoritesPage() {
           localStorage.setItem(storageKey, JSON.stringify(cloudData));
         }
       } catch (error) {
-        console.error("Lỗi fetch yêu thích từ tinh hệ:", error);
+        console.error("Lỗi fetch yêu thích từ:", error);
       } finally {
         setIsLoading(false);
       }

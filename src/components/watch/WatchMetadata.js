@@ -33,7 +33,7 @@ export default function WatchMetadata({
       {/* ── 🚀 THÔNG BÁO TOAST CHIA SẺ PHA LÊ MOONLIGHT GOLD ── */}
       {shareToast && (
         <div className="fixed bottom-10 right-10 z-[999] bg-[#0F1326]/90 border border-[#E6C687]/30 backdrop-blur-2xl text-[#ffe3ae] text-[10px] font-bold uppercase tracking-widest px-5 py-3 rounded-2xl shadow-[0_15px_40px_rgba(0,0,0,0.6)] animate-in slide-in-from-bottom-5 duration-300 flex items-center gap-2">
-          <span>✨</span> Đã sao chép liên kết tinh hệ phim!
+          <span>✨</span> Đã sao chép liên kết phim!
         </div>
       )}
 

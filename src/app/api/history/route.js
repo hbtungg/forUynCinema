@@ -10,9 +10,6 @@ export async function POST(req) {
 
     if (!movie || !userEmail) return NextResponse.json({ error: "Thiếu dữ liệu" }, { status: 400 });
 
-    // canonicalKey là key duy nhất nhận diện phim, độc lập với provider/slug.
-    // Nếu thiếu canonicalKey thì từ chối lưu — tránh tạo bản ghi trùng khi fallback slug
-    // không nhất quán giữa các nguồn (nguonc vs kkphim có thể dùng slug khác nhau).
     if (!movie.canonicalKey) {
       console.warn("[history/POST] Thiếu canonicalKey, bỏ qua lưu lịch sử:", movie.slug);
       return NextResponse.json({ error: "Thiếu canonicalKey" }, { status: 400 });
@@ -58,26 +55,41 @@ export async function POST(req) {
   }
 }
 
-// 2. LẤY LỊCH SỬ XEM VỀ (GET)
+// 2. LẤY LỊCH SỬ XEM VỀ (GET) - HỖ TRỢ PHÂN TRANG CỐ ĐỊNH 8 PHIM
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
     const userEmail = searchParams.get('userEmail');
-    if (!userEmail) return NextResponse.json([]);
+    
+    // Đọc trang hiện tại, mặc định là trang 1
+    const page = parseInt(searchParams.get('page'), 10) || 1;
+    const limit = 8; // Cố định 8 phim trên 1 trang theo ý anh
+    const skip = (page - 1) * limit;
+
+    if (!userEmail) return NextResponse.json({ movies: [], total: 0 });
 
     const client = await clientPromise;
     const db = client.db("ForUynDB");
     
-    const history = await db.collection("history")
+    // 1. Lấy tổng số phim thực tế đã xem trong DB của User
+    const total = await db.collection("history").countDocuments({ userEmail: userEmail });
+
+    // 2. Lấy danh sách phim đã được phân trang chọc lọc
+    const historyData = await db.collection("history")
       .find({ userEmail: userEmail })
       .sort({ updatedAt: -1 }) // Phim mới xem lên đầu
-      .limit(10)
+      .skip(skip)
+      .limit(limit)
       .toArray();
 
-    // Trả về danh sách movie phẳng
-    return NextResponse.json(history.map(item => item.movie));
+    // Trả về cả mảng dữ liệu phẳng và tổng số lượng chính xác
+    return NextResponse.json({
+      movies: historyData.map(item => item.movie),
+      total: total
+    });
   } catch (e) {
-    return NextResponse.json([]);
+    console.error("Lỗi GET lịch sử phân trang:", e);
+    return NextResponse.json({ movies: [], total: 0 });
   }
 }
 

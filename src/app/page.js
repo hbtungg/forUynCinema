@@ -51,7 +51,7 @@ function WelcomePage() {
       
       <title>Uynflix Việt Nam - Watch series online, watch films online free</title>
 
-      {/* 🚀 2. GĂM SHADER CHẠY NGẦM: Tạo các dải hạt tinh vân lơ lửng xuyên suốt chuyển cảnh */}
+      {/* 🚀 2. GĂM SHADER CHẠY NGẦM: Tạo các dải hạt lơ lửng xuyên suốt chuyển cảnh */}
       <MidnightShader />
 
       {/* ── BACKDROP SLIDESHOW ── */}
@@ -117,7 +117,7 @@ function WelcomePage() {
           </h1>
 
           <p className="text-xs sm:text-sm text-[#d0c5b5]/70 max-w-lg leading-relaxed font-medium text-justify">
-            Hàng ngàn bộ phim bom tấn chất lượng cao, cập nhật liên tục tinh hệ. Tuyệt đối không quảng cáo, giao thức truyền tải mượt mà kịch trần trên mọi thiết bị cá nhân.
+            Hàng ngàn bộ phim bom tấn chất lượng cao, cập nhật liên tục. Tuyệt đối (không) quảng cáo, truyền tải mượt mà trên mọi thiết bị.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 pt-3">
@@ -145,7 +145,7 @@ function WelcomePage() {
         <div className="flex items-center gap-6 text-[#d0c5b5]/30 text-[10px] uppercase tracking-widest font-bold font-mono">
           <span>Saigon Observatory</span>
           <span className="w-px h-3 bg-white/10" />
-          <span>Tinh Hệ · 2026</span>
+          <span>HB.TUNGG · 2026</span>
         </div>
         <p className="text-[#d0c5b5]/20 text-[9px] tracking-[0.25em] uppercase font-bold font-mono">© 2026 Uynflix</p>
       </div>

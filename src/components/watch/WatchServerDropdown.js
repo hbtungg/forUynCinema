@@ -34,7 +34,7 @@ export default function WatchServerDropdown({ servers, selectedServer, handleSer
         </span>
         
         <span className="flex items-center gap-2 text-[10px] font-bold text-[#ffe3ae] uppercase tracking-wider">
-          {/* Chòm sao nhấp nháy Moonlight Gold */}
+
           <span className="w-1.5 h-1.5 rounded-full bg-[#E6C687] shadow-[0_0_8px_#E6C687] animate-pulse" />
           {servers[selectedServer]?.server_name || 'Server TM'}
           <ChevronDown className={`w-3.5 h-3.5 text-[#d0c5b5]/40 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />

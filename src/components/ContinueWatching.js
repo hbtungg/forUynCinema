@@ -19,7 +19,7 @@ export default function ContinueWatching() {
           setHistory(data);
         }
       } catch (error) {
-        console.error("Lỗi lấy lịch sử từ tinh hệ mây:", error);
+        console.error("Lỗi lấy lịch sử từ:", error);
       }
     } else if (status === "unauthenticated") {
       setHistory([]);
@@ -75,10 +75,6 @@ export default function ContinueWatching() {
     // 1. Tự động nhận diện nhà cung cấp
     const isKKPhim = item.provider === 'kkphim' ||
       (item.thumb_url && item.thumb_url.includes('phimapi.com'));
-
-    // ĐÃ SỬA CHUẨN ĐÉT ẢNH NGANG:
-    // KKPhim: thumb_url là ảnh ngang
-    // NguồnC (hoặc mặc định): poster_url là ảnh ngang
     let rawUrl = isKKPhim
       ? (item.thumb_url || item.poster_url || '')
       : (item.poster_url || item.thumb_url || '');

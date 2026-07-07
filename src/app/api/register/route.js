@@ -12,7 +12,7 @@ export async function POST(req) {
     // Kiểm tra trùng lặp email
     const existingUser = await db.collection("users").findOne({ email });
     if (existingUser) {
-      return NextResponse.json({ error: "Email này đã đăng ký rồi anh yêu ơi! ❌" }, { status: 400 });
+      return NextResponse.json({ error: "Email này đã đăng ký! ❌" }, { status: 400 });
     }
 
     // Mã hóa bảo mật mật khẩu cho bà xã

@@ -39,7 +39,7 @@ export default function DisclaimerPage() {
             </header>
             
             <p className="text-[#d0c5b5]/40 text-xs leading-relaxed font-medium pl-6 max-w-xs text-justify">
-              Bằng việc sử dụng website, bạn xác nhận đã đọc, hiểu rõ và đồng ý tuân thủ toàn bộ các tuyên bố miễn trừ trách nhiệm này từ tinh hệ hệ thống.
+              Bằng việc sử dụng website, bạn xác nhận đã đọc, hiểu rõ và đồng ý tuân thủ toàn bộ các tuyên bố miễn trừ trách nhiệm này từ hệ thống.
             </p>
           </div>
 

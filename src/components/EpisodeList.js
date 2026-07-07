@@ -13,7 +13,7 @@ export default function EpisodeList({ episodes, slug }) {
   if (!episodes || episodes.length === 0) {
     return (
       <p className="text-xs text-[#d0c5b5]/30 italic pl-1">
-        Đang cập nhật chòm sao tập phim...
+        Đang cập nhật tập phim...
       </p>
     );
   }

@@ -37,10 +37,10 @@ export default function RegisterPage() {
   };
 
   return (
-    /* 🚀 ĐÃ SỬA: Sử dụng bg-transparent để lộ mây tinh vân Shader chạy ngầm lộng lẫy dưới gầm trang */
+    /* 🚀 ĐÃ SỬA: Sử dụng bg-transparent để lộ Shader chạy ngầm lộng lẫy dưới gầm trang */
     <div className="min-h-screen bg-transparent flex items-center justify-center p-6 font-sans relative overflow-hidden select-none" style={{ fontFamily: "'Be Vietnam Pro', sans-serif" }}>
       
-      {/* Hào quang Moonlight Gold mờ sương vuốt nhẹ góc trên tinh hệ */}
+      {/* Hào quang Moonlight Gold mờ sương vuốt nhẹ góc trên */}
       <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-[#E6C687]/5 rounded-full blur-[130px] pointer-events-none"></div>
 
       {/* HỘP KÉN TRUNG TÂM KÍNH MỜ PHA LÊ XANH ĐÊM THẲM */}

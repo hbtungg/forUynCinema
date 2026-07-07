@@ -21,7 +21,7 @@ const faqs = [
     id: 'history',
     icon: <History className="w-4 h-4 text-[#E6C687]" />,
     question: 'Tính năng "Phim Đang Xem" và "Lịch Sử" hoạt động ra sao?',
-    answer: 'Khi bạn xem bất kỳ bộ phim nào, hệ thống sẽ tự động ghi nhớ chính xác tập phim và tiến trình xem dở của bạn lên tinh hệ đám mây (đồng bộ qua Email tài khoản). Ở lần vào sau, các khay "Phim Đang Xem" ở trang chủ và bảng phụ Aside bên phải sẽ tự động hiển thị để bạn click vào cày tiếp chỉ trong 1 nốt nhạc.'
+    answer: 'Khi bạn xem bất kỳ bộ phim nào, hệ thống sẽ tự động ghi nhớ chính xác tập phim và tiến trình xem dở của bạn lên đám mây (đồng bộ qua Email tài khoản). Ở lần vào sau, các khay "Phim Đang Xem" ở trang chủ và bảng phụ Aside bên phải sẽ tự động hiển thị để bạn click vào cày tiếp chỉ trong 1 nốt nhạc.'
   }
 ];
 
@@ -114,7 +114,7 @@ export default function HelpPage() {
         })}
       </section>
 
-      {/* ── FOOTER THIẾT LẬP TINH HỆ ── */}
+      {/* ── FOOTER ── */}
       <div className="mt-16 text-center space-y-2">
         <div className="flex justify-center items-center gap-1.5 text-[9px] font-bold uppercase tracking-[0.3em] text-[#d0c5b5]/20">
           <Sparkles className="w-3 h-3 text-[#E6C687]/30" /> System Status: Operational

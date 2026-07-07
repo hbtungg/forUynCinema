@@ -50,8 +50,7 @@ export default function Footer() {
             <p className="text-[9px] font-medium uppercase tracking-[0.2em] text-[#d0c5b5]/20">
               &copy; {new Date().getFullYear()} - hb.tungg
             </p>
-            
-            {/* Chòm sao mini nhấp nháy */}
+
             <div className="flex items-center gap-2">
               <div className="h-px w-4 bg-white/5" />
               <div className="relative flex items-center justify-center">

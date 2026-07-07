@@ -129,7 +129,7 @@ export default async function CountryPage({ params, searchParams }) {
             ))
           ) : (
             <div className="col-span-full py-24 text-center text-[10px] text-[#d0c5b5]/30 font-bold uppercase tracking-widest italic">
-              Hết phim thuộc quốc gia này rồi anh yêu ơi... 🌌
+              Hết phim thuộc quốc gia này rồi... 🌌
             </div>
           )}
         </div>

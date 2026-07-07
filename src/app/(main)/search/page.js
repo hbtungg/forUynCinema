@@ -11,7 +11,7 @@ export default function SearchPage({ searchParams }) {
   const sParams = use(searchParams);
   const router = useRouter();
   
-  // Đồng bộ bắt tham số q từ URL tinh hệ
+  // Đồng bộ bắt tham số q từ URL
   const keyword = sParams?.q || '';
   const page = Number(sParams?.page || 1);
 
@@ -45,7 +45,7 @@ export default function SearchPage({ searchParams }) {
       } catch (err) {
         console.error('Lỗi tìm kiếm tại SearchPage:', err);
         setMovies([]);
-        setError('Không tải được kết quả tìm kiếm từ tinh hệ. Anh thử lại sau nhé.');
+        setError('Không tải được kết quả tìm kiếm. Bạn thử lại sau nhé.');
       } finally {
         setIsFetching(false);
       }
@@ -77,7 +77,6 @@ export default function SearchPage({ searchParams }) {
           Quay lại trang chủ
         </Link>
 
-        {/* ── TIÊU ĐỀ KẾT QUẢ TÌM KIẾM CHÒM SAO (MÀU VÀNG MOONLIGHT GOLD) ── */}
         <header className="mb-8 border-b border-white/5 pb-6">
           <div className="flex items-center gap-3">
             <div className="w-1 h-8 bg-[#E6C687] rounded-full shadow-[0_0_15px_rgba(230,198,135,0.6)]" />
@@ -145,7 +144,7 @@ export default function SearchPage({ searchParams }) {
                   Không thấy phim
                 </p>
                 <p className="text-[#d0c5b5]/40 font-semibold uppercase tracking-[0.2em] text-[10px] leading-relaxed max-w-md">
-                  Tinh hệ không tìm thấy từ khóa phù hợp. Anh thử tìm bằng tên ngắn hơn hoặc từ khóa khác nhé.
+                  Không tìm thấy từ khóa phù hợp. Bạn thử lại hoặc sử dụng từ khóa khác nhé.
                 </p>
               </div>
             )}
@@ -166,7 +165,7 @@ export default function SearchPage({ searchParams }) {
 
             <div className="flex flex-col items-center gap-1 min-w-[60px]">
               <span className="text-[#d0c5b5]/30 font-bold text-[9px] tracking-widest uppercase">
-                Tinh hệ
+                Uynflix
               </span>
               <span className="text-[#e8e1da] font-mono font-bold text-xs">
                 {page} / {totalPages}

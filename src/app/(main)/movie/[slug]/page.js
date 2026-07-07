@@ -252,7 +252,7 @@ export default function MovieDetailPage({ params: paramsPromise }) {
 
             <div className="space-y-4">
               {!episodes || episodes.length === 0 ? (
-                <p className="text-xs text-[#d0c5b5]/30 italic pl-1">Đang cập nhật chòm sao tập phim...</p>
+                <p className="text-xs text-[#d0c5b5]/30 italic pl-1">Đang cập nhật tập phim...</p>
               ) : (
                 <div className="bg-[#0F1326]/40 backdrop-blur-2xl border border-white/5 p-4 md:p-6 rounded-2xl space-y-4 md:space-y-6 shadow-2xl">
 

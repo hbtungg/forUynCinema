@@ -29,7 +29,7 @@ export default function HistoryPopup() {
             }
           }
         } catch (error) {
-          console.error("Lỗi popup tinh hệ:", error);
+          console.error("Lỗi popup:", error);
         }
       };
 

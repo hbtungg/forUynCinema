@@ -139,7 +139,7 @@ export default async function CategoryPage({ params, searchParams }) {
             ))
           ) : (
             <div className="col-span-full py-24 text-center text-[10px] text-[#d0c5b5]/30 font-bold uppercase tracking-widest italic">
-              Hết phim trong tinh thể này rồi anh yêu ơi... 🌌
+              Hết phim trong danh sách này rồi... 🌌
             </div>
           )}
         </div>

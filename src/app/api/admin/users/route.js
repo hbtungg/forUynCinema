@@ -11,7 +11,7 @@ const COLLECTION_NAME = 'users';
 // ── 1. API LẤY DANH SÁCH USER, TRẠNG THÁI ONLINE & LỊCH SỬ XEM (GET) ──
 export async function GET(request) {
   try {
-    // 🛡️ Bảo mật: Kiểm tra quyền truy cập độc quyền của tài khoản admin anh yêu
+    // 🛡️ Bảo mật: Kiểm tra quyền truy cập độc quyền của tài khoản admin
     const session = await getServerSession(authOptions);
     if (!session || session.user?.email !== 'hb.tungg@gmail.com') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

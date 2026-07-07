@@ -94,7 +94,7 @@ export default function RightPanel({ continueItems: initialItems, genres, topRat
                       </p>
                     </div>
 
-                    {/* Nút Play nhanh kính mờ tinh vân */}
+                    
                     <button className="w-6 h-6 flex flex-shrink-0 items-center justify-center rounded-lg bg-white/5 border border-white/5 text-[#d0c5b5]/70 group-hover:text-[#402d00] group-hover:bg-[#ffe3ae] group-hover:border-[#ffe3ae] transition-all duration-300 cursor-pointer focus:outline-none">
                       <Play className="w-2.5 h-2.5 fill-current" />
                     </button>

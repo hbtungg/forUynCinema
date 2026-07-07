@@ -87,7 +87,7 @@ export default function AccountPage() {
               </p>
             </div>
             <button className="px-5 py-2.5 rounded-xl bg-[#E6C687]/10 hover:bg-[#E6C687] border border-[#E6C687]/20 text-[#E6C687] hover:text-[#402d00] font-bold text-[10px] uppercase tracking-widest transition-all duration-300 active:scale-95 shrink-0 cursor-pointer focus:outline-none shadow-md">
-              Gia hạn gói tinh hệ
+              Gia hạn
             </button>
           </section>
 

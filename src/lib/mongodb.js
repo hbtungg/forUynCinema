@@ -10,7 +10,7 @@ let client;
 let clientPromise;
 
 if (!uri) {
-  throw new Error('Anh yêu ơi, thiếu MONGODB_URI trong Environment Variables rồi!');
+  throw new Error('Thiếu MONGODB_URI trong Environment Variables rồi!');
 }
 
 if (process.env.NODE_ENV === 'development') {

@@ -65,7 +65,7 @@ export default function UserMenu({ isMobile = false }) {
         <div className="flex flex-col px-2 pb-2 space-y-1">
           <span className="text-xs font-bold text-[#d0c5b5]/40 uppercase tracking-wider">Khách ẩn danh</span>
           <span className="text-[9px] text-[#d0c5b5]/20 font-semibold uppercase tracking-widest">
-            Đăng nhập để mở khóa tinh hệ
+            Đăng nhập để mở khóa
           </span>
         </div>
       )}
@@ -110,7 +110,7 @@ export default function UserMenu({ isMobile = false }) {
           className={`w-full ${isMobile ? 'py-2' : 'py-2.5'} mt-3 flex items-center justify-center gap-2 rounded-xl border border-white/5 bg-white/[0.01] text-[#d0c5b5]/40 hover:text-red-400 hover:bg-red-500/5 hover:border-red-500/20 text-[10px] font-bold tracking-widest uppercase transition-all duration-300 cursor-pointer focus:outline-none`}
         >
           <LogOut className="w-3.5 h-3.5" />
-          Đăng xuất tinh hệ
+          Đăng xuất
         </button>
       ) : (
         <div className="flex flex-col gap-2 pt-2">

@@ -110,7 +110,7 @@ export default function SearchBox() {
             ) : searchResults.length > 0 ? (
               <div className="space-y-0.5">
                 <div className="px-3 py-2 text-[8px] font-black uppercase tracking-[0.25em] text-[#d0c5b5]/30 border-b border-white/5 mb-1 flex items-center gap-1.5">
-                  <span className="text-[#E6C687]">✨</span> Tinh tú phù hợp nhất
+                  <span className="text-[#E6C687]">✨</span> Phim phù hợp nhất
                 </div>
                 
                 {searchResults.map((movie) => (
