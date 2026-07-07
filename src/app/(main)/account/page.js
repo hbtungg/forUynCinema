@@ -9,7 +9,7 @@ export default function AccountPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
-  // Điều hướng về trang đăng nhập nếu chưa có session tinh hệ
+  // Điều hướng về trang đăng nhập nếu chưa có session
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/login');
@@ -83,7 +83,7 @@ export default function AccountPage() {
                 <h3 className="text-xs font-bold uppercase tracking-widest text-[#ffe3ae]" style={{ textShadow: '0 0 10px rgba(255,227,174,0.2)' }}>UYNFLIX PREMIUM</h3>
               </div>
               <p className="text-[11px] text-[#d0c5b5]/60 font-medium leading-relaxed max-w-md">
-                Tài khoản của anh đang sở hữu đặc quyền tối thượng: Thưởng thức bom tấn điện ảnh độ phân giải <span className="text-[#ffe3ae] font-bold">4K HDR</span>, đường truyền mượt mà và tuyệt đối không quảng cáo.
+                Tài khoản của bạn đang sở hữu đặc quyền: Thưởng thức bom tấn điện ảnh độ phân giải <span className="text-[#ffe3ae] font-bold">4K HDR</span>, đường truyền mượt mà và tuyệt đối không quảng cáo.
               </p>
             </div>
             <button className="px-5 py-2.5 rounded-xl bg-[#E6C687]/10 hover:bg-[#E6C687] border border-[#E6C687]/20 text-[#E6C687] hover:text-[#402d00] font-bold text-[10px] uppercase tracking-widest transition-all duration-300 active:scale-95 shrink-0 cursor-pointer focus:outline-none shadow-md">
@@ -110,7 +110,7 @@ export default function AccountPage() {
             </div>
           </section>
 
-          {/* NÚT ĐĂNG XUẤT TINH HỆ */}
+          {/* NÚT ĐĂNG XUẤT */}
           <div className="pt-4 text-left">
             <button 
               onClick={() => signOut({ callbackUrl: '/login' })}

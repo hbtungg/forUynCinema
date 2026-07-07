@@ -184,7 +184,7 @@ function DanhSachContent() {
       {loading ? (
         <div className="flex flex-col items-center justify-center py-40 gap-3">
           <Loader2 className="w-6 h-6 border-2 border-[#E6C687]/20 border-t-[#E6C687] rounded-full animate-spin text-[#E6C687]" />
-          <span className="text-[9px] uppercase tracking-widest text-[#d0c5b5]/40 font-bold">Đang đồng bộ tinh hệ dữ liệu...</span>
+          <span className="text-[9px] uppercase tracking-widest text-[#d0c5b5]/40 font-bold">Đang đồng bộ dữ liệu...</span>
         </div>
       ) : movies.length > 0 ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5 w-full animate-in fade-in duration-500">

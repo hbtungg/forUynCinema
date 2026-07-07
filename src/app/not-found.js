@@ -5,7 +5,7 @@ import { Hourglass, ArrowRight } from 'lucide-react';
 
 export default function NotFound() {
   return (
-    /* 🚀 ĐÃ SỬA: Sử dụng bg-transparent để lộ mây tinh vân Shader chạy ngầm lộng lẫy dưới gầm trang */
+    /* 🚀 ĐÃ SỬA: Sử dụng bg-transparent để lộ Shader chạy ngầm lộng lẫy dưới gầm trang */
     <div className="min-h-screen w-full bg-transparent text-[#e8e1da] flex flex-col items-center justify-center p-4 select-none relative overflow-hidden font-sans" style={{ fontFamily: "'Be Vietnam Pro', sans-serif" }}>
       
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(230,198,135,0.03)_0%,transparent_70%)] pointer-events-none" />

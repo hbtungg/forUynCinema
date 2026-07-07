@@ -31,14 +31,14 @@ export default function HistoryPage() {
   const { data: session, status } = useSession();
   const userEmail = session?.user?.email;
   const [history, setHistory] = useState([]);
-  const [totalMovies, setTotalMovies] = useState(0); // Lưu chính xác tổng số phim đã xem
-  const [currentPage, setCurrentPage] = useState(1);   // Quản lý trang hiện tại
+  const [totalMovies, setTotalMovies] = useState(0); 
+  const [currentPage, setCurrentPage] = useState(1);   
   const [episodeUpdates, setEpisodeUpdates] = useState({});
   const [isCheckingUpdates, setIsCheckingUpdates] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const ITEMS_PER_PAGE = 8; // Số lượng phim trên mỗi trang
+  const ITEMS_PER_PAGE = 8; 
 
   useEffect(() => {
     document.title = "Histories - Uynflix";
@@ -56,7 +56,6 @@ export default function HistoryPage() {
     setError('');
 
     try {
-      // Gọi API kèm tham số trang hiện tại
       const res = await fetch(
         `/api/history?userEmail=${encodeURIComponent(userEmail)}&page=${pageToLoad}`
       );
@@ -66,7 +65,6 @@ export default function HistoryPage() {
       }
 
       const data = await res.json();
-      // Bóc tách cấu trúc mới trả về từ API phân trang
       setHistory(Array.isArray(data.movies) ? data.movies : []);
       setTotalMovies(data.total || 0);
       setEpisodeUpdates({});
@@ -163,7 +161,6 @@ export default function HistoryPage() {
       const updatedLocal = saved.filter((item) => item.slug !== slug);
       localStorage.setItem('watchHistory', JSON.stringify(updatedLocal));
 
-      // Nếu xoá hết phim ở trang hiện tại (trừ trang 1), tự động lùi về trang trước
       if (updatedHistory.length === 0 && currentPage > 1) {
         setCurrentPage((prev) => prev - 1);
       } else {
@@ -173,8 +170,28 @@ export default function HistoryPage() {
       console.error('Lỗi xoá lịch sử:', error);
       setHistory(previousHistory);
       setTotalMovies(previousHistory.length);
-      setError('Không xoá được phim khỏi lịch sử xem. Bạn thử lại sau nhé.');
+      setError('Không xoá được phim khỏi lịch sử xem. Anh thử lại sau nhé.');
     }
+  };
+
+  // 🚀 ĐỒNG BỘ LOGIC: Định vị chính xác ảnh ngang tương thích hệ thống API
+  const getDisplayImage = (item) => {
+    if (!item) return '';
+
+    const isKKPhim = item.provider === 'kkphim' ||
+      (item.thumb_url && item.thumb_url.includes('phimapi.com'));
+    let rawUrl = isKKPhim
+      ? (item.thumb_url || item.poster_url || '')
+      : (item.poster_url || item.thumb_url || '');
+
+    if (!rawUrl) return '';
+
+    if (rawUrl.startsWith('http://') || rawUrl.startsWith('https://')) {
+      return rawUrl;
+    }
+
+    const baseDomain = isKKPhim ? 'https://img.phimapi.com' : 'https://phim.nguonc.com';
+    return `${baseDomain}/${rawUrl.replace(/^\//, '')}`;
   };
 
   const updatedMovies = history.filter((item) => episodeUpdates[item.slug]);
@@ -184,7 +201,6 @@ export default function HistoryPage() {
     <div className="w-full min-h-screen bg-transparent text-[#e8e1da] select-none font-sans" style={{ fontFamily: "'Be Vietnam Pro', sans-serif" }}>
       <div className="px-4 md:px-12 py-6">
 
-        {/* NÚT QUAY LẠI CHUẨN PHA LÊ MOONLIGHT */}
         <Link
           href="/home"
           className="text-[#d0c5b5]/40 hover:text-[#ffe3ae] text-[10px] font-bold uppercase tracking-[0.2em] inline-flex items-center gap-2 mb-8 transition-colors duration-300 group w-fit"
@@ -193,29 +209,26 @@ export default function HistoryPage() {
           Quay lại trang chủ
         </Link>
 
-        {/* TIÊU ĐỀ LAYER CHUẨN THIÊN VĂN CAO CẤP */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 border-l-4 border-[#E6C687] pl-5 md:pl-6">
           <div className="space-y-1">
             <p className="text-[#E6C687] font-bold uppercase tracking-[0.45em] text-[9px]">
               Personal Tracking System
             </p>
             <h1 className="text-xl md:text-2xl font-bold uppercase tracking-wider leading-none">
-              Hành trình: <span className="text-[#ffe3ae]" style={{ textShadow: '0 0 10px rgba(255,227,174,0.35)' }}>Phim Đang Xem</span>
+              Danh sách: <span className="text-[#ffe3ae]" style={{ textShadow: '0 0 10px rgba(255,227,174,0.35)' }}>Phim Đang Xem</span>
             </h1>
           </div>
 
           <div className="text-[#d0c5b5]/40 font-bold uppercase text-[10px] tracking-widest flex items-center gap-3">
-            {/* 🚀 HIỂN THỊ CHÍNH XÁC SỐ PHIM ĐÃ XEM TỪ DATABASE */}
             <span>Tổng số: {totalMovies} phim</span>
             {isCheckingUpdates && (
               <span className="text-[#ffe3ae] animate-pulse flex items-center gap-1.5 font-bold">
-                <Loader2 className="w-3 h-3 animate-spin" /> Rà tìm tập mới...
+                <Loader2 className="w-3 h-3 animate-spin" /> Kiểm tra tập mới...
               </span>
             )}
           </div>
         </div>
 
-        {/* KHỐI BÁO LỖI KÍNH MỜ TRONG SUỐT */}
         {error && (
           <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-red-500/20 bg-red-950/10 px-5 py-4">
             <p className="text-xs font-semibold text-red-200 tracking-wide">{error}</p>
@@ -229,16 +242,15 @@ export default function HistoryPage() {
           </div>
         )}
 
-        {/* BANNER THÔNG BÁO CÓ TẬP MỚI PHA LÊ SIÊU SANG CHẢNH */}
         {!isLoading && updatedMovies.length > 0 && (
           <div className="mb-10 rounded-[24px] border border-[#E6C687]/30 bg-[#0F1326]/40 backdrop-blur-2xl px-6 py-5 shadow-2xl animate-in fade-in duration-500">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div className="space-y-1">
                 <p className="text-[#ffe3ae] text-[10px] font-bold uppercase tracking-[0.25em] flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-[#E6C687]" /> Cập nhật
+                  <Sparkles className="w-3.5 h-3.5 text-[#E6C687]" /> Thông báo cập nhật
                 </p>
                 <p className="text-xs md:text-sm text-[#e8e1da]/80 font-medium">
-                  Phát hiện <span className="text-[#ffe3ae] font-bold">{updatedMovies.length} bộ phim</span> trong lịch sử của bạn vừa có tập mới phát sóng.
+                  Phát hiện <span className="text-[#ffe3ae] font-bold">{updatedMovies.length} bộ phim</span> vừa có tập mới.
                 </p>
               </div>
 
@@ -246,19 +258,17 @@ export default function HistoryPage() {
                 href={`/watch/${updatedMovies[0].slug}?ep=${encodeURIComponent(episodeUpdates[updatedMovies[0].slug]?.latestEpisodeName || '1')}`}
                 className="px-5 py-2.5 bg-[#E6C687]/10 hover:bg-[#E6C687] border border-[#E6C687]/20 text-[#E6C687] hover:text-[#402d00] font-bold text-[10px] uppercase tracking-widest rounded-xl transition-all duration-300 active:scale-95 text-center shadow-md"
               >
-                Thưởng thức tập mới nhất
+                Xem tập mới nhất
               </Link>
             </div>
           </div>
         )}
 
-        {/* GRID LỊCH SỬ PHIM BỌC THÉP */}
         {isLoading ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-6 md:gap-8">
             {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
               <div
                 key={i}
-                // 🚀 ĐÃ SỬA SKELETON: Chuyển sang aspect-video để hiển thị bộ khung ngang lúc đang load
                 className="aspect-video bg-[#0F1326]/40 border border-white/5 rounded-2xl animate-pulse"
               />
             ))}
@@ -267,17 +277,10 @@ export default function HistoryPage() {
           <>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-6 md:gap-8 md:gap-y-10">
               {history.map((item) => {
-                const isNguonC = item.provider === 'nguonc' ||
-                  (item.thumb_url && item.thumb_url.includes('nguonc.com')) ||
-                  (!item.thumb_url?.includes('phimapi.com'));
-
-                // 🚀 ĐÃ SỬA: Nếu anh lưu ảnh ngang ở trường nào thì anh ép lấy trường đó, ở đây mặc định lấy thumb_url ngang xịn của anh
-                const imageSrc = item.thumb_url || item.poster_url;
-
                 return (
                   <div key={item.slug} className="group/card relative animate-in fade-in duration-500">
 
-                    {/* Tag báo có tập mới */}
+                    {/* Tag báo tập mới */}
                     {episodeUpdates[item.slug] && (
                       <Link
                         href={`/watch/${item.slug}?ep=${encodeURIComponent(episodeUpdates[item.slug].latestEpisodeName)}`}
@@ -287,40 +290,35 @@ export default function HistoryPage() {
                       </Link>
                     )}
 
-                    {/* NÚT XOÁ KHỎI LỊCH SỬ */}
                     <button
                       type="button"
-                      aria-label={`Xoá ${item.name} khỏi lịch sử xem`}
+                      aria-label={`Xoá ${item.name} khỏi lịch sử`}
                       onClick={() => removeHistory(item.slug)}
                       className="absolute top-3 right-3 w-8 h-8 bg-[#0F1326]/80 border border-white/10 rounded-full flex items-center justify-center text-[#d0c5b5]/60 hover:bg-amber-500 hover:text-white transition-all z-20 shadow-xl md:opacity-0 md:group-hover/card:opacity-100 focus:outline-none cursor-pointer"
                     >
                       <X className="w-4 h-4" />
                     </button>
 
-                    {/* 🚀 ĐÃ SỬA KHUNG ẢNH: Ép cứng khung ngang aspect-video tinh tế, ảnh nét không mờ mịt */}
                     <Link href={`/watch/${item.slug}?ep=${item.episode || '1'}`} className="block">
                       <div className="relative aspect-video rounded-2xl overflow-hidden border border-white/5 group-hover/card:border-[#E6C687]/30 transition-all duration-500 bg-[#0F1326]/40 shadow-2xl">
                         <img
-                          src={imageSrc}
+                          src={getDisplayImage(item)}
                           alt={item.name}
-                          // 🚀 ĐÃ FIX: opacity-95 tĩnh và opacity-100 khi hover để giữ trọn vẹn độ nét rực rỡ của ảnh nền
-                          className="w-full h-full object-cover opacity-99 group-hover/card:opacity-100 group-hover/card:scale-105 transition-all duration-700"
+                          // 🚀 FIX ĐỘ NÉT: Đặt độ nét 95% tĩnh và 100% khi tương tác chuột
+                          className="w-full h-full object-cover opacity-95 group-hover/card:opacity-100 group-hover/card:scale-105 transition-all duration-700"
                           loading="lazy"
                         />
 
-                        {/* Lớp thông tin phủ bóng mờ dưới chân card */}
                         <div className="absolute inset-0 bg-gradient-to-t from-[#060814]/95 via-[#060814]/40 to-transparent p-4 flex flex-col justify-end">
                           <h3 className="text-white font-bold text-sm uppercase truncate tracking-wide mb-1.5 group-hover/card:text-[#ffe3ae] transition-colors leading-snug">
                             {item.name}
                           </h3>
 
-                          {/* Vết tiến trình đang xem */}
                           <span className="w-fit text-[#ffe3ae] text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 bg-[#E6C687]/10 px-2 py-0.5 rounded border border-[#E6C687]/20">
                             <Clock className="w-3 h-3 text-[#E6C687]" />
                             Tập {getEpisodeLabel(item.episode)}
                           </span>
 
-                          {/* Ghi chú tập mới ra lò ngay bên dưới */}
                           {episodeUpdates[item.slug] && (
                             <span className="mt-2 w-fit text-[#d0c5b5]/40 text-[9px] font-bold uppercase tracking-widest pl-0.5 flex items-center gap-1">
                               <Tv className="w-3 h-3" /> Đã có Tập {getEpisodeLabel(episodeUpdates[item.slug].latestEpisodeName)}
@@ -334,7 +332,6 @@ export default function HistoryPage() {
               })}
             </div>
 
-            {/* THANH ĐIỀU HƯỚNG PHÂN TRANG PHA LÊ CAO CẤP */}
             {totalPages > 1 && (
               <div className="mt-16 flex items-center justify-center gap-2 border-t border-white/5 pt-8">
                 <button
@@ -374,14 +371,13 @@ export default function HistoryPage() {
             )}
           </>
         ) : (
-          /* TRẠNG THÁI TRỐNG RỖNG */
           <div className="py-24 text-center flex flex-col items-center justify-center gap-3 border border-dashed border-white/5 rounded-[32px] bg-[#0F1326]/10 backdrop-blur-md max-w-4xl mx-auto px-6 animate-in fade-in duration-500">
-            <HelpCircle className="w-10 h-10 text-[#d0c5b5]/20 animate-bounce" />
+            <HelpCircle className="w-10 h-10 text-[#d0c5b5]/20" />
             <p className="text-[#d0c5b5]/20 text-3xl md:text-5xl font-black uppercase tracking-tighter leading-none select-none">
               Chưa có phim
             </p>
             <p className="text-[#d0c5b5]/40 font-semibold uppercase tracking-[0.2em] text-[10px] leading-relaxed max-w-md">
-              Hiện chưa có phim nào! Hãy bắt đầu hành trình xem phim của bạn ngay bây giờ.
+              Lịch sử xem hiện đang trống.
             </p>
             <Link
               href="/home"

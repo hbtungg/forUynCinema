@@ -124,7 +124,7 @@ export default function WatchPlayer({
         </div>
       )}
 
-      {/* Error interface chuẩn tinh hệ khi sập nguồn phim */}
+      {/* Error interface chuẩn khi sập nguồn phim */}
       {iframeError && (
         <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 bg-[#0F1326]/90 backdrop-blur-2xl border border-white/5">
           <Radio className="w-8 h-8 text-amber-500 animate-bounce" />

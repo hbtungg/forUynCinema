@@ -9,7 +9,6 @@ export default function ContinueWatching() {
   const [history, setHistory] = useState([]);
   const scrollRef = useRef(null);
 
-  // Hàm load dữ liệu từ API
   const loadHistory = async () => {
     if (status === "authenticated" && session?.user?.email) {
       try {
@@ -32,16 +31,13 @@ export default function ContinueWatching() {
     } else if (status === "unauthenticated") {
       setHistory([]);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status]);
 
   useEffect(() => {
     window.addEventListener('historyUpdated', loadHistory);
     return () => window.removeEventListener('historyUpdated', loadHistory);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, session]);
 
-  // Hàm xóa lịch sử phim đang xem
   const removeHistory = async (slug) => {
     if (!session?.user?.email) return;
     const updatedHistory = history.filter(item => item.slug !== slug);
@@ -68,11 +64,9 @@ export default function ContinueWatching() {
     }
   };
 
-  // 🚀 SỬA CHÍ MẠNG: Định vị chính xác ảnh NGANG (Landscape) để khớp hoàn hảo với tỷ lệ khung hình aspect-video (16:9)
   const getDisplayImage = (item) => {
     if (!item) return '';
 
-    // 1. Tự động nhận diện nhà cung cấp
     const isKKPhim = item.provider === 'kkphim' ||
       (item.thumb_url && item.thumb_url.includes('phimapi.com'));
     let rawUrl = isKKPhim
@@ -81,12 +75,10 @@ export default function ContinueWatching() {
 
     if (!rawUrl) return '';
 
-    // 2. Nếu đã là URL tuyệt đối thì giữ nguyên
     if (rawUrl.startsWith('http://') || rawUrl.startsWith('https://')) {
       return rawUrl;
     }
 
-    // 3. Nếu là đường dẫn tương đối, tự nối domain gốc tương ứng chống 404
     const baseDomain = isKKPhim ? 'https://img.phimapi.com' : 'https://phim.nguonc.com';
     return `${baseDomain}/${rawUrl.replace(/^\//, '')}`;
   };
@@ -125,7 +117,7 @@ export default function ContinueWatching() {
           {history.map((item) => (
             <div key={item.slug} className="w-[240px] md:w-[320px] flex-shrink-0 relative group/card animate-in fade-in duration-500">
 
-              {/* NÚT XÓA LỊCH SỬ PHA LÊ */}
+              {/* NÚT XÓA LỊCH SỬ */}
               <button
                 onClick={(e) => {
                   e.preventDefault();
@@ -143,22 +135,22 @@ export default function ContinueWatching() {
                 href={`/watch/${item.slug}?ep=${encodeURIComponent(item.episode || 1)}`}
                 className="block relative aspect-video rounded-[1.5rem] md:rounded-[1.8rem] overflow-hidden border border-white/5 shadow-2xl bg-[#0F1326]/40 transition-all duration-500 group-hover/card:border-[#E6C687]/30"
               >
-                {/* 🚀 ĐÃ SỬA: Lấy ảnh nền theo đúng luồng API và thêm hiệu ứng scale-105 khi Hover */}
+                {/* 🚀 ĐÃ SỬA: Đẩy opacity lên 100 và loại bỏ giảm độ sáng khi hover */}
                 <img
                   src={getDisplayImage(item)}
                   alt={item.name}
-                  className="w-full h-full object-cover opacity-50 group-hover/card:opacity-40 group-hover/card:scale-105 transition-all duration-700 pointer-events-none"
+                  className="w-full h-full object-cover opacity-100 group-hover/card:scale-105 transition-all duration-700 pointer-events-none"
                   loading="lazy"
                 />
 
-                {/* 🚀 ĐÃ THÊM: Nút Play pha lê mờ ảo hiện ra giữa tâm ảnh khi Hover */}
+                {/* NÚT PLAY KHI HOVER */}
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-opacity duration-500 z-10">
                   <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-[#E6C687]/20 backdrop-blur-md border border-[#E6C687]/40 flex items-center justify-center text-[#E6C687] shadow-[0_0_20px_rgba(230,198,135,0.2)] transform group-hover/card:scale-110 transition-transform duration-500">
                     <Play className="w-5 h-5 md:w-6 md:h-6 fill-current ml-1" />
                   </div>
                 </div>
 
-                {/* LỚP PHỦ GRADIENT ĐƯỢC LÀM MƯỢT HƠN */}
+                {/* LỚP PHỦ GRADIENT THÔNG TIN */}
                 <div className="absolute inset-x-0 bottom-0 p-4 md:p-5 bg-gradient-to-t from-[#060814] via-[#060814]/90 to-transparent z-20">
                   <h3 className="text-white font-bold text-xs md:text-sm truncate tracking-wide uppercase group-hover/card:text-[#ffe3ae] transition-colors">{item.name}</h3>
 
@@ -166,7 +158,7 @@ export default function ContinueWatching() {
                     ● Progress: Tập {String(item.episode || '1').replace(/^(tập|tập|tâp|tap|ep|episode)\s*/i, '').trim()}
                   </span>
 
-                  {/* THANH TIMELINE TỎA SÁNG */}
+                  {/* THANH TIMELINE PROGRESS */}
                   <div className="mt-3 w-full h-[3px] bg-white/10 rounded-full overflow-hidden">
                     <div className="w-1/2 h-full bg-[#E6C687] shadow-[0_0_8px_rgba(230,198,135,0.8)] rounded-full"></div>
                   </div>

@@ -402,7 +402,7 @@ export default function WatchClient({ slug }) {
             handleEpisodeChange={handleEpisodeChange}
           />
 
-          {/* KHAY ĐỀ XUẤT LIÊN QUAN CHUẨN TINH HỆ MOONLIGHT GOLD */}
+          {/* KHAY ĐỀ XUẤT LIÊN QUAN CHUẨN MOONLIGHT GOLD */}
           <div className="border-t border-white/5 pt-4">
             <span className="block text-[10px] font-black uppercase tracking-[0.25em] text-[#d0c5b5]/40 px-1 mb-3">
               Có thể bạn thích
