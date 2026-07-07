@@ -15,33 +15,6 @@ export const metadata = {
   description: 'Watch series online, watch films online free',
 };
 
-if (typeof window !== 'undefined' && !window.fetchProxySet) {
-  window.fetchProxySet = true;
-  const originalFetch = window.fetch;
-  window.fetch = async function (...args) {
-    const url = args[0];
-    const response = await originalFetch.apply(this, args);
-    
-    // Chỉ chặn bắt log nếu url gọi đến api history
-    if (typeof url === 'string' && url.includes('/api/history')) {
-      const clonedResponse = response.clone();
-      try {
-        const data = await clonedResponse.json();
-        console.log(`%c[FETCH LOG DETECTED] URL: ${url}`, 'background: #222; color: #bada55; pading: 2px;');
-        console.log('[FETCH DATA REAL]:', data);
-        
-        // Kiểm tra nếu dữ liệu không phải mảng mà bị map/slice trực tiếp
-        if (data && typeof data === 'object' && !Array.isArray(data)) {
-          console.warn('[FETCH WARNING]: Dữ liệu trả về là OBJECT phân trang, nếu component nào dùng .map() trực tiếp lên cục này sẽ bị CRASH!');
-        }
-      } catch (err) {
-        console.error('[FETCH LOG ERROR]: Không thể đọc JSON', err);
-      }
-    }
-    return response;
-  };
-}
-
 export default function HomePageClient({
   allMovies,
   koreaMovies,
@@ -61,7 +34,6 @@ export default function HomePageClient({
         if (res.ok) {
           const data = await res.json();
           
-          // 🚀 FIX LỖI CRASH: Trích xuất mảng movies từ Object phân trang mới trước khi dùng slice
           const historyList = data.movies || (Array.isArray(data) ? data : []);
           setLiveContinueItems(historyList.slice(0, 4));
         }
@@ -74,6 +46,32 @@ export default function HomePageClient({
   };
 
   useEffect(() => {
+    // 🚀 VỊ TRÍ THÊM LOG 2: Chặn bắt toàn cục tiến trình fetch gọi tới API History
+    if (typeof window !== 'undefined' && !window.fetchProxySet) {
+      window.fetchProxySet = true;
+      const originalFetch = window.fetch;
+      window.fetch = async function (...args) {
+        const url = args[0];
+        const response = await originalFetch.apply(this, args);
+        
+        if (typeof url === 'string' && url.includes('/api/history')) {
+          const clonedResponse = response.clone();
+          try {
+            const data = await clonedResponse.json();
+            console.log(`%c[FETCH LOG DETECTED] URL: ${url}`, 'background: #222; color: #bada55; padding: 2px;');
+            console.log('[FETCH DATA REAL]:', data);
+            
+            if (data && typeof data === 'object' && !Array.isArray(data)) {
+              console.warn('[FETCH WARNING]: Dữ liệu trả về là OBJECT phân trang, nếu component nào dùng .map() trực tiếp lên cục này sẽ bị CRASH!');
+            }
+          } catch (err) {
+            console.error('[FETCH LOG ERROR]: Không thể đọc JSON', err);
+          }
+        }
+        return response;
+      };
+    }
+
     if (status === "authenticated") {
       loadRightPanelHistory();
     } else {
@@ -134,7 +132,6 @@ export default function HomePageClient({
           </div>
           <div className="grid grid-cols-2 gap-2">
             {genres && genres.map(({ label, icon, href }) => (
-              /* 🚀 TỐI ƯU CHUYỂN TRANG: Đổi thẻ <a> sang <Link> để tối ưu Client-side Routing */
               <Link 
                 key={label} 
                 href={href}
