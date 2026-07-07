@@ -173,7 +173,7 @@ export default function HistoryPage() {
       console.error('Lỗi xoá lịch sử:', error);
       setHistory(previousHistory);
       setTotalMovies(previousHistory.length);
-      setError('Không xoá được phim khỏi lịch sử xem. Anh thử lại sau nhé.');
+      setError('Không xoá được phim khỏi lịch sử xem. Bạn thử lại sau nhé.');
     }
   };
 
@@ -238,7 +238,7 @@ export default function HistoryPage() {
                   <Sparkles className="w-3.5 h-3.5 text-[#E6C687]" /> Cập nhật
                 </p>
                 <p className="text-xs md:text-sm text-[#e8e1da]/80 font-medium">
-                  Phát hiện <span className="text-[#ffe3ae] font-bold">{updatedMovies.length} bộ phim</span> trong lịch sử của anh vừa có chương mới phát sóng.
+                  Phát hiện <span className="text-[#ffe3ae] font-bold">{updatedMovies.length} bộ phim</span> trong lịch sử của bạn vừa có tập mới phát sóng.
                 </p>
               </div>
 
@@ -258,7 +258,8 @@ export default function HistoryPage() {
             {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
               <div
                 key={i}
-                className="aspect-[2/3] bg-[#0F1326]/40 border border-white/5 rounded-2xl animate-pulse"
+                // 🚀 ĐÃ SỬA SKELETON: Chuyển sang aspect-video để hiển thị bộ khung ngang lúc đang load
+                className="aspect-video bg-[#0F1326]/40 border border-white/5 rounded-2xl animate-pulse"
               />
             ))}
           </div>
@@ -270,7 +271,8 @@ export default function HistoryPage() {
                   (item.thumb_url && item.thumb_url.includes('nguonc.com')) ||
                   (!item.thumb_url?.includes('phimapi.com'));
 
-                const imageSrc = isNguonC ? (item.poster_url || item.thumb_url) : item.thumb_url;
+                // 🚀 ĐÃ SỬA: Nếu anh lưu ảnh ngang ở trường nào thì anh ép lấy trường đó, ở đây mặc định lấy thumb_url ngang xịn của anh
+                const imageSrc = item.thumb_url || item.poster_url;
 
                 return (
                   <div key={item.slug} className="group/card relative animate-in fade-in duration-500">
@@ -295,13 +297,14 @@ export default function HistoryPage() {
                       <X className="w-4 h-4" />
                     </button>
 
-                    {/* KHUNG ẢNH ĐỘC QUYỀN */}
+                    {/* 🚀 ĐÃ SỬA KHUNG ẢNH: Ép cứng khung ngang aspect-video tinh tế, ảnh nét không mờ mịt */}
                     <Link href={`/watch/${item.slug}?ep=${item.episode || '1'}`} className="block">
-                      <div className={`relative ${isNguonC ? 'aspect-[2/3]' : 'aspect-video'} rounded-2xl overflow-hidden border border-white/5 group-hover/card:border-[#E6C687]/30 transition-all duration-500 bg-[#0F1326]/40 shadow-2xl`}>
+                      <div className="relative aspect-video rounded-2xl overflow-hidden border border-white/5 group-hover/card:border-[#E6C687]/30 transition-all duration-500 bg-[#0F1326]/40 shadow-2xl">
                         <img
                           src={imageSrc}
                           alt={item.name}
-                          className="w-full h-full object-cover opacity-90 group-hover/card:opacity-100 group-hover/card:scale-105 transition-all duration-700"
+                          // 🚀 ĐÃ FIX: opacity-95 tĩnh và opacity-100 khi hover để giữ trọn vẹn độ nét rực rỡ của ảnh nền
+                          className="w-full h-full object-cover opacity-99 group-hover/card:opacity-100 group-hover/card:scale-105 transition-all duration-700"
                           loading="lazy"
                         />
 
@@ -331,7 +334,7 @@ export default function HistoryPage() {
               })}
             </div>
 
-            {/* 🚀 THANH ĐIỀU HƯỚNG PHÂN TRANG PHA LÊ CAO CẤP */}
+            {/* THANH ĐIỀU HƯỚNG PHÂN TRANG PHA LÊ CAO CẤP */}
             {totalPages > 1 && (
               <div className="mt-16 flex items-center justify-center gap-2 border-t border-white/5 pt-8">
                 <button
@@ -378,7 +381,7 @@ export default function HistoryPage() {
               Chưa có phim
             </p>
             <p className="text-[#d0c5b5]/40 font-semibold uppercase tracking-[0.2em] text-[10px] leading-relaxed max-w-md">
-              Hành trình lưu trữ của anh hiện đang trống rỗng. Hãy đi lùng sục các bộ phim bom tấn ngay nhé.
+              Hiện chưa có phim nào! Hãy bắt đầu hành trình xem phim của bạn ngay bây giờ.
             </p>
             <Link
               href="/home"
