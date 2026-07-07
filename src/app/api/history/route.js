@@ -1,7 +1,7 @@
 import clientPromise from "@/lib/mongodb";
 import { NextResponse } from "next/server";
 
-// 1. GHI NHỚ LỊCH SỬ XEM (POST)
+// 1. GHI NHỚ LỊCH SỬ XEM (POST) - GIỮ NGUYÊN GỐC
 export async function POST(req) {
   try {
     const client = await clientPromise;
@@ -15,7 +15,6 @@ export async function POST(req) {
       return NextResponse.json({ error: "Thiếu canonicalKey" }, { status: 400 });
     }
 
-    // Tìm tài liệu lịch sử xem của phim này (trùng canonicalKey hoặc trùng slug)
     const existingHistory = await db.collection("history").findOne({
       userEmail: userEmail,
       $or: [
@@ -55,52 +54,53 @@ export async function POST(req) {
   }
 }
 
-// 2. LẤY LỊCH SỬ XEM VỀ (GET) - HỖ TRỢ PHÂN TRANG CỐ ĐỊNH 8 PHIM
+// 2. LẤY LỊCH SỬ XEM VỀ (GET) - TƯƠNG THÍCH NGƯỢC HOÀN HẢO
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
     const userEmail = searchParams.get('userEmail');
+    if (!userEmail) return NextResponse.json([]);
+
+    const pageParam = searchParams.get('page');
     
-    // Đọc trang hiện tại, mặc định là trang 1
-    const page = parseInt(searchParams.get('page'), 10) || 1;
-    const limit = 8; // Cố định 8 phim trên 1 trang theo ý anh
-    const skip = (page - 1) * limit;
-
-    console.log(`[API HISTORY GET] Đang gọi lịch sử cho email: ${userEmail}, Page: ${page}`);
-
-    if (!userEmail) return NextResponse.json({ movies: [], total: 0 });
-
     const client = await clientPromise;
     const db = client.db("ForUynDB");
-    
-    // 1. Lấy tổng số phim thực tế đã xem trong DB của User
-    const total = await db.collection("history").countDocuments({ userEmail: userEmail });
 
-    // 2. Lấy danh sách phim đã được phân trang chọc lọc
-    const historyData = await db.collection("history")
+    // TRƯỜNG HỢP 1: Trang /history gọi (có truyền tham số page) -> Trả về Object phân trang
+    if (pageParam) {
+      const page = parseInt(pageParam, 10) || 1;
+      const limit = 8;
+      const skip = (page - 1) * limit;
+
+      const total = await db.collection("history").countDocuments({ userEmail: userEmail });
+      
+      const historyData = await db.collection("history")
+        .find({ userEmail: userEmail })
+        .sort({ updatedAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .toArray();
+
+      return NextResponse.json({
+        movies: historyData.map(item => item.movie).filter(Boolean),
+        total: total
+      });
+    }
+
+    // TRƯỜNG HỢP 2: Trang chủ gọi (không truyền page) -> Trả về mảng phẳng 10 phim như file gốc cũ
+    const history = await db.collection("history")
       .find({ userEmail: userEmail })
-      .sort({ updatedAt: -1 }) // Phim mới xem lên đầu
-      .skip(skip)
-      .limit(limit)
+      .sort({ updatedAt: -1 })
+      .limit(10)
       .toArray();
 
-      console.log(`[API HISTORY GET] Dữ liệu trả về:`, { 
-      moviesLength: responseData.movies.length, 
-      total: responseData.total 
-    });
-
-    // Trả về cả mảng dữ liệu phẳng và tổng số lượng chính xác
-    return NextResponse.json({
-      movies: historyData.map(item => item.movie),
-      total: total
-    });
+    return NextResponse.json(history.map(item => item.movie).filter(Boolean));
   } catch (e) {
-    console.error("Lỗi GET lịch sử phân trang:", e);
-    return NextResponse.json({ movies: [], total: 0 });
+    return NextResponse.json([]);
   }
 }
 
-// 3. XÓA MỘT BỘ PHIM KHỎI LỊCH SỬ (DELETE) - MỚI CẬP NHẬT
+// 3. XÓA MỘT BỘ PHIM KHỎI LỊCH SỬ (DELETE) - GIỮ NGUYÊN GỐC
 export async function DELETE(req) {
   try {
     const client = await clientPromise;
@@ -111,7 +111,6 @@ export async function DELETE(req) {
       return NextResponse.json({ error: "Thiếu email hoặc slug" }, { status: 400 });
     }
 
-    // Xóa tất cả các bản ghi lịch sử xem trùng canonicalKey hoặc slug
     const deleteFilter = {
       userEmail: userEmail,
       $or: [
@@ -123,7 +122,7 @@ export async function DELETE(req) {
     const result = await db.collection("history").deleteMany(deleteFilter);
 
     if (result.deletedCount >= 1) {
-      return NextResponse.json({ message: "Đã dọn dẹp kho báu 🧹" });
+      return NextResponse.json({ message: "Đã dọn dẹp" });
     } else {
       return NextResponse.json({ error: "Không tìm thấy phim để xóa" }, { status: 404 });
     }
