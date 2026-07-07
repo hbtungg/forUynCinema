@@ -15,7 +15,8 @@ export default function ContinueWatching() {
         const res = await fetch(`/api/history?userEmail=${session.user.email}`);
         if (res.ok) {
           const data = await res.json();
-          setHistory(data);
+          const historyList = data.movies || (Array.isArray(data) ? data : []);
+          setHistory(historyList);
         }
       } catch (error) {
         console.error("Lỗi lấy lịch sử từ:", error);
@@ -135,7 +136,6 @@ export default function ContinueWatching() {
                 href={`/watch/${item.slug}?ep=${encodeURIComponent(item.episode || 1)}`}
                 className="block relative aspect-video rounded-[1.5rem] md:rounded-[1.8rem] overflow-hidden border border-white/5 shadow-2xl bg-[#0F1326]/40 transition-all duration-500 group-hover/card:border-[#E6C687]/30"
               >
-                {/* 🚀 ĐÃ SỬA: Đẩy opacity lên 100 và loại bỏ giảm độ sáng khi hover */}
                 <img
                   src={getDisplayImage(item)}
                   alt={item.name}
