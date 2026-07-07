@@ -66,6 +66,8 @@ export async function GET(req) {
     const limit = 8; // Cố định 8 phim trên 1 trang theo ý anh
     const skip = (page - 1) * limit;
 
+    console.log(`[API HISTORY GET] Đang gọi lịch sử cho email: ${userEmail}, Page: ${page}`);
+
     if (!userEmail) return NextResponse.json({ movies: [], total: 0 });
 
     const client = await clientPromise;
@@ -81,6 +83,11 @@ export async function GET(req) {
       .skip(skip)
       .limit(limit)
       .toArray();
+
+      console.log(`[API HISTORY GET] Dữ liệu trả về:`, { 
+      moviesLength: responseData.movies.length, 
+      total: responseData.total 
+    });
 
     // Trả về cả mảng dữ liệu phẳng và tổng số lượng chính xác
     return NextResponse.json({

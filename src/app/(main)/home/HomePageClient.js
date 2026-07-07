@@ -15,6 +15,33 @@ export const metadata = {
   description: 'Watch series online, watch films online free',
 };
 
+if (typeof window !== 'undefined' && !window.fetchProxySet) {
+  window.fetchProxySet = true;
+  const originalFetch = window.fetch;
+  window.fetch = async function (...args) {
+    const url = args[0];
+    const response = await originalFetch.apply(this, args);
+    
+    // Chỉ chặn bắt log nếu url gọi đến api history
+    if (typeof url === 'string' && url.includes('/api/history')) {
+      const clonedResponse = response.clone();
+      try {
+        const data = await clonedResponse.json();
+        console.log(`%c[FETCH LOG DETECTED] URL: ${url}`, 'background: #222; color: #bada55; pading: 2px;');
+        console.log('[FETCH DATA REAL]:', data);
+        
+        // Kiểm tra nếu dữ liệu không phải mảng mà bị map/slice trực tiếp
+        if (data && typeof data === 'object' && !Array.isArray(data)) {
+          console.warn('[FETCH WARNING]: Dữ liệu trả về là OBJECT phân trang, nếu component nào dùng .map() trực tiếp lên cục này sẽ bị CRASH!');
+        }
+      } catch (err) {
+        console.error('[FETCH LOG ERROR]: Không thể đọc JSON', err);
+      }
+    }
+    return response;
+  };
+}
+
 export default function HomePageClient({
   allMovies,
   koreaMovies,
