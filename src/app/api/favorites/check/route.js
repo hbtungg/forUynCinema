@@ -1,3 +1,4 @@
+import { requireUserEmail, apiError } from "@/lib/userApi";
 import clientPromise from "@/lib/mongodb";
 import { NextResponse } from "next/server";
 
@@ -6,9 +7,9 @@ export const runtime = 'nodejs';
 
 export async function GET(req) {
   try {
+    const userEmail = await requireUserEmail(req);
     const { searchParams } = new URL(req.url);
     const slug = searchParams.get('slug');
-    const userEmail = searchParams.get('userEmail');
 
     // Nếu không truyền slug hoặc người dùng chưa đăng nhập (không có email), mặc định báo chưa yêu thích
     if (!slug || !userEmail) {
@@ -34,8 +35,6 @@ export async function GET(req) {
     return NextResponse.json({ isFavorite: !!favorite }, { status: 200 });
 
   } catch (error) {
-    console.error("Lỗi hệ thống tại api/favorites/check:", error);
-    // Bọc lót an toàn: Nếu sập database, vẫn trả về false để giao diện xem phim nạp bình thường, không bị sập trang
-    return NextResponse.json({ isFavorite: false }, { status: 200 });
+    return apiError(error);
   }
 }

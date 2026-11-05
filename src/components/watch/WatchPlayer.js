@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import DirectStreamPlayer from './DirectStreamPlayer';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { Lock, Radio, Loader2 } from 'lucide-react';
@@ -35,9 +36,13 @@ export default function WatchPlayer({
   getEmbedUrl, 
   setIsLoading, 
   setIframeError,
-  collapsed
+  collapsed,
+  onProgress,
+  resumeSeconds
 }) {
   const { data: session, status } = useSession();
+  const [embedFallback, setEmbedFallback] = useState('');
+  const useDirect = Boolean(currentEp?.m3u8 && embedFallback !== currentEp.m3u8);
 
   // Theo dõi sát sao biến isLoading để ép đổi tên tab chính xác theo tiến độ nạp phim
   useEffect(() => {
@@ -52,17 +57,17 @@ export default function WatchPlayer({
   }, [movie?.name, epName, isLoading]);
 
   // Ép cứng chiều cao cố định cho khung phát chuẩn rạp phim
-  const playerLayoutClass = 'w-full h-[68vh]'; 
+  const playerLayoutClass = 'w-full aspect-video md:aspect-auto md:h-[68vh]';
 
   // ── 🚀 VÒNG CHỜ CHUYỂN TRẠNG THÁI HỆ THỐNG KÍNH MỜ ──
   if (status === 'loading') {
     return (
       <div 
-        className={`relative bg-[#0F1326]/40 backdrop-blur-2xl border border-white/5 rounded-2xl overflow-hidden flex flex-col items-center justify-center gap-3 shadow-2xl transition-all duration-300 ${playerLayoutClass}`}
-        style={{ fontFamily: "'Be Vietnam Pro', sans-serif" }}
+        className={`relative glass-surface border border-white/5 rounded-2xl overflow-hidden flex flex-col items-center justify-center gap-3 shadow-2xl transition-all duration-300 ${playerLayoutClass}`}
+        style={{ fontFamily: "var(--font-main)" }}
       >
-        <Loader2 className="w-8 h-8 border-2 border-[#E6C687]/20 border-t-[#E6C687] rounded-full animate-spin text-[#E6C687]" />
-        <span className="text-[10px] uppercase tracking-widest text-[#d0c5b5]/40 font-bold">Đang kiểm tra quyền...</span>
+        <Loader2 className="w-8 h-8 border-2 border-[#e8e8e8]/20 border-t-[#e8e8e8] rounded-full animate-spin text-[#e8e8e8]" />
+        <span className="text-[10px] uppercase tracking-widest text-[#808080] font-bold">Đang kiểm tra quyền...</span>
       </div>
     );
   }
@@ -71,22 +76,22 @@ export default function WatchPlayer({
   if (!session) {
     return (
       <div 
-        className={`relative bg-[#0F1326]/40 backdrop-blur-2xl border border-white/5 rounded-2xl overflow-hidden flex flex-col items-center justify-center gap-4 px-6 text-center select-none shadow-2xl transition-all duration-300 ${playerLayoutClass}`}
-        style={{ fontFamily: "'Be Vietnam Pro', sans-serif" }}
+        className={`relative glass-surface border border-white/5 rounded-2xl overflow-hidden flex flex-col items-center justify-center gap-4 px-6 text-center select-none shadow-2xl transition-all duration-300 ${playerLayoutClass}`}
+        style={{ fontFamily: "var(--font-main)" }}
       >
-        <div className="w-12 h-12 rounded-full bg-[#E6C687]/10 border border-[#E6C687]/20 flex items-center justify-center text-[#E6C687] animate-pulse shadow-[0_0_15px_rgba(230,198,135,0.15)]">
-          <Lock className="w-5 h-5 text-[#E6C687]" />
+        <div className="w-12 h-12 rounded-full bg-[#e8e8e8]/10 border border-[#e8e8e8]/20 flex items-center justify-center text-[#e8e8e8] animate-pulse ">
+          <Lock className="w-5 h-5 text-[#e8e8e8]" />
         </div>
         <div className="space-y-1.5">
           <p className="text-sm font-bold text-white uppercase tracking-wider">Nội dung giới hạn</p>
-          <p className="text-[#d0c5b5]/40 text-[11px] font-medium tracking-wide max-w-md">
-            Vui lòng đăng nhập tài khoản để thưởng thức bom tấn <span className="text-[#ffe3ae] font-bold">“{movie?.name}”</span>
+          <p className="text-[#808080] text-[11px] font-medium tracking-wide max-w-md">
+            Vui lòng đăng nhập tài khoản để thưởng thức bom tấn <span className="text-[#ffffff] font-bold">“{movie?.name}”</span>
           </p>
         </div>
         
         <Link
           href="/login"
-          className="mt-2 px-6 py-2.5 bg-[#E6C687]/10 hover:bg-[#E6C687] border border-[#E6C687]/20 text-[#E6C687] hover:text-[#402d00] font-bold text-[10px] uppercase tracking-widest rounded-xl transition-all duration-300 active:scale-95 shadow-lg"
+          className="mt-2 px-6 py-2.5 bg-[#e8e8e8]/10 hover:bg-[#e8e8e8] border border-[#e8e8e8]/20 text-[#e8e8e8] hover:text-[#050505] font-bold text-[10px] uppercase tracking-widest rounded-xl transition-all duration-300 active:scale-95 shadow-lg"
         >
           Đăng nhập ngay
         </Link>
@@ -98,12 +103,12 @@ export default function WatchPlayer({
   return (
     <div 
       className={`relative bg-black border border-white/5 rounded-2xl overflow-hidden shadow-2xl transition-all duration-300 ${playerLayoutClass}`}
-      style={{ fontFamily: "'Be Vietnam Pro', sans-serif" }}
+      style={{ fontFamily: "var(--font-main)" }}
     >
       {/* Title overlay thông tin phim lướt mờ sương nhẹ thượng tầng */}
       <div className="absolute top-0 left-0 right-0 z-10 px-5 pt-4 pb-12 bg-gradient-to-b from-black/60 to-transparent pointer-events-none">
-        <p className="text-xs md:text-sm font-bold text-white tracking-wide uppercase drop-shadow-[0_1px_4px_rgba(0,0,0,0.9)]">{movie?.name}</p>
-        <p className="text-[10px] text-[#d0c5b5]/40 mt-1 font-semibold uppercase font-mono tracking-wider">
+        <p className="text-xs md:text-sm font-bold text-white tracking-wide uppercase ">{movie?.name}</p>
+        <p className="text-[10px] text-[#808080] mt-1 font-semibold uppercase font-mono tracking-wider">
           Server: {selectedServer + 1} · Tập: {epName}
           {currentEp?.title ? ` · ${currentEp.title}` : ''}
         </p>
@@ -112,13 +117,13 @@ export default function WatchPlayer({
       {/* Lớp phủ Ảnh Poster đại diện phủ bóng mờ thay thế cho màn hình đen xì khi chưa phát phim */}
       {isLoading && !iframeError && (
         <div 
-          className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-cover bg-center transition-all duration-700"
+          className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-cover bg-center transition-all duration-300"
           style={{ 
-            backgroundImage: `linear-gradient(to top, rgba(15,19,38,0.95), rgba(15,19,38,0.7)), url(${movie?.poster_url || movie?.thumb_url})` 
+            backgroundImage: `linear-gradient(to top, rgba(5,5,5,0.95), rgba(5,5,5,0.7)), url(${movie?.poster_url || movie?.thumb_url})` 
           }}
         >
-          <Loader2 className="w-8 h-8 border-2 border-[#E6C687]/20 border-t-[#E6C687] rounded-full animate-spin text-[#E6C687]" />
-          <span className="text-[10px] uppercase tracking-widest text-[#ffe3ae] font-bold drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+          <Loader2 className="w-8 h-8 border-2 border-[#e8e8e8]/20 border-t-[#e8e8e8] rounded-full animate-spin text-[#e8e8e8]" />
+          <span className="text-[10px] uppercase tracking-widest text-[#ffffff] font-bold ">
             Đang cấu hình luồng phát...
           </span>
         </div>
@@ -126,19 +131,23 @@ export default function WatchPlayer({
 
       {/* Error interface chuẩn khi sập nguồn phim */}
       {iframeError && (
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 bg-[#0F1326]/90 backdrop-blur-2xl border border-white/5">
-          <Radio className="w-8 h-8 text-amber-500 animate-bounce" />
-          <p className="text-[#d0c5b5]/60 text-xs font-bold uppercase tracking-widest">Nguồn phim gặp sự cố</p>
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 glass-surface border border-white/5">
+          <Radio className="w-8 h-8 text-neutral-300 " />
+          <p className="text-[#b8b8b8] text-xs font-bold uppercase tracking-widest">Nguồn phim gặp sự cố</p>
           <button
             onClick={() => { setIframeError(false); setIsLoading(true); }}
-            className="px-5 py-2 rounded-xl border border-white/10 bg-white/[0.02] text-[10px] font-bold uppercase tracking-wider text-[#d0c5b5] hover:border-[#E6C687]/40 hover:text-[#ffe3ae] transition-all focus:outline-none cursor-pointer"
+            className="px-5 py-2 rounded-xl border border-white/10 bg-white/[0.02] text-[10px] font-bold uppercase tracking-wider text-[#b8b8b8] hover:border-[#e8e8e8]/40 hover:text-[#ffffff] transition-all focus:outline-none cursor-pointer"
           >
             Thử lại
           </button>
         </div>
       )}
 
-      {currentEp?.embed && !iframeError ? (
+      {useDirect ? (
+        <DirectStreamPlayer key={currentEp.m3u8} url={currentEp.m3u8} resumeSeconds={resumeSeconds}
+          onReady={() => setIsLoading(false)} onProgress={onProgress}
+          onError={() => { setEmbedFallback(currentEp.m3u8); setIsLoading(false); if (!currentEp?.embed) setIframeError(true); }} />
+      ) : currentEp?.embed && !iframeError ? (
         <iframe
           src={getEmbedUrl()}
           className="w-full h-full border-none"
@@ -149,10 +158,16 @@ export default function WatchPlayer({
           onError={() => { setIsLoading(false); setIframeError(true); }}
         />
       ) : !iframeError ? (
-        <div className="flex items-center justify-center h-full text-[#d0c5b5]/20 text-xs uppercase font-bold tracking-widest italic">
+        <div className="flex items-center justify-center h-full text-[#808080] text-xs uppercase font-bold tracking-widest italic">
           Không có nguồn phim
         </div>
       ) : null}
+      {currentEp?.m3u8 && !useDirect && (
+        <button onClick={() => { setEmbedFallback(''); setIframeError(false); setIsLoading(true); }}
+          className="absolute bottom-2 left-2 z-30 rounded-lg bg-[#0b0b0b] px-3 py-2 text-xs text-[#e8e8e8]">
+          Thử nguồn HLS
+        </button>
+      )}
     </div>
   );
 }

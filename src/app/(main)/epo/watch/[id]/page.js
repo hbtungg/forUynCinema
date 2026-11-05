@@ -36,14 +36,14 @@ export default function EpoWatchPage({ params }) {
   }, [id]);
 
   if (loading) return (
-    <div className="min-h-screen bg-black flex flex-col items-center justify-center text-white font-black uppercase tracking-[0.5em] text-[10px]">
-      <div className="w-12 h-12 border-2 border-red-600 border-t-transparent rounded-full animate-spin mb-8 shadow-[0_0_20px_rgba(220,38,38,0.3)]"></div>
+    <div className="min-h-screen bg-black flex flex-col items-center justify-center text-white font-semibold uppercase tracking-[0.5em] text-[10px]">
+      <div className="w-12 h-12 border-2 border-neutral-600 border-t-transparent rounded-full animate-spin mb-8 "></div>
       Đang chuẩn bị rạp phim riêng cho Thu Uyên...
     </div>
   );
 
   if (!video) return (
-    <div className="min-h-screen bg-black flex flex-col items-center justify-center text-red-600 font-black uppercase text-[10px] gap-4">
+    <div className="min-h-screen bg-black flex flex-col items-center justify-center text-neutral-300 font-semibold uppercase text-[10px] gap-4">
       <span>Phim không tồn tại trong kho báu.</span>
       <Link href="/epo" className="text-zinc-500 hover:text-white transition-colors underline decoration-1 underline-offset-4 tracking-widest">Quay lại bộ sưu tập</Link>
     </div>
@@ -58,7 +58,7 @@ export default function EpoWatchPage({ params }) {
         <div className="w-full max-w-5xl mb-8">
           <Link
             href="/epo"
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-zinc-900/30 backdrop-blur-md border border-zinc-800/50 rounded-full text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500 hover:text-red-600 hover:border-red-600/50 transition-all group"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-zinc-900/30 backdrop-blur-md border border-zinc-800/50 rounded-full text-[9px] font-semibold uppercase tracking-[0.2em] text-zinc-500 hover:text-neutral-300 hover:border-neutral-600/50 transition-all group"
           >
             <span className="group-hover:-translate-x-1 transition-transform duration-300">←</span>
             Trở lại bộ sưu tập
@@ -67,21 +67,21 @@ export default function EpoWatchPage({ params }) {
 
         {/* TIÊU ĐỀ PHIM */}
         <div className="w-full max-w-5xl mb-10">
-          <h1 className="text-2xl md:text-4xl font-black uppercase italic tracking-tighter text-white drop-shadow-[0_0_30px_rgba(255,255,255,0.1)] leading-tight">
+          <h1 className="text-2xl md:text-4xl font-semibold uppercase italic tracking-tighter text-white  leading-tight">
             {video.title}
           </h1>
           <div className="flex flex-wrap items-center gap-4 mt-6">
-            <span className="text-red-600 text-[9px] font-black uppercase tracking-[0.4em] bg-red-600/10 px-4 py-1.5 rounded-lg border border-red-600/20 shadow-[0_0_20px_rgba(220,38,38,0.1)]">
+            <span className="text-neutral-300 text-[9px] font-semibold uppercase tracking-[0.4em] bg-neutral-700/10 px-4 py-1.5 rounded-lg border border-neutral-600/20 ">
               PRIVATE ARCHIVE
             </span>
-            <span className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.2em]">
+            <span className="text-zinc-500 text-[10px] font-semibold uppercase tracking-[0.2em]">
               {video.length_min} • {video.views?.toLocaleString()} VIEWS • NO TRACE MODE
             </span>
           </div>
         </div>
 
         {/* PLAYER - FIX KHUNG DÀI HƠN PHIM & BO GÓC TĂM TẮP */}
-        <div className="w-full max-w-5xl mx-auto mb-12 relative group p-1.5 bg-zinc-900 rounded-[2.5rem] shadow-[0_0_80px_rgba(0,0,0,1),0_0_30px_rgba(220,38,38,0.1)]">
+        <div className="w-full max-w-5xl mx-auto mb-12 relative group p-1.5 bg-zinc-900 rounded-[2.5rem] ">
           {/* LỚP BỌC TRONG: ÉP VIDEO PHẢI KHỚP KHUNG */}
           <div className="relative w-full pb-[56.25%] h-0 rounded-[2.1rem] overflow-hidden bg-black">
             <iframe
@@ -93,14 +93,14 @@ export default function EpoWatchPage({ params }) {
             ></iframe>
 
             {/* Viền đỏ hiệu ứng bao phủ toàn bộ - Cân bằng góc bo */}
-            <div className="absolute inset-0 pointer-events-none border-2 border-red-600/5 group-hover:border-red-600/20 rounded-[2.1rem] transition-colors duration-500"></div>
+            <div className="absolute inset-0 pointer-events-none border-2 border-neutral-600/5 group-hover:border-neutral-600/20 rounded-[2.1rem] transition-colors duration-300"></div>
           </div>
         </div>
 
         {/* MÔ TẢ & ĐỀ XUẤT */}
         <div className="w-full max-w-5xl space-y-10 pb-20">
           <div className="p-12 bg-zinc-900/10 rounded-[3.5rem] border border-zinc-800/30 backdrop-blur-xl">
-            <h3 className="text-[10px] font-black uppercase text-red-600 mb-6 tracking-[0.5em] italic">
+            <h3 className="text-[10px] font-semibold uppercase text-neutral-300 mb-6 tracking-[0.5em] italic">
               Metadata & Keywords
             </h3>
             <div className="flex flex-wrap gap-2">

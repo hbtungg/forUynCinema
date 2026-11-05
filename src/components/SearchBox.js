@@ -80,37 +80,38 @@ export default function SearchBox() {
   };
 
   return (
-    <div ref={searchContainerRef} className="relative w-full flex items-center gap-2 justify-end lg:justify-start" style={{ fontFamily: "'Be Vietnam Pro', sans-serif" }}>
+    <div ref={searchContainerRef} className="relative w-full flex items-center gap-2 justify-end lg:justify-start" style={{ fontFamily: "var(--font-main)" }}>
       
       {/* KHỐI HỘP NHẬP TEXT INPUT CHUẨN PHA LÊ ĐÊM TỐI GIẢN CAO CẤP */}
       <div className="relative flex-1 max-w-xs lg:max-w-md">
         {/* 🚀 VÁ UI CHÍ MẠNG: Tăng độ tương phản border-white/10 và nâng nền bg-white/[0.03] để hiện rõ khối trên Header */}
-        <div className="relative flex items-center bg-white/[0.03] backdrop-blur-md border border-white/10 rounded-full px-4 py-1.5 gap-2.5 focus-within:border-[#E6C687]/40 focus-within:bg-[#0F1326]/80 focus-within:shadow-[0_0_20px_rgba(230,198,135,0.08)] transition-all duration-300">
-          <Search className="w-3.5 h-3.5 text-[#d0c5b5]/50 flex-shrink-0 transition-colors duration-300 group-focus-within:text-[#E6C687]" />
+        <div className="relative flex items-center bg-white/[0.03] backdrop-blur-md border border-white/10 rounded-full px-4 py-1.5 gap-2.5 focus-within:border-[#e8e8e8]/40 focus-within:bg-white/[0.04] focus-within: transition-all duration-300">
+          <Search className="w-3.5 h-3.5 text-[#b8b8b8] flex-shrink-0 transition-colors duration-300 group-focus-within:text-[#e8e8e8]" />
           <input 
-            type="text" 
+            type="text"
+            aria-label="Tìm kiếm phim" 
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
             onFocus={() => keyword.trim().length >= 2 && setIsOpen(true)}
             onKeyDown={handleKeyDown}
             placeholder="Tìm kiếm phim..." 
-            /* Tăng placeholder lên text-[#d0c5b5]/40 để chữ không bị chìm nghỉm */
-            className="bg-transparent border-none outline-none text-xs text-[#e8e1da] placeholder:text-[#d0c5b5]/40 w-40 lg:w-52 font-sans tracking-wide font-medium"
+            /* Tăng placeholder lên text-[#808080] để chữ không bị chìm nghỉm */
+            className="bg-transparent border-none outline-none text-xs text-[#ffffff] placeholder:text-[#808080] w-40 lg:w-52 font-sans tracking-wide font-medium"
           />
         </div>
 
         {/* ── 🚀 KHAY DROPDOWN HIỂN THỊ KẾT QUẢ KÍNH MỜ XANH ĐÊM LUXURY ── */}
         {isOpen && (
-          <div className="absolute top-full left-0 right-0 mt-3 bg-[#0F1326]/95 backdrop-blur-2xl border border-white/10 rounded-2xl p-1.5 shadow-[0_25px_60px_rgba(0,0,0,0.8)] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 z-50">
+          <div className="absolute top-full left-0 right-0 mt-3 glass-surface border border-white/10 rounded-2xl p-1.5  overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 z-50">
             {loading ? (
               <div className="flex items-center justify-center py-6 gap-2">
-                <div className="w-3 h-3 rounded-full border-2 border-[#E6C687]/20 border-t-[#E6C687] animate-spin" />
-                <span className="text-[9px] font-bold uppercase tracking-widest text-[#d0c5b5]/40 font-mono">Scanning stars...</span>
+                <div className="w-3 h-3 rounded-full border-2 border-[#e8e8e8]/20 border-t-[#e8e8e8] animate-spin" />
+                <span className="text-[9px] font-bold uppercase tracking-widest text-[#808080] font-mono">Scanning stars...</span>
               </div>
             ) : searchResults.length > 0 ? (
               <div className="space-y-0.5">
-                <div className="px-3 py-2 text-[8px] font-black uppercase tracking-[0.25em] text-[#d0c5b5]/30 border-b border-white/5 mb-1 flex items-center gap-1.5">
-                  <span className="text-[#E6C687]">✨</span> Phim phù hợp nhất
+                <div className="px-3 py-2 text-[8px] font-semibold uppercase tracking-[0.25em] text-[#808080] border-b border-white/5 mb-1 flex items-center gap-1.5">
+                  <span className="text-[#e8e8e8]">✨</span> Phim phù hợp nhất
                 </div>
                 
                 {searchResults.map((movie) => (
@@ -121,30 +122,30 @@ export default function SearchBox() {
                     className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/5 border border-transparent hover:border-white/5 transition-all duration-300 group/item"
                   >
                     {/* Ảnh poster mini bo góc tròn */}
-                    <div className="w-8 h-11 flex-shrink-0 rounded-lg overflow-hidden bg-[#0F1326] border border-white/5">
+                    <div className="w-8 h-11 flex-shrink-0 rounded-lg overflow-hidden bg-[#0b0b0b] border border-white/5">
                       <img 
                         src={getMiniCleanImage(movie)} 
                         alt="" 
-                        className="w-full h-full object-cover group-hover/item:scale-105 transition-transform duration-500" 
+                        className="w-full h-full object-cover group-hover/item:scale-105 transition-transform duration-300" 
                       />
                     </div>
                     
                     {/* Thông tin chữ */}
                     <div className="flex-1 min-w-0 text-left">
-                      <h4 className="text-[11px] font-bold text-[#e8e1da] group-hover/item:text-[#ffe3ae] transition-colors truncate leading-tight tracking-wide">
+                      <h4 className="text-[11px] font-bold text-[#ffffff] group-hover/item:text-[#ffffff] transition-colors truncate leading-tight tracking-wide">
                         {movie.name}
                       </h4>
-                      <p className="text-[9px] text-[#d0c5b5]/40 font-bold uppercase tracking-wider truncate mt-1.5 font-sans">
-                        {movie.year || '2026'} • <span className="text-[#E6C687]/80 bg-[#E6C687]/10 px-1.5 py-0.5 rounded-md text-[8px]">{movie.current_episode || movie.episode_current || 'Full'}</span>
+                      <p className="text-[9px] text-[#808080] font-bold uppercase tracking-wider truncate mt-1.5 font-sans">
+                        {movie.year || '2026'} • <span className="text-[#e8e8e8]/80 bg-[#e8e8e8]/10 px-1.5 py-0.5 rounded-md text-[8px]">{movie.current_episode || movie.episode_current || 'Full'}</span>
                       </p>
                     </div>
 
-                    <span className="text-[#d0c5b5]/15 group-hover/item:text-[#E6C687] group-hover/item:translate-x-0.5 transition-all text-[9px] pr-1.5 font-mono">➔</span>
+                    <span className="text-[#808080] group-hover/item:text-[#e8e8e8] group-hover/item:translate-x-0.5 transition-all text-[9px] pr-1.5 font-mono">➔</span>
                   </Link>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-6 text-[9px] text-[#d0c5b5]/30 font-black uppercase tracking-widest font-mono">
+              <div className="text-center py-6 text-[9px] text-[#808080] font-semibold uppercase tracking-widest font-mono">
                 Không tìm thấy tọa độ phim 📡
               </div>
             )}
@@ -155,7 +156,7 @@ export default function SearchBox() {
       {/* NÚT TÌM KIẾM DÀNH CHO MOBILE TINH GỌN PHẲNG LỲ */}
       <button 
         onClick={executeSearch}
-        className="lg:hidden bg-[#E6C687]/10 hover:bg-[#E6C687] text-[#E6C687] hover:text-[#402d00] font-black text-[10px] uppercase tracking-widest px-4 py-2 rounded-full border border-[#E6C687]/20 transition-all duration-300 active:scale-95 flex-shrink-0 focus:outline-none"
+        className="lg:hidden bg-[#e8e8e8]/10 hover:bg-[#e8e8e8] text-[#e8e8e8] hover:text-[#050505] font-semibold text-[10px] uppercase tracking-widest px-4 py-2 rounded-full border border-[#e8e8e8]/20 transition-all duration-300 active:scale-95 flex-shrink-0 focus:outline-none"
       >
         Tìm
       </button>

@@ -15,8 +15,8 @@ export default function TwitterFeed() {
   return (
     <section className="mt-24 mb-32 max-w-4xl mx-auto px-4">
       <div className="flex items-center gap-3 mb-8">
-        <div className="w-1 h-6 bg-blue-500 rounded-full shadow-[0_0_15px_rgba(59,130,246,0.5)]"></div>
-        <h2 className="text-sm font-black text-zinc-400 uppercase tracking-[0.4em]">
+        <div className="w-1 h-6 bg-neutral-800 rounded-full "></div>
+        <h2 className="text-sm font-semibold text-zinc-400 uppercase tracking-[0.4em]">
           X • News Feed
         </h2>
       </div>
@@ -30,7 +30,7 @@ export default function TwitterFeed() {
           href="https://twitter.com/Linhcun123?ref_src=twsrc%5Etfw"
         >
           {/* Màn hình loading dự phòng */}
-          <div className="py-20 text-center text-zinc-800 font-black uppercase text-[10px] tracking-[0.2em] animate-pulse">
+          <div className="py-20 text-center text-zinc-800 font-semibold uppercase text-[10px] tracking-[0.2em] animate-pulse">
             Đang kết nối tới bản tin của Linh...
           </div>
         </a>

@@ -38,14 +38,14 @@ export default function SecretChat() {
   }, []);
 
   return (
-    <div ref={chatContainerRef} className="relative font-sans shrink-0" style={{ fontFamily: "'Be Vietnam Pro', sans-serif" }}>
+    <div ref={chatContainerRef} className="relative font-sans shrink-0" style={{ fontFamily: "var(--font-main)" }}>
 
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={`w-8 h-8 flex items-center justify-center rounded-full transition-all duration-300 relative focus:outline-none cursor-pointer ${isOpen
-            ? 'text-[#E6C687] bg-[#E6C687]/10 border border-[#E6C687]/20'
-            : 'text-[#e8e1da]/60 hover:text-[#ffe3ae] hover:scale-110'
+            ? 'text-[#e8e8e8] bg-[#e8e8e8]/10 border border-[#e8e8e8]/20'
+            : 'text-[#ffffff]/60 hover:text-[#ffffff] hover:scale-110'
           }`}
         title="Private Channel"
       >
@@ -58,23 +58,23 @@ export default function SecretChat() {
 
       {/* ── 🚀 KHAY NHẬP MẬT MÃ THẢ RỚT KÍNH MỜ XANH ĐÊM LUXURY ── */}
       {isOpen && (
-        <div className="absolute top-full right-0 mt-3 w-64 bg-[#0F1326]/95 backdrop-blur-2xl border border-white/10 rounded-2xl p-1.5 shadow-[0_25px_60px_rgba(0,0,0,0.8)] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 z-[180] origin-top-right">
+        <div className="absolute top-full right-0 mt-3 w-64 glass-surface border border-white/10 rounded-2xl p-1.5  overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 z-[180] origin-top-right">
 
           {/* Header khay mật mã */}
           <div className="px-3 py-2 border-b border-white/5 bg-white/[0.02] rounded-t-xl flex items-center justify-between">
             <div className="flex items-center gap-1.5">
-              <span className="text-[#E6C687] text-[10px]">✨</span>
-              <p className="text-[8px] font-black text-[#d0c5b5]/40 uppercase tracking-[0.25em]">Private Channel</p>
+              <span className="text-[#e8e8e8] text-[10px]">✨</span>
+              <p className="text-[8px] font-semibold text-[#808080] uppercase tracking-[0.25em]">Private Channel</p>
             </div>
-            <button onClick={() => setIsOpen(false)} className="text-[#d0c5b5]/20 hover:text-white transition-colors focus:outline-none">
+            <button onClick={() => setIsOpen(false)} className="text-[#808080] hover:text-white transition-colors focus:outline-none">
               <X className="w-3 h-3" />
             </button>
           </div>
 
           {/* Khối Input nhập liệu tinh tế */}
           <div className="p-4 space-y-3">
-            <div className="flex items-center gap-2 text-[10px] text-[#d0c5b5]/50 font-bold italic pl-1">
-              <KeyRound className="w-3 h-3 text-[#E6C687]/50" />
+            <div className="flex items-center gap-2 text-[10px] text-[#b8b8b8] font-bold italic pl-1">
+              <KeyRound className="w-3 h-3 text-[#e8e8e8]/50" />
               <span>&quot;One Piece&quot;</span>
             </div>
 
@@ -86,8 +86,8 @@ export default function SecretChat() {
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Nhập mật mã..."
                 /* 🚀 FIX CHÍ MẠNG: Đồng bộ input với SearchBox, đổi sang màu vàng dịu nhẹ khi gõ sai */
-                className={`w-full bg-white/[0.03] border ${error ? 'border-amber-500/50 bg-amber-500/5 animate-shake' : 'border-white/5 focus-within:border-[#E6C687]/30'
-                  } rounded-xl py-2 px-3.5 text-xs text-white outline-none placeholder:text-[#d0c5b5]/20 font-semibold tracking-wide transition-all duration-300`}
+                className={`w-full bg-white/[0.03] border ${error ? 'border-neutral-800/50 bg-neutral-800/5 animate-shake' : 'border-white/5 focus-within:border-[#e8e8e8]/30'
+                  } rounded-xl py-2 px-3.5 text-xs text-white outline-none placeholder:text-[#808080] font-semibold tracking-wide transition-all duration-300`}
               />
             </form>
           </div>

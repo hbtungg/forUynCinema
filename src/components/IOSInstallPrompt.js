@@ -33,13 +33,13 @@ export default function IOSInstallPrompt() {
   if (!showPrompt) return null;
 
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[999] w-[calc(100%-2rem)] max-w-[360px] animate-in slide-in-from-bottom duration-500 font-sans select-none" style={{ fontFamily: "'Be Vietnam Pro', sans-serif" }}>
-      <div className="relative bg-[#0F1326]/90 backdrop-blur-2xl border border-[#E6C687]/30 rounded-[24px] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.8)] text-[#e8e1da]">
+    <div className="install-prompt fixed bottom-6 left-1/2 -translate-x-1/2 z-[999] w-[calc(100%-2rem)] max-w-[360px] animate-in slide-in-from-bottom duration-300 font-sans select-none" style={{ fontFamily: "var(--font-main)" }}>
+      <div className="relative glass-surface border border-[#e8e8e8]/30 rounded-[24px] p-5  text-[#ffffff]">
         
         {/* Nút đóng góc phải */}
         <button 
           onClick={handleDismiss}
-          className="absolute top-3 right-3 w-6 h-6 rounded-full bg-white/5 border border-white/5 flex items-center justify-center text-[#d0c5b5]/40 hover:text-white transition-colors focus:outline-none"
+          className="absolute top-3 right-3 w-6 h-6 rounded-full bg-white/5 border border-white/5 flex items-center justify-center text-[#808080] hover:text-white transition-colors focus:outline-none"
         >
           <X className="w-3.5 h-3.5" />
         </button>
@@ -47,26 +47,26 @@ export default function IOSInstallPrompt() {
         {/* Nội dung chỉ dẫn */}
         <div className="space-y-4">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-[#E6C687] animate-pulse" />
-            <h4 className="text-xs font-black uppercase tracking-widest text-[#E6C687]">Cài đặt Uynflix App</h4>
+            <Sparkles className="w-4 h-4 text-[#e8e8e8] animate-pulse" />
+            <h4 className="text-xs font-semibold uppercase tracking-widest text-[#e8e8e8]">Cài đặt Uynflix App</h4>
           </div>
 
-          <p className="text-xs text-[#d0c5b5]/80 leading-relaxed font-medium">
-            Mang <span className="text-[#ffe3ae] font-bold">Uynflix</span> ra màn hình chính để trải nghiệm mượt mà nhất nhé!
+          <p className="text-xs text-[#b8b8b8] leading-relaxed font-medium">
+            Mang <span className="text-[#ffffff] font-bold">Uynflix</span> ra màn hình chính để trải nghiệm mượt mà nhất nhé!
           </p>
 
           {/* Các bước thao tác mô phỏng đúng chuẩn iOS UI */}
-          <div className="bg-black/20 rounded-xl p-3 border border-white/5 space-y-3 text-[11px] font-semibold text-[#d0c5b5]/60">
+          <div className="bg-black/20 rounded-xl p-3 border border-white/5 space-y-3 text-[11px] font-semibold text-[#b8b8b8]">
             <div className="flex items-center gap-3">
-              <div className="w-6 h-6 rounded-lg bg-white/5 flex items-center justify-center text-[#ffe3ae] border border-white/10 shrink-0">
-                <Share className="w-3.5 h-3.5 text-[#E6C687]" />
+              <div className="w-6 h-6 rounded-lg bg-white/5 flex items-center justify-center text-[#ffffff] border border-white/10 shrink-0">
+                <Share className="w-3.5 h-3.5 text-[#e8e8e8]" />
               </div>
               <span>1. Bấm vào nút <span className="text-white font-bold">Chia sẻ (Share)</span> trên thanh công cụ Safari.</span>
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="w-6 h-6 rounded-lg bg-white/5 flex items-center justify-center text-[#ffe3ae] border border-white/10 shrink-0">
-                <PlusSquare className="w-3.5 h-3.5 text-[#E6C687]" />
+              <div className="w-6 h-6 rounded-lg bg-white/5 flex items-center justify-center text-[#ffffff] border border-white/10 shrink-0">
+                <PlusSquare className="w-3.5 h-3.5 text-[#e8e8e8]" />
               </div>
               <span>2. Cuộn xuống dưới và chọn mục <span className="text-white font-bold">Thêm vào MH chính (Add to Home Screen)</span>.</span>
             </div>
@@ -74,14 +74,14 @@ export default function IOSInstallPrompt() {
 
           <button 
             onClick={handleDismiss}
-            className="w-full py-2.5 bg-[#E6C687]/10 hover:bg-[#E6C687] border border-[#E6C687]/20 text-[#E6C687] hover:text-[#402d00] font-bold text-[10px] tracking-widest uppercase rounded-xl transition-all duration-300 active:scale-95"
+            className="w-full py-2.5 bg-[#e8e8e8]/10 hover:bg-[#e8e8e8] border border-[#e8e8e8]/20 text-[#e8e8e8] hover:text-[#050505] font-bold text-[10px] tracking-widest uppercase rounded-xl transition-all duration-300 active:scale-95"
           >
             Đã hiểu
           </button>
         </div>
 
         {/* Mũi tên nhỏ chỉ xuống nút Share của Safari (Dành riêng cho iPhone) */}
-        <div className="absolute bottom-[-6px] left-1/2 -translate-x-1/2 w-3 h-3 bg-[#0F1326] border-r border-b border-[#E6C687]/30 rotate-45 hidden md:block" />
+        <div className="absolute bottom-[-6px] left-1/2 -translate-x-1/2 w-3 h-3 bg-[#0b0b0b] border-r border-b border-[#e8e8e8]/30 rotate-45 hidden md:block" />
       </div>
     </div>
   );

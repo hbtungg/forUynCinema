@@ -1,10 +1,10 @@
+import { requireUserEmail, apiError, validMovieKey } from "@/lib/userApi";
 import clientPromise from "@/lib/mongodb";
 import { NextResponse } from "next/server";
 
 export async function GET(req) {
   try {
-    const { searchParams } = new URL(req.url);
-    const userEmail = searchParams.get('userEmail');
+    const userEmail = await requireUserEmail(req);
     if (!userEmail) return NextResponse.json([]);
 
     const client = await clientPromise;
@@ -15,16 +15,19 @@ export async function GET(req) {
       .toArray();
 
     return NextResponse.json(favorites);
-  } catch (e) {
-    return NextResponse.json([]);
+  } catch (error) {
+    return apiError(error);
   }
 }
 
 export async function POST(req) {
   try {
+    const userEmail = await requireUserEmail(req);
     const client = await clientPromise;
     const db = client.db("ForUynDB");
-    const { movie, userEmail } = await req.json();
+    const { movie } = await req.json();
+    if (movie?.canonicalKey !== undefined && !validMovieKey(movie.canonicalKey)) return NextResponse.json({error:"Mã phim không hợp lệ"},{status:400});
+    if (!movie || typeof movie.slug !== "string" || !movie.slug) return NextResponse.json({error:"Thiếu phim"},{status:400});
 
     const movieKey = movie.canonicalKey
       ? { userEmail, canonicalKey: movie.canonicalKey }
@@ -32,20 +35,23 @@ export async function POST(req) {
 
     await db.collection("favorites").updateOne(
       movieKey,
-      { $set: { ...movie, userEmail, updatedAt: new Date() } },
+      { $set: { ...Object.fromEntries(Object.entries(movie).filter(([key]) => !["_id", "userEmail", "updatedAt"].includes(key))), userEmail, updatedAt: new Date() } },
       { upsert: true }
     );
     return NextResponse.json({ message: "Đã lưu vào mây ❤️" });
-  } catch (e) {
-    return NextResponse.json({ error: "Lỗi" }, { status: 500 });
+  } catch (error) {
+    return apiError(error);
   }
 }
 
 export async function DELETE(req) {
   try {
+    const userEmail = await requireUserEmail(req);
     const client = await clientPromise;
     const db = client.db("ForUynDB");
-    const { slug, canonicalKey, userEmail } = await req.json();
+    const { slug, canonicalKey } = await req.json();
+    if (canonicalKey !== undefined && !validMovieKey(canonicalKey)) return NextResponse.json({error:"Mã phim không hợp lệ"},{status:400});
+    if (typeof slug !== "string" || !slug) return NextResponse.json({error:"Thiếu slug"},{status:400});
 
     await db.collection("favorites").deleteOne({
       userEmail,
@@ -55,7 +61,7 @@ export async function DELETE(req) {
       ]
     });
     return NextResponse.json({ message: "Đã xóa khỏi mây" });
-  } catch (e) {
-    return NextResponse.json({ error: "Lỗi" }, { status: 500 });
+  } catch (error) {
+    return apiError(error);
   }
 }

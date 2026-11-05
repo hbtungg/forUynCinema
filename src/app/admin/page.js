@@ -104,19 +104,19 @@ export default function AdminDashboard() {
         className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-900 pb-5"
       >
         <div className="flex items-center gap-4">
-          <div className="w-1.5 h-6 bg-red-600 shadow-[0_0_20px_rgba(220,38,38,0.6)] rounded-full" />
+          <div className="w-1.5 h-6 bg-neutral-700  rounded-full" />
           <div>
-            <h1 className="text-xl font-black uppercase tracking-wider text-white">
+            <h1 className="text-xl font-semibold uppercase tracking-wider text-white">
               Bảng điều khiển hệ thống
             </h1>
-            <p className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.2em] mt-0.5">
+            <p className="text-zinc-500 text-[10px] font-semibold uppercase tracking-[0.2em] mt-0.5">
               UynCinema Administration Center
             </p>
           </div>
         </div>
         <button 
           onClick={() => { setLoading(true); fetchDashboardData(); }}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.06] hover:border-white/[0.1] text-zinc-400 hover:text-white transition-all duration-300"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-semibold uppercase tracking-widest bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.06] hover:border-white/[0.1] text-zinc-400 hover:text-white transition-all duration-300"
         >
           🔄 Làm mới dữ liệu
         </button>
@@ -138,21 +138,21 @@ export default function AdminDashboard() {
             className="grid grid-cols-2 lg:grid-cols-4 gap-4"
           >
             {[
-              { label: 'Thành viên rạp', value: totalUsers, icon: '👥', color: 'text-blue-500', bg: 'bg-blue-500/10' },
+              { label: 'Thành viên rạp', value: totalUsers, icon: '👥', color: 'text-neutral-300', bg: 'bg-neutral-800/10' },
               { label: 'Đang hoạt động', value: onlineUsers, icon: '🟢', color: 'text-green-500', bg: 'bg-green-500/10', sub: `${activeWatching} đang chiếu phim` },
-              { label: 'Tổng lượt chiếu', value: totalViews, icon: '🎬', color: 'text-red-500', bg: 'bg-red-500/10' },
-              { label: 'Máy chủ phòng chiếu', value: 'ONLINE', icon: '⚡', color: 'text-yellow-500', bg: 'bg-yellow-500/10', sub: 'Ping: 14ms' },
+              { label: 'Tổng lượt chiếu', value: totalViews, icon: '🎬', color: 'text-neutral-300', bg: 'bg-neutral-700/10' },
+              { label: 'Máy chủ phòng chiếu', value: 'ONLINE', icon: '⚡', color: 'text-neutral-300', bg: 'bg-neutral-800/10', sub: 'Ping: 14ms' },
             ].map((stat, i) => (
               <motion.div
                 key={i}
                 variants={itemVariants}
-                className="rounded-2xl border border-white/[0.04] bg-[#0c0c0e]/60 p-4 sm:p-5 relative overflow-hidden group hover:border-white/[0.08] transition-all duration-300 shadow-[0_10px_30px_rgba(0,0,0,0.2)]"
+                className="rounded-2xl border border-white/[0.04] bg-[#0c0c0e]/60 p-4 sm:p-5 relative overflow-hidden group hover:border-white/[0.08] transition-all duration-300 "
               >
                 <div className="flex justify-between items-start">
-                  <p className="text-zinc-500 text-[9px] uppercase tracking-[0.18em] font-black">{stat.label}</p>
+                  <p className="text-zinc-500 text-[9px] uppercase tracking-[0.18em] font-semibold">{stat.label}</p>
                   <span className={`text-base p-1.5 rounded-lg ${stat.bg} ${stat.color}`}>{stat.icon}</span>
                 </div>
-                <h2 className="text-2xl sm:text-3xl font-black mt-2 text-white tracking-tight">{stat.value}</h2>
+                <h2 className="text-2xl sm:text-3xl font-semibold mt-2 text-white tracking-tight">{stat.value}</h2>
                 {stat.sub ? (
                   <p className="text-zinc-500 text-[10px] font-semibold mt-1.5 flex items-center gap-1.5">
                     <span className="w-1 h-1 rounded-full bg-zinc-500 animate-ping" />
@@ -161,7 +161,7 @@ export default function AdminDashboard() {
                 ) : (
                   <p className="text-zinc-600 text-[10px] font-bold mt-1.5 uppercase tracking-wide">Hệ thống an toàn</p>
                 )}
-                <div className="absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-transparent via-red-600/20 to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500" />
+                <div className="absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-transparent via-neutral-600/20 to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300" />
               </motion.div>
             ))}
           </motion.div>
@@ -178,13 +178,13 @@ export default function AdminDashboard() {
             >
               <div className="flex justify-between items-center pb-3 border-b border-white/[0.04]">
                 <div>
-                  <h3 className="text-xs font-black text-white uppercase tracking-wider flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_#22c55e]" />
+                  <h3 className="text-xs font-semibold text-white uppercase tracking-wider flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse " />
                     Đang xem trực tuyến ({onlineUsers})
                   </h3>
                   <p className="text-[10px] text-zinc-500 mt-0.5">Những người đang túc trực tại rạp chiếu phim.</p>
                 </div>
-                <Link href="/admin/users" className="text-[10px] font-black uppercase text-red-500 hover:text-red-400 transition-colors">
+                <Link href="/admin/users" className="text-[10px] font-semibold uppercase text-neutral-300 hover:text-neutral-300 transition-colors">
                   Quản lý →
                 </Link>
               </div>
@@ -200,23 +200,23 @@ export default function AdminDashboard() {
                   {users.filter(u => u.isOnline).map((user) => (
                     <div 
                       key={user.id}
-                      className="p-3.5 rounded-xl border border-white/[0.04] bg-[#09090b]/80 flex flex-col justify-between hover:border-red-600/20 hover:bg-red-500/[0.01] transition-all duration-300 relative group"
+                      className="p-3.5 rounded-xl border border-white/[0.04] bg-[#09090b]/80 flex flex-col justify-between hover:border-neutral-600/20 hover:bg-neutral-700/[0.01] transition-all duration-300 relative group"
                     >
                       <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-full bg-zinc-900 border border-white/[0.06] flex items-center justify-center text-xs font-black text-zinc-400 group-hover:bg-red-600/10 group-hover:text-red-400 transition-colors">
+                        <div className="w-8 h-8 rounded-full bg-zinc-900 border border-white/[0.06] flex items-center justify-center text-xs font-semibold text-zinc-400 group-hover:bg-neutral-700/10 group-hover:text-neutral-300 transition-colors">
                           {user.name?.charAt(0).toUpperCase()}
                         </div>
                         <div className="min-w-0">
-                          <p className="font-bold text-xs text-zinc-200 group-hover:text-red-400 transition-colors truncate">{user.name}</p>
+                          <p className="font-bold text-xs text-zinc-200 group-hover:text-neutral-300 transition-colors truncate">{user.name}</p>
                           <p className="text-[9px] text-zinc-600 truncate">{user.email}</p>
                         </div>
                       </div>
 
                       {user.watching ? (
-                        <div className="mt-3 bg-red-600/5 border border-red-500/10 rounded-lg p-2 flex items-start gap-1.5 animate-pulse">
+                        <div className="mt-3 bg-neutral-700/5 border border-neutral-600/10 rounded-lg p-2 flex items-start gap-1.5 animate-pulse">
                           <span className="text-xs mt-0.5">🎬</span>
                           <div className="min-w-0">
-                            <p className="text-[10px] font-black text-red-400 uppercase tracking-wide truncate">Đang phát:</p>
+                            <p className="text-[10px] font-semibold text-neutral-300 uppercase tracking-wide truncate">Đang phát:</p>
                             <p className="text-[10px] text-zinc-300 font-bold tracking-tight truncate leading-normal">{user.watching.movieName}</p>
                           </div>
                         </div>
@@ -241,25 +241,25 @@ export default function AdminDashboard() {
                 transition={{ delay: 0.15 }}
                 className="rounded-2xl border border-white/[0.04] bg-[#0c0c0e]/30 p-5 space-y-4"
               >
-                <h3 className="text-xs font-black text-white uppercase tracking-wider pb-3 border-b border-white/[0.04]">
+                <h3 className="text-xs font-semibold text-white uppercase tracking-wider pb-3 border-b border-white/[0.04]">
                   Tác vụ nhanh
                 </h3>
                 <div className="grid grid-cols-2 gap-2">
                   <Link href="/admin/users?add=true" className="p-3 bg-white/[0.01] hover:bg-white/[0.03] border border-white/[0.04] hover:border-white/[0.08] rounded-xl flex flex-col items-center justify-center text-center transition-all group active:scale-95">
                     <span className="text-lg mb-1 group-hover:scale-110 transition-transform">➕</span>
-                    <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400 group-hover:text-white">Thêm TV</span>
+                    <span className="text-[9px] font-semibold uppercase tracking-widest text-zinc-400 group-hover:text-white">Thêm TV</span>
                   </Link>
                   <Link href="/admin/history" className="p-3 bg-white/[0.01] hover:bg-white/[0.03] border border-white/[0.04] hover:border-white/[0.08] rounded-xl flex flex-col items-center justify-center text-center transition-all group active:scale-95">
                     <span className="text-lg mb-1 group-hover:scale-110 transition-transform">👁️</span>
-                    <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400 group-hover:text-white">Giám sát</span>
+                    <span className="text-[9px] font-semibold uppercase tracking-widest text-zinc-400 group-hover:text-white">Giám sát</span>
                   </Link>
                   <Link href="/admin/movies" className="p-3 bg-white/[0.01] hover:bg-white/[0.03] border border-white/[0.04] hover:border-white/[0.08] rounded-xl flex flex-col items-center justify-center text-center transition-all group active:scale-95">
                     <span className="text-lg mb-1 group-hover:scale-110 transition-transform">🎥</span>
-                    <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400 group-hover:text-white">Kho Phim</span>
+                    <span className="text-[9px] font-semibold uppercase tracking-widest text-zinc-400 group-hover:text-white">Kho Phim</span>
                   </Link>
-                  <Link href="/home" className="p-3 bg-red-600/10 hover:bg-red-600/20 border border-red-600/10 hover:border-red-600/20 rounded-xl flex flex-col items-center justify-center text-center transition-all group active:scale-95">
+                  <Link href="/home" className="p-3 bg-neutral-700/10 hover:bg-neutral-700/20 border border-neutral-600/10 hover:border-neutral-600/20 rounded-xl flex flex-col items-center justify-center text-center transition-all group active:scale-95">
                     <span className="text-lg mb-1 group-hover:scale-110 transition-transform">🚪</span>
-                    <span className="text-[9px] font-black uppercase tracking-widest text-red-500 group-hover:text-red-400">Vào Rạp</span>
+                    <span className="text-[9px] font-semibold uppercase tracking-widest text-neutral-300 group-hover:text-neutral-300">Vào Rạp</span>
                   </Link>
                 </div>
               </motion.div>
@@ -272,10 +272,10 @@ export default function AdminDashboard() {
                 className="rounded-2xl border border-white/[0.04] bg-[#0c0c0e]/30 p-5 space-y-4"
               >
                 <div className="flex justify-between items-center pb-3 border-b border-white/[0.04]">
-                  <h3 className="text-xs font-black text-white uppercase tracking-wider flex items-center gap-2">
+                  <h3 className="text-xs font-semibold text-white uppercase tracking-wider flex items-center gap-2">
                     🏆 Phim thịnh hành
                   </h3>
-                  <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400">LOGS</span>
+                  <span className="text-[8px] font-semibold px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400">LOGS</span>
                 </div>
 
                 {topMovies.length === 0 ? (
@@ -285,10 +285,10 @@ export default function AdminDashboard() {
                     {topMovies.map((mv, idx) => (
                       <div key={idx} className="flex justify-between items-center p-2 rounded-xl bg-white/[0.005] border border-white/[0.02] hover:bg-white/[0.01] transition-all">
                         <div className="flex items-center gap-2.5 min-w-0">
-                          <span className={`w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-black ${
-                            idx === 0 ? 'bg-yellow-500/20 text-yellow-500' :
+                          <span className={`w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-semibold ${
+                            idx === 0 ? 'bg-neutral-800/20 text-neutral-300' :
                             idx === 1 ? 'bg-zinc-300/20 text-zinc-300' :
-                            idx === 2 ? 'bg-amber-600/20 text-amber-500' :
+                            idx === 2 ? 'bg-neutral-800/20 text-neutral-300' :
                             'bg-zinc-800 text-zinc-500'
                           }`}>
                             {idx + 1}
@@ -316,12 +316,12 @@ export default function AdminDashboard() {
           >
             <div className="flex justify-between items-center pb-3 border-b border-white/[0.04]">
               <div>
-                <h3 className="text-xs font-black text-white uppercase tracking-wider flex items-center gap-2">
+                <h3 className="text-xs font-semibold text-white uppercase tracking-wider flex items-center gap-2">
                   🔔 Hoạt động chiếu phim gần đây
                 </h3>
                 <p className="text-[10px] text-zinc-500 mt-0.5">Thời gian thực các tác phẩm được các thành viên khởi chạy.</p>
               </div>
-              <Link href="/admin/history" className="text-[10px] font-black uppercase text-red-500 hover:text-red-400 transition-colors">
+              <Link href="/admin/history" className="text-[10px] font-semibold uppercase text-neutral-300 hover:text-neutral-300 transition-colors">
                 Xem tất cả →
               </Link>
             </div>
@@ -342,10 +342,10 @@ export default function AdminDashboard() {
                           {getRelativeTime(act.updatedAt)}
                         </span>
                       </div>
-                      <p className="text-[11px] font-black text-red-500 tracking-tight truncate">{act.movie?.name}</p>
+                      <p className="text-[11px] font-semibold text-neutral-300 tracking-tight truncate">{act.movie?.name}</p>
                       <div className="flex justify-between items-center text-[10px] text-zinc-600">
                         <span>Phòng chiếu số {idx + 1}</span>
-                        <span className="uppercase text-[9px] font-black tracking-wider bg-white/[0.02] px-1 py-0.2 rounded border border-white/[0.04] text-zinc-500">
+                        <span className="uppercase text-[9px] font-semibold tracking-wider bg-white/[0.02] px-1 py-0.2 rounded border border-white/[0.04] text-zinc-500">
                           {act.movie?.episode === 'Full' ? 'FULL' : `Tập ${act.movie?.episode}`}
                         </span>
                       </div>

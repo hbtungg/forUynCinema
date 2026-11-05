@@ -148,12 +148,12 @@ export default function AdminHistoryPage() {
         className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-900 pb-5"
       >
         <div className="flex items-center gap-4">
-          <div className="w-1.5 h-6 bg-red-600 shadow-[0_0_20px_rgba(220,38,38,0.6)] rounded-full" />
+          <div className="w-1.5 h-6 bg-neutral-700  rounded-full" />
           <div>
-            <h1 className="text-xl font-black uppercase tracking-wider text-white">
+            <h1 className="text-xl font-semibold uppercase tracking-wider text-white">
               Giám sát rạp phim
             </h1>
-            <p className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.2em] mt-0.5">
+            <p className="text-zinc-500 text-[10px] font-semibold uppercase tracking-[0.2em] mt-0.5">
               Real-time cinema analytics log
             </p>
           </div>
@@ -162,7 +162,7 @@ export default function AdminHistoryPage() {
         {historyList.length > 0 && (
           <button
             onClick={handleClearAllLogs}
-            className="px-3.5 py-2 bg-red-950/20 hover:bg-red-900/20 border border-red-900/10 hover:border-red-500/20 text-red-500 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all duration-300 active:scale-95 flex items-center gap-1.5"
+            className="px-3.5 py-2 bg-neutral-950/20 hover:bg-neutral-950/20 border border-neutral-600/10 hover:border-neutral-600/20 text-neutral-300 text-[10px] font-semibold uppercase tracking-widest rounded-xl transition-all duration-300 active:scale-95 flex items-center gap-1.5"
           >
             🗑️ Dọn sạch nhật ký
           </button>
@@ -178,7 +178,7 @@ export default function AdminHistoryPage() {
       >
         {[
           { label: 'Tổng lượt xem', value: historyList.length, color: 'text-zinc-100' },
-          { label: 'Người dùng', value: historyList.filter((i) => i.userEmail).length, color: 'text-red-400' },
+          { label: 'Người dùng', value: historyList.filter((i) => i.userEmail).length, color: 'text-neutral-300' },
           { label: 'Khách vãng lai', value: historyList.filter((i) => !i.userEmail).length, color: 'text-zinc-400' },
           { label: 'Trạng thái log', value: 'LIVE', color: 'text-green-500' },
         ].map((item, i) => (
@@ -186,10 +186,10 @@ export default function AdminHistoryPage() {
             key={i}
             className="rounded-2xl border border-white/[0.03] bg-[#0c0c0e]/60 p-4.5 backdrop-blur-xl hover:border-white/[0.06] transition-colors"
           >
-            <p className="text-zinc-500 text-[9px] uppercase tracking-[0.18em] font-black">
+            <p className="text-zinc-500 text-[9px] uppercase tracking-[0.18em] font-semibold">
               {item.label}
             </p>
-            <h2 className={`text-xl md:text-2xl font-black mt-2 tracking-tight ${item.color}`}>
+            <h2 className={`text-xl md:text-2xl font-semibold mt-2 tracking-tight ${item.color}`}>
               {item.value}
             </h2>
           </div>
@@ -209,7 +209,7 @@ export default function AdminHistoryPage() {
             placeholder="Tìm phim hoặc email..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="bg-white/[0.01] border border-white/[0.05] rounded-xl px-4 py-2.5 pl-10 text-xs outline-none focus:border-red-600/40 text-white transition-all w-full placeholder:text-zinc-600 select-text"
+            className="bg-white/[0.01] border border-white/[0.05] rounded-xl px-4 py-2.5 pl-10 text-xs outline-none focus:border-neutral-600/40 text-white transition-all w-full placeholder:text-zinc-600 select-text"
           />
           <span className="absolute left-3.5 top-3 text-xs opacity-40">🔍</span>
         </div>
@@ -217,7 +217,7 @@ export default function AdminHistoryPage() {
         <select
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          className="bg-[#0c0c0e]/80 border border-white/[0.05] rounded-xl px-4 py-2.5 text-xs outline-none focus:border-red-600/40 text-zinc-400 transition-all cursor-pointer min-w-[130px]"
+          className="bg-[#0c0c0e]/80 border border-white/[0.05] rounded-xl px-4 py-2.5 text-xs outline-none focus:border-neutral-600/40 text-zinc-400 transition-all cursor-pointer min-w-[130px]"
         >
           <option value="all">Tất cả</option>
           <option value="user">Người dùng</option>
@@ -232,14 +232,14 @@ export default function AdminHistoryPage() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="flex items-center gap-2.5 bg-red-600/10 border border-red-600/20 px-4 py-2 rounded-xl w-fit"
+            className="flex items-center gap-2.5 bg-neutral-700/10 border border-neutral-600/20 px-4 py-2 rounded-xl w-fit"
           >
             <span className="text-[10px] uppercase tracking-wider text-zinc-400 font-bold">
-              Đang lọc xem lịch sử của: <span className="text-red-400 font-mono lowercase ml-1">{selectedUserEmail}</span>
+              Đang lọc xem lịch sử của: <span className="text-neutral-300 font-mono lowercase ml-1">{selectedUserEmail}</span>
             </span>
             <button 
               onClick={() => setSelectedUserEmail(null)}
-              className="text-zinc-500 hover:text-white transition-colors text-xs font-black p-0.5 ml-1.5"
+              className="text-zinc-500 hover:text-white transition-colors text-xs font-semibold p-0.5 ml-1.5"
               title="Xóa bộ lọc người dùng"
             >
               ✕
@@ -261,7 +261,7 @@ export default function AdminHistoryPage() {
       ) : paginatedHistory.length === 0 ? (
         <div className="py-24 flex flex-col items-center justify-center text-center border border-dashed border-white/[0.03] rounded-2xl">
           <div className="text-4xl mb-4">🎬</div>
-          <h2 className="text-white font-black text-lg mb-1">Không tìm thấy dữ liệu</h2>
+          <h2 className="text-white font-semibold text-lg mb-1">Không tìm thấy dữ liệu</h2>
           <p className="text-zinc-600 text-xs font-medium">Hệ thống chưa ghi nhận hoạt động nào phù hợp.</p>
         </div>
       ) : (
@@ -273,7 +273,7 @@ export default function AdminHistoryPage() {
           >
             <table className="w-full min-w-[800px] border-collapse">
               <thead>
-                <tr className="border-b border-white/[0.04] text-zinc-500 text-[9px] font-black uppercase tracking-[0.15em] bg-white/[0.005]">
+                <tr className="border-b border-white/[0.04] text-zinc-500 text-[9px] font-semibold uppercase tracking-[0.15em] bg-white/[0.005]">
                   <th className="py-4 px-5 text-left">Thành viên (Click để lọc riêng)</th>
                   <th className="py-4 px-5 text-left">Tên tác phẩm</th>
                   <th className="py-4 px-5 text-center">Tập phim</th>
@@ -286,23 +286,23 @@ export default function AdminHistoryPage() {
                 {paginatedHistory.map((item, index) => (
                   <tr
                     key={item._id || index}
-                    className="group hover:bg-red-500/5 transition-all duration-300"
+                    className="group hover:bg-neutral-700/5 transition-all duration-300"
                   >
                     {/* CỘT THÀNH VIÊN - Hỗ trợ bấm chọn lọc nhanh */}
                     <td 
                       onClick={() => item.userEmail && setSelectedUserEmail(item.userEmail)}
-                      className={`py-4 px-5 border-l-2 border-transparent group-hover:border-red-500 transition-all duration-300 ${item.userEmail ? 'cursor-pointer group/cell' : ''}`}
+                      className={`py-4 px-5 border-l-2 border-transparent group-hover:border-neutral-600 transition-all duration-300 ${item.userEmail ? 'cursor-pointer group/cell' : ''}`}
                     >
                       <div className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-full border flex items-center justify-center font-black text-xs transition-colors ${
+                        <div className={`w-8 h-8 rounded-full border flex items-center justify-center font-semibold text-xs transition-colors ${
                           item.userEmail 
-                            ? 'bg-red-600/10 text-red-400 border-red-500/20' 
+                            ? 'bg-neutral-700/10 text-neutral-300 border-neutral-600/20' 
                             : 'bg-white/[0.02] border-white/[0.05] text-zinc-500'
                         }`}>
                           {item.userEmail ? item.userEmail.charAt(0).toUpperCase() : 'G'}
                         </div>
                         <div>
-                          <p className={`font-mono text-xs transition-colors ${item.userEmail ? 'text-zinc-300 group-hover/cell:text-red-400' : 'text-zinc-500'}`}>
+                          <p className={`font-mono text-xs transition-colors ${item.userEmail ? 'text-zinc-300 group-hover/cell:text-neutral-300' : 'text-zinc-500'}`}>
                             {item.userEmail || 'Ẩn danh (Guest)'}
                           </p>
                           <span className="text-[9px] uppercase tracking-wider text-zinc-600 font-bold mt-0.5 block">
@@ -315,7 +315,7 @@ export default function AdminHistoryPage() {
                     {/* CỘT PHIM */}
                     <td className="py-4 px-5">
                       <div>
-                        <h3 className="font-bold text-zinc-200 text-xs group-hover:text-red-500 transition-colors duration-300">
+                        <h3 className="font-bold text-zinc-200 text-xs group-hover:text-neutral-300 transition-colors duration-300">
                           {item.movie?.name || 'N/A'}
                         </h3>
                         <p className="text-zinc-600 text-[10px] mt-0.5 font-medium">
@@ -326,7 +326,7 @@ export default function AdminHistoryPage() {
 
                     {/* CỘT TẬP */}
                     <td className="py-4 px-5 text-center">
-                      <span className="px-2.5 py-1 rounded-lg bg-white/[0.01] border border-white/[0.03] text-[9px] font-black uppercase tracking-wider text-zinc-400">
+                      <span className="px-2.5 py-1 rounded-lg bg-white/[0.01] border border-white/[0.03] text-[9px] font-semibold uppercase tracking-wider text-zinc-400">
                         {item.movie?.episode === 'Full' ? 'FULL' : `TẬP ${item.movie?.episode}`}
                       </span>
                     </td>
@@ -347,7 +347,7 @@ export default function AdminHistoryPage() {
                     <td className="py-4 px-5 text-center" onClick={(e) => e.stopPropagation()}>
                       <button
                         onClick={() => handleDeleteEntry(item._id)}
-                        className="p-1.5 text-zinc-600 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                        className="p-1.5 text-zinc-600 hover:text-neutral-300 hover:bg-neutral-700/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
                         title="Xóa dòng log"
                       >
                         ✕
@@ -364,7 +364,7 @@ export default function AdminHistoryPage() {
             <button
               onClick={() => setPage(p => Math.max(1, p - 1))}
               disabled={page === 1}
-              className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all border ${
+              className={`px-4 py-2 text-[10px] font-semibold uppercase tracking-widest rounded-xl transition-all border ${
                 page === 1
                   ? 'border-transparent text-zinc-800 cursor-not-allowed'
                   : 'bg-white/[0.01] border-white/[0.04] text-zinc-300 hover:bg-white/[0.04] active:scale-95'
@@ -372,13 +372,13 @@ export default function AdminHistoryPage() {
             >
               ← Trước
             </button>
-            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
               Trang <span className="text-white font-mono text-sm mx-1">{page}</span> / {totalPages}
             </span>
             <button
               onClick={() => setPage(p => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
-              className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all border ${
+              className={`px-4 py-2 text-[10px] font-semibold uppercase tracking-widest rounded-xl transition-all border ${
                 page === totalPages
                   ? 'border-transparent text-zinc-800 cursor-not-allowed'
                   : 'bg-white/[0.01] border-white/[0.04] text-zinc-300 hover:bg-white/[0.04] active:scale-95'

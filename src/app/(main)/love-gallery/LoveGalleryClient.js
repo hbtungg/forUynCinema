@@ -23,10 +23,10 @@ export default function LoveGalleryClient() {
 
   if (!isUnlocked) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-8 animate-in fade-in duration-700">
+      <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-8 animate-in fade-in duration-300">
         <div className="text-center space-y-2">
-          <h2 className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.5em]">Private Access</h2>
-          <p className="text-white font-black italic text-xl uppercase tracking-tighter">UNLOCK FOR LOVE ❤️</p>
+          <h2 className="text-zinc-500 text-[10px] font-semibold uppercase tracking-[0.5em]">Private Access</h2>
+          <p className="text-white font-semibold italic text-xl uppercase tracking-tighter">UNLOCK FOR LOVE ❤️</p>
         </div>
 
         <form onSubmit={handleUnlock} className="flex flex-col items-center gap-4 w-full max-w-xs">
@@ -35,14 +35,14 @@ export default function LoveGalleryClient() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="•••"
-            className={`w-full bg-zinc-950 border-2 ${error ? 'border-red-600 animate-shake' : 'border-zinc-900'} rounded-2xl px-6 py-4 text-center text-white focus:outline-none focus:border-red-600 transition-all font-black tracking-[0.3em]`}
+            className={`w-full bg-zinc-950 border-2 ${error ? 'border-neutral-600 animate-shake' : 'border-zinc-900'} rounded-2xl px-6 py-4 text-center text-white focus:outline-none focus:border-neutral-600 transition-all font-semibold tracking-[0.3em]`}
             autoFocus
           />
-          {error && <p className="text-red-600 text-[9px] font-black uppercase tracking-widest animate-pulse">Mật mã không đúng rồi anh ơi!</p>}
+          {error && <p className="text-neutral-300 text-[9px] font-semibold uppercase tracking-widest animate-pulse">Mật mã không đúng rồi anh ơi!</p>}
           
           <button
             type="submit"
-            className="mt-2 px-8 py-3 bg-red-600 hover:bg-red-500 text-white rounded-xl text-[10px] font-black uppercase tracking-[0.3em] transition-all active:scale-95 shadow-lg shadow-red-900/20"
+            className="mt-2 px-8 py-3 bg-neutral-700 hover:bg-neutral-700 text-white rounded-xl text-[10px] font-semibold uppercase tracking-[0.3em] transition-all active:scale-95 shadow-lg shadow-neutral-600/20"
           >
             Mở khóa
           </button>

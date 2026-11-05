@@ -28,10 +28,10 @@ export default function EpoTrigger() {
       
       {/* POPUP XÁC MINH MINI - Bung từ dưới lên, sang phải giống SecretChat */}
       {isOpen && (
-        <div className="absolute bottom-16 left-0 w-64 bg-zinc-950 border border-zinc-800 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,1)] overflow-hidden animate-in fade-in slide-in-from-bottom-4 origin-bottom-left">
-          <div className="p-4 border-b border-zinc-900 flex items-center gap-3 bg-yellow-500/5">
-            <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
-            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-yellow-600">Restricted Area</span>
+        <div className="absolute bottom-16 left-0 w-64 bg-zinc-950 border border-zinc-800 rounded-[2rem]  overflow-hidden animate-in fade-in slide-in-from-bottom-4 origin-bottom-left">
+          <div className="p-4 border-b border-zinc-900 flex items-center gap-3 bg-neutral-800/5">
+            <div className="w-2 h-2 bg-neutral-800 rounded-full animate-pulse"></div>
+            <span className="text-[9px] font-semibold uppercase tracking-[0.2em] text-neutral-300">Restricted Area</span>
           </div>
           
           <div className="p-6 text-center">
@@ -42,13 +42,13 @@ export default function EpoTrigger() {
             <div className="flex flex-col gap-2">
               <button 
                 onClick={handleConfirm}
-                className="w-full py-3 bg-yellow-500 text-black font-black uppercase text-[9px] tracking-widest rounded-xl hover:bg-yellow-400 transition-all active:scale-95 shadow-lg shadow-yellow-500/10"
+                className="w-full py-3 bg-neutral-800 text-black font-semibold uppercase text-[9px] tracking-widest rounded-xl hover:bg-neutral-800 transition-all active:scale-95 shadow-lg shadow-neutral-800/10"
               >
                 Xác nhận 18+
               </button>
               <button 
                 onClick={() => setIsOpen(false)}
-                className="w-full py-3 bg-zinc-900 text-zinc-500 font-black uppercase text-[9px] tracking-widest rounded-xl hover:text-white transition-all"
+                className="w-full py-3 bg-zinc-900 text-zinc-500 font-semibold uppercase text-[9px] tracking-widest rounded-xl hover:text-white transition-all"
               >
                 Quay lại
               </button>
@@ -60,13 +60,13 @@ export default function EpoTrigger() {
       {/* NÚT BẤM CHỮ P - Nằm phía trên SecretChat */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-500 shadow-2xl border-2 ${
+        className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 shadow-2xl border-2 ${
           isOpen 
-          ? 'bg-yellow-500 border-yellow-400 scale-90' 
-          : 'bg-black border-yellow-600/30 hover:border-yellow-500 hover:scale-110'
+          ? 'bg-neutral-800 border-neutral-800 scale-90' 
+          : 'bg-black border-neutral-800/30 hover:border-neutral-800 hover:scale-110'
         }`}
       >
-        <span className={`text-xl font-black italic transition-colors ${isOpen ? 'text-black' : 'text-yellow-500'}`}>
+        <span className={`text-xl font-semibold italic transition-colors ${isOpen ? 'text-black' : 'text-neutral-300'}`}>
           P
         </span>
       </button>

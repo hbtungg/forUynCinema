@@ -41,20 +41,20 @@ export default function MovieSection({ title, movies, viewAllLink }) {
   return (
     <div 
       className="flex flex-col gap-4 group/section py-4 w-full select-none"
-      style={{ fontFamily: "'Be Vietnam Pro', sans-serif" }}
+      style={{ fontFamily: "var(--font-main)" }}
     >
       
       {/* ── 🚀 TẦNG 1: CỘT TIÊU ĐỀ NẰM NGANG ── */}
-      <div className="w-full flex flex-row items-center justify-between pb-2 border-b border-white/5 px-2 md:px-0">
+      <div className="w-full flex flex-row items-center justify-between pb-2 px-2 md:px-0">
         
         <div className="flex items-center gap-3">
-          <div className="w-1 h-6 md:h-7 bg-[#E6C687] rounded-full shadow-[0_0_15px_rgba(230,198,135,0.6)] shrink-0"></div>
           
-          <h2 className="text-lg md:text-xl font-bold text-[#e8e1da] uppercase tracking-wider whitespace-nowrap">
+          
+          <h2 className="text-lg md:text-xl font-medium text-[#ffffff] tracking-tight">
             {title.split(' ').map((word, i) => (
               <span 
                 key={i} 
-                className={`${i === 1 ? 'text-[#E6C687] drop-shadow-[0_0_10px_rgba(230,198,135,0.25)]' : ''} inline`}
+                className={`${i === 1 ? 'text-[#e8e8e8] ' : ''} inline`}
               >
                 {word}{' '}
               </span>
@@ -65,7 +65,7 @@ export default function MovieSection({ title, movies, viewAllLink }) {
         {viewAllLink && (
           <Link 
             href={viewAllLink} 
-            className="text-[#d0c5b5]/50 hover:text-[#ffe3ae] transition-colors duration-300 inline-flex items-center text-[10px] md:text-xs font-bold uppercase tracking-widest gap-0.5"
+            className="text-[#b8b8b8] hover:text-[#ffffff] transition-colors duration-300 inline-flex items-center text-[10px] md:text-xs font-bold uppercase tracking-widest gap-0.5"
           >
             <span className="hidden md:inline">Xem toàn bộ</span>
             <ChevronRight className="w-3.5 h-3.5" />
@@ -104,7 +104,7 @@ export default function MovieSection({ title, movies, viewAllLink }) {
 
         {/* NÚT MŨI TÊN ĐIỀU HƯỚNG TRÁI */}
         <button 
-          className={`prev-${sectionId} absolute left-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-[#0F1326]/60 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center text-[#d0c5b5] opacity-0 group-hover/slider:opacity-100 transition-all duration-300 hover:border-[#E6C687]/40 hover:text-[#ffe3ae] hover:bg-[#0F1326]/90 shadow-[0_4px_20px_rgba(0,0,0,0.5)] active:scale-90 select-none cursor-pointer focus:outline-none`}
+          className={`prev-${sectionId} absolute left-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 glass-surface border border-white/10 rounded-full flex items-center justify-center text-[#b8b8b8] opacity-0 group-hover/slider:opacity-100 transition-all duration-300 hover:border-[#e8e8e8]/40 hover:text-[#ffffff] hover:bg-white/[0.04]  active:scale-90 select-none cursor-pointer focus:outline-none`}
           onMouseDown={(e) => e.preventDefault()}
           title="Trượt sang trái"
         >
@@ -113,7 +113,7 @@ export default function MovieSection({ title, movies, viewAllLink }) {
 
         {/* NÚT MŨI TÊN ĐIỀU HƯỚNG PHẢI */}
         <button 
-          className={`next-${sectionId} absolute right-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 bg-[#0F1326]/60 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center text-[#d0c5b5] opacity-0 group-hover/slider:opacity-100 transition-all duration-300 hover:border-[#E6C687]/40 hover:text-[#ffe3ae] hover:bg-[#0F1326]/90 shadow-[0_4px_20px_rgba(0,0,0,0.5)] active:scale-90 select-none cursor-pointer focus:outline-none`}
+          className={`next-${sectionId} absolute right-2 top-1/2 -translate-y-1/2 z-20 w-10 h-10 glass-surface border border-white/10 rounded-full flex items-center justify-center text-[#b8b8b8] opacity-0 group-hover/slider:opacity-100 transition-all duration-300 hover:border-[#e8e8e8]/40 hover:text-[#ffffff] hover:bg-white/[0.04]  active:scale-90 select-none cursor-pointer focus:outline-none`}
           onMouseDown={(e) => e.preventDefault()}
           title="Trượt sang phải"
         >

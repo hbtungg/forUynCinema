@@ -1,43 +1,49 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSession } from "next-auth/react";
 import Link from 'next/link';
 import { X, Sparkles, Play } from 'lucide-react';
 
 export default function ContinueWatching() {
   const { data: session, status } = useSession();
-  const [history, setHistory] = useState([]);
+  const email = session?.user?.email;
+  const [storedHistory, setStoredHistory] = useState({ email: null, items: [] });
+  const history = storedHistory.email === session?.user?.email ? storedHistory.items : [];
+  const setHistory = useCallback(items => {
+    setStoredHistory({ email: session?.user?.email, items });
+  }, [session?.user?.email]);
   const scrollRef = useRef(null);
 
-  const loadHistory = async () => {
-    if (status === "authenticated" && session?.user?.email) {
+  const loadHistory = useCallback(async () => {
+    if (status === "authenticated" && email) {
       try {
-        const res = await fetch(`/api/history?userEmail=${session.user.email}`);
+        const res = await fetch('/api/history');
         if (res.ok) {
           const data = await res.json();
           const historyList = data.movies || (Array.isArray(data) ? data : []);
-          setHistory(historyList);
+          return historyList;
         }
       } catch (error) {
         console.error("Lỗi lấy lịch sử từ:", error);
       }
-    } else if (status === "unauthenticated") {
-      setHistory([]);
     }
-  };
+    return null;
+  }, [status, email]);
 
   useEffect(() => {
-    if (status === "authenticated") {
-      loadHistory();
-    } else if (status === "unauthenticated") {
-      setHistory([]);
-    }
-  }, [status]);
-
-  useEffect(() => {
-    window.addEventListener('historyUpdated', loadHistory);
-    return () => window.removeEventListener('historyUpdated', loadHistory);
-  }, [status, session]);
+    let cancelled = false;
+    const refresh = () => loadHistory().then(items => {
+      if (!cancelled && items) setStoredHistory({ email, items });
+    });
+    refresh();
+    window.addEventListener('historyUpdated', refresh);
+    window.addEventListener('focus', refresh);
+    return () => {
+      cancelled = true;
+      window.removeEventListener('historyUpdated', refresh);
+      window.removeEventListener('focus', refresh);
+    };
+  }, [email, loadHistory]);
 
   const removeHistory = async (slug) => {
     if (!session?.user?.email) return;
@@ -53,7 +59,7 @@ export default function ContinueWatching() {
         }),
       });
       if (!res.ok) {
-        loadHistory();
+        setHistory(await loadHistory() || history);
       } else {
         const saved = JSON.parse(localStorage.getItem('watchHistory') || '[]');
         const updatedLocal = saved.filter(item => item.slug !== slug);
@@ -61,7 +67,7 @@ export default function ContinueWatching() {
         window.dispatchEvent(new Event('historyUpdated'));
       }
     } catch (error) {
-      loadHistory();
+      setHistory(await loadHistory() || history);
     }
   };
 
@@ -89,25 +95,25 @@ export default function ContinueWatching() {
   const titleText = "Phim Đang Xem";
 
   return (
-    <section className="mt-12 md:mt-16 group/section font-sans select-none" style={{ fontFamily: "'Be Vietnam Pro', sans-serif" }}>
+    <section className="mt-12 md:mt-16 group/section font-sans select-none" style={{ fontFamily: "var(--font-main)" }}>
 
       {/* TIÊU ĐỀ KHAY PHIM */}
       <div className="flex items-center justify-between mb-6 md:mb-8 pr-4">
         <div className="flex items-center gap-3">
-          <div className="w-1 h-6 md:h-7 bg-[#E6C687] rounded-full shadow-[0_0_15px_rgba(230,198,135,0.6)] shrink-0"></div>
+          <div className="w-1 h-6 md:h-7 bg-[#e8e8e8] rounded-full  shrink-0"></div>
 
           <h2 className="text-lg md:text-xl font-bold text-white uppercase tracking-wider flex items-center gap-2">
             <span className="inline">
               {titleText.split(' ').map((word, i) => (
                 <span
                   key={i}
-                  className={`${i === 1 ? 'text-[#E6C687] drop-shadow-[0_0_10px_rgba(230,198,135,0.25)]' : ''} inline`}
+                  className={`${i === 1 ? 'text-[#e8e8e8] ' : ''} inline`}
                 >
                   {word}{' '}
                 </span>
               ))}
             </span>
-            <Sparkles className="w-4 h-4 text-[#E6C687] animate-pulse shrink-0" />
+            <Sparkles className="w-4 h-4 text-[#e8e8e8] animate-pulse shrink-0" />
           </h2>
         </div>
       </div>
@@ -116,7 +122,7 @@ export default function ContinueWatching() {
       <div ref={scrollRef} className="overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden touch-pan-x scroll-smooth px-1">
         <div className="flex gap-4 md:gap-6 pb-4" style={{ width: 'max-content' }}>
           {history.map((item) => (
-            <div key={item.slug} className="w-[240px] md:w-[320px] flex-shrink-0 relative group/card animate-in fade-in duration-500">
+            <div key={item.slug} className="w-[240px] md:w-[320px] flex-shrink-0 relative group/card animate-in fade-in duration-300">
 
               {/* NÚT XÓA LỊCH SỬ */}
               <button
@@ -125,7 +131,7 @@ export default function ContinueWatching() {
                   e.stopPropagation();
                   removeHistory(item.slug);
                 }}
-                className="absolute top-2.5 right-2.5 w-7 h-7 md:w-8 md:h-8 bg-[#0F1326]/80 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center text-[#d0c5b5]/60 hover:bg-red-500/20 hover:text-red-400 transition-all z-50 opacity-100 md:opacity-0 md:group-hover/card:opacity-100 shadow-xl active:scale-75 cursor-pointer focus:outline-none"
+                className="absolute top-2.5 right-2.5 w-7 h-7 md:w-8 md:h-8 glass-surface border border-white/10 rounded-full flex items-center justify-center text-[#b8b8b8] hover:bg-neutral-700/20 hover:text-neutral-300 transition-all z-50 opacity-100 md:opacity-0 md:group-hover/card:opacity-100 shadow-xl active:scale-75 cursor-pointer focus:outline-none"
                 title="Xóa khỏi danh sách xem tiếp"
               >
                 <X className="w-3.5 h-3.5 md:w-4 md:h-4" />
@@ -133,34 +139,34 @@ export default function ContinueWatching() {
 
               {/* CARD KHUNG HÌNH PHIM */}
               <Link
-                href={`/watch/${item.slug}?ep=${encodeURIComponent(item.episode || 1)}`}
-                className="block relative aspect-video rounded-[1.5rem] md:rounded-[1.8rem] overflow-hidden border border-white/5 shadow-2xl bg-[#0F1326]/40 transition-all duration-500 group-hover/card:border-[#E6C687]/30"
+                href={`/watch/${item.slug}?ep=${encodeURIComponent(item.episode || 1)}&provider=${encodeURIComponent(item.provider || 'auto')}`}
+                className="block relative aspect-video rounded-[1.5rem] md:rounded-[1.8rem] overflow-hidden border border-white/5 shadow-2xl bg-white/[0.04] transition-all duration-300 group-hover/card:border-[#e8e8e8]/30"
               >
                 <img
                   src={getDisplayImage(item)}
                   alt={item.name}
-                  className="w-full h-full object-cover opacity-100 group-hover/card:scale-105 transition-all duration-700 pointer-events-none"
+                  className="w-full h-full object-cover opacity-100 group-hover/card:scale-105 transition-all duration-300 pointer-events-none"
                   loading="lazy"
                 />
 
                 {/* NÚT PLAY KHI HOVER */}
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-opacity duration-500 z-10">
-                  <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-[#E6C687]/20 backdrop-blur-md border border-[#E6C687]/40 flex items-center justify-center text-[#E6C687] shadow-[0_0_20px_rgba(230,198,135,0.2)] transform group-hover/card:scale-110 transition-transform duration-500">
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-opacity duration-300 z-10">
+                  <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-[#e8e8e8]/20 backdrop-blur-md border border-[#e8e8e8]/40 flex items-center justify-center text-[#e8e8e8]  transform group-hover/card:scale-110 transition-transform duration-300">
                     <Play className="w-5 h-5 md:w-6 md:h-6 fill-current ml-1" />
                   </div>
                 </div>
 
                 {/* LỚP PHỦ GRADIENT THÔNG TIN */}
-                <div className="absolute inset-x-0 bottom-0 p-4 md:p-5 bg-gradient-to-t from-[#060814] via-[#060814]/90 to-transparent z-20">
-                  <h3 className="text-white font-bold text-xs md:text-sm truncate tracking-wide uppercase group-hover/card:text-[#ffe3ae] transition-colors">{item.name}</h3>
+                <div className="absolute inset-x-0 bottom-0 p-4 md:p-5 bg-gradient-to-t from-[#050505] via-[#050505]/90 to-transparent z-20">
+                  <h3 className="text-white font-bold text-xs md:text-sm truncate tracking-wide uppercase group-hover/card:text-[#ffffff] transition-colors">{item.name}</h3>
 
-                  <span className="text-[#ffe3ae] text-[9px] md:text-[10px] font-bold uppercase tracking-widest mt-1.5 block font-mono">
+                  <span className="text-[#ffffff] text-[9px] md:text-[10px] font-bold uppercase tracking-widest mt-1.5 block font-mono">
                     ● Progress: Tập {String(item.episode || '1').replace(/^(tập|tập|tâp|tap|ep|episode)\s*/i, '').trim()}
                   </span>
 
                   {/* THANH TIMELINE PROGRESS */}
                   <div className="mt-3 w-full h-[3px] bg-white/10 rounded-full overflow-hidden">
-                    <div className="w-1/2 h-full bg-[#E6C687] shadow-[0_0_8px_rgba(230,198,135,0.8)] rounded-full"></div>
+                    <div className="w-1/2 h-full bg-[#e8e8e8]  rounded-full"></div>
                   </div>
                 </div>
               </Link>

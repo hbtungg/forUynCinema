@@ -198,31 +198,31 @@ export default function HistoryPage() {
   const totalPages = Math.ceil(totalMovies / ITEMS_PER_PAGE);
 
   return (
-    <div className="w-full min-h-screen bg-transparent text-[#e8e1da] select-none font-sans" style={{ fontFamily: "'Be Vietnam Pro', sans-serif" }}>
+    <div className="w-full min-h-screen bg-transparent text-[#ffffff] select-none font-sans" style={{ fontFamily: "var(--font-main)" }}>
       <div className="px-4 md:px-12 py-6">
 
         <Link
           href="/home"
-          className="text-[#d0c5b5]/40 hover:text-[#ffe3ae] text-[10px] font-bold uppercase tracking-[0.2em] inline-flex items-center gap-2 mb-8 transition-colors duration-300 group w-fit"
+          className="text-[#808080] hover:text-[#ffffff] text-[10px] font-bold uppercase tracking-[0.2em] inline-flex items-center gap-2 mb-8 transition-colors duration-300 group w-fit"
         >
           <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
           Quay lại trang chủ
         </Link>
 
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 border-l-4 border-[#E6C687] pl-5 md:pl-6">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 border-l-4 border-[#e8e8e8] pl-5 md:pl-6">
           <div className="space-y-1">
-            <p className="text-[#E6C687] font-bold uppercase tracking-[0.45em] text-[9px]">
+            <p className="text-[#e8e8e8] font-bold uppercase tracking-[0.45em] text-[9px]">
               Personal Tracking System
             </p>
             <h1 className="text-xl md:text-2xl font-bold uppercase tracking-wider leading-none">
-              Danh sách: <span className="text-[#ffe3ae]" style={{ textShadow: '0 0 10px rgba(255,227,174,0.35)' }}>Phim Đang Xem</span>
+              Danh sách: <span className="text-[#ffffff]" style={{ textShadow: 'none' }}>Phim Đang Xem</span>
             </h1>
           </div>
 
-          <div className="text-[#d0c5b5]/40 font-bold uppercase text-[10px] tracking-widest flex items-center gap-3">
+          <div className="text-[#808080] font-bold uppercase text-[10px] tracking-widest flex items-center gap-3">
             <span>Tổng số: {totalMovies} phim</span>
             {isCheckingUpdates && (
-              <span className="text-[#ffe3ae] animate-pulse flex items-center gap-1.5 font-bold">
+              <span className="text-[#ffffff] animate-pulse flex items-center gap-1.5 font-bold">
                 <Loader2 className="w-3 h-3 animate-spin" /> Kiểm tra tập mới...
               </span>
             )}
@@ -230,12 +230,12 @@ export default function HistoryPage() {
         </div>
 
         {error && (
-          <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-red-500/20 bg-red-950/10 px-5 py-4">
-            <p className="text-xs font-semibold text-red-200 tracking-wide">{error}</p>
+          <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-neutral-600/20 bg-neutral-950/10 px-5 py-4">
+            <p className="text-xs font-semibold text-neutral-300 tracking-wide">{error}</p>
             <button
               type="button"
               onClick={() => loadHistory(currentPage)}
-              className="px-4 py-2 rounded-xl bg-[#0F1326]/60 border border-white/10 text-[10px] font-bold uppercase tracking-wider text-[#d0c5b5] hover:border-[#E6C687]/40 hover:text-[#ffe3ae] transition-colors cursor-pointer focus:outline-none"
+              className="px-4 py-2 rounded-xl bg-white/[0.04] border border-white/10 text-[10px] font-bold uppercase tracking-wider text-[#b8b8b8] hover:border-[#e8e8e8]/40 hover:text-[#ffffff] transition-colors cursor-pointer focus:outline-none"
             >
               Thử lại
             </button>
@@ -243,20 +243,20 @@ export default function HistoryPage() {
         )}
 
         {!isLoading && updatedMovies.length > 0 && (
-          <div className="mb-10 rounded-[24px] border border-[#E6C687]/30 bg-[#0F1326]/40 backdrop-blur-2xl px-6 py-5 shadow-2xl animate-in fade-in duration-500">
+          <div className="mb-10 rounded-[24px] border border-[#e8e8e8]/30 glass-surface px-6 py-5 shadow-2xl animate-in fade-in duration-300">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div className="space-y-1">
-                <p className="text-[#ffe3ae] text-[10px] font-bold uppercase tracking-[0.25em] flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-[#E6C687]" /> Thông báo cập nhật
+                <p className="text-[#ffffff] text-[10px] font-bold uppercase tracking-[0.25em] flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-[#e8e8e8]" /> Thông báo cập nhật
                 </p>
-                <p className="text-xs md:text-sm text-[#e8e1da]/80 font-medium">
-                  Phát hiện <span className="text-[#ffe3ae] font-bold">{updatedMovies.length} bộ phim</span> vừa có tập mới.
+                <p className="text-xs md:text-sm text-[#ffffff]/80 font-medium">
+                  Phát hiện <span className="text-[#ffffff] font-bold">{updatedMovies.length} bộ phim</span> vừa có tập mới.
                 </p>
               </div>
 
               <Link
                 href={`/watch/${updatedMovies[0].slug}?ep=${encodeURIComponent(episodeUpdates[updatedMovies[0].slug]?.latestEpisodeName || '1')}`}
-                className="px-5 py-2.5 bg-[#E6C687]/10 hover:bg-[#E6C687] border border-[#E6C687]/20 text-[#E6C687] hover:text-[#402d00] font-bold text-[10px] uppercase tracking-widest rounded-xl transition-all duration-300 active:scale-95 text-center shadow-md"
+                className="px-5 py-2.5 bg-[#e8e8e8]/10 hover:bg-[#e8e8e8] border border-[#e8e8e8]/20 text-[#e8e8e8] hover:text-[#050505] font-bold text-[10px] uppercase tracking-widest rounded-xl transition-all duration-300 active:scale-95 text-center shadow-md"
               >
                 Xem tập mới nhất
               </Link>
@@ -269,7 +269,7 @@ export default function HistoryPage() {
             {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
               <div
                 key={i}
-                className="aspect-video bg-[#0F1326]/40 border border-white/5 rounded-2xl animate-pulse"
+                className="aspect-video bg-white/[0.04] border border-white/5 rounded-2xl animate-pulse"
               />
             ))}
           </div>
@@ -278,13 +278,13 @@ export default function HistoryPage() {
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-6 md:gap-8 md:gap-y-10">
               {history.map((item) => {
                 return (
-                  <div key={item.slug} className="group/card relative animate-in fade-in duration-500">
+                  <div key={item.slug} className="group/card relative animate-in fade-in duration-300">
 
                     {/* Tag báo tập mới */}
                     {episodeUpdates[item.slug] && (
                       <Link
                         href={`/watch/${item.slug}?ep=${encodeURIComponent(episodeUpdates[item.slug].latestEpisodeName)}`}
-                        className="absolute top-3 left-3 z-20 rounded-full bg-[#E6C687]/10 border border-[#E6C687]/30 px-3 py-1 text-[9px] font-bold uppercase tracking-wider text-[#ffe3ae] shadow-xl backdrop-blur-md hover:bg-[#E6C687] hover:text-[#402d00] transition-all duration-300 font-sans"
+                        className="absolute top-3 left-3 z-20 rounded-full bg-[#e8e8e8]/10 border border-[#e8e8e8]/30 px-3 py-1 text-[9px] font-bold uppercase tracking-wider text-[#ffffff] shadow-xl backdrop-blur-md hover:bg-[#e8e8e8] hover:text-[#050505] transition-all duration-300 font-sans"
                       >
                         Mới: Tập {getEpisodeLabel(episodeUpdates[item.slug].latestEpisodeName)}
                       </Link>
@@ -294,33 +294,33 @@ export default function HistoryPage() {
                       type="button"
                       aria-label={`Xoá ${item.name} khỏi lịch sử`}
                       onClick={() => removeHistory(item.slug)}
-                      className="absolute top-3 right-3 w-8 h-8 bg-[#0F1326]/80 border border-white/10 rounded-full flex items-center justify-center text-[#d0c5b5]/60 hover:bg-amber-500 hover:text-white transition-all z-20 shadow-xl md:opacity-0 md:group-hover/card:opacity-100 focus:outline-none cursor-pointer"
+                      className="absolute top-3 right-3 w-8 h-8 bg-white/[0.04] border border-white/10 rounded-full flex items-center justify-center text-[#b8b8b8] hover:bg-neutral-800 hover:text-white transition-all z-20 shadow-xl md:opacity-0 md:group-hover/card:opacity-100 focus:outline-none cursor-pointer"
                     >
                       <X className="w-4 h-4" />
                     </button>
 
                     <Link href={`/watch/${item.slug}?ep=${item.episode || '1'}`} className="block">
-                      <div className="relative aspect-video rounded-2xl overflow-hidden border border-white/5 group-hover/card:border-[#E6C687]/30 transition-all duration-500 bg-[#0F1326]/40 shadow-2xl">
+                      <div className="relative aspect-video rounded-2xl overflow-hidden border border-white/5 group-hover/card:border-[#e8e8e8]/30 transition-all duration-300 bg-white/[0.04] shadow-2xl">
                         <img
                           src={getDisplayImage(item)}
                           alt={item.name}
                           // 🚀 FIX ĐỘ NÉT: Đặt độ nét 95% tĩnh và 100% khi tương tác chuột
-                          className="w-full h-full object-cover opacity-95 group-hover/card:opacity-100 group-hover/card:scale-105 transition-all duration-700"
+                          className="w-full h-full object-cover opacity-95 group-hover/card:opacity-100 group-hover/card:scale-105 transition-all duration-300"
                           loading="lazy"
                         />
 
-                        <div className="absolute inset-0 bg-gradient-to-t from-[#060814]/95 via-[#060814]/40 to-transparent p-4 flex flex-col justify-end">
-                          <h3 className="text-white font-bold text-sm uppercase truncate tracking-wide mb-1.5 group-hover/card:text-[#ffe3ae] transition-colors leading-snug">
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#050505]/95 via-[#050505]/40 to-transparent p-4 flex flex-col justify-end">
+                          <h3 className="text-white font-bold text-sm uppercase truncate tracking-wide mb-1.5 group-hover/card:text-[#ffffff] transition-colors leading-snug">
                             {item.name}
                           </h3>
 
-                          <span className="w-fit text-[#ffe3ae] text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 bg-[#E6C687]/10 px-2 py-0.5 rounded border border-[#E6C687]/20">
-                            <Clock className="w-3 h-3 text-[#E6C687]" />
+                          <span className="w-fit text-[#ffffff] text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 bg-[#e8e8e8]/10 px-2 py-0.5 rounded border border-[#e8e8e8]/20">
+                            <Clock className="w-3 h-3 text-[#e8e8e8]" />
                             Tập {getEpisodeLabel(item.episode)}
                           </span>
 
                           {episodeUpdates[item.slug] && (
-                            <span className="mt-2 w-fit text-[#d0c5b5]/40 text-[9px] font-bold uppercase tracking-widest pl-0.5 flex items-center gap-1">
+                            <span className="mt-2 w-fit text-[#808080] text-[9px] font-bold uppercase tracking-widest pl-0.5 flex items-center gap-1">
                               <Tv className="w-3 h-3" /> Đã có Tập {getEpisodeLabel(episodeUpdates[item.slug].latestEpisodeName)}
                             </span>
                           )}
@@ -338,7 +338,7 @@ export default function HistoryPage() {
                   type="button"
                   disabled={currentPage === 1}
                   onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-                  className="w-10 h-10 rounded-xl bg-[#0F1326]/40 border border-white/10 flex items-center justify-center text-[#d0c5b5] hover:border-[#E6C687]/40 hover:text-[#ffe3ae] disabled:opacity-20 disabled:pointer-events-none transition-all cursor-pointer focus:outline-none"
+                  className="w-10 h-10 rounded-xl bg-white/[0.04] border border-white/10 flex items-center justify-center text-[#b8b8b8] hover:border-[#e8e8e8]/40 hover:text-[#ffffff] disabled:opacity-20 disabled:pointer-events-none transition-all cursor-pointer focus:outline-none"
                   title="Trang trước"
                 >
                   <ChevronLeft className="w-4 h-4" />
@@ -350,8 +350,8 @@ export default function HistoryPage() {
                     type="button"
                     onClick={() => setCurrentPage(page)}
                     className={`w-10 h-10 rounded-xl font-bold text-xs transition-all cursor-pointer focus:outline-none ${currentPage === page
-                        ? 'bg-[#E6C687] text-[#402d00] shadow-[0_0_15px_rgba(230,198,135,0.3)]'
-                        : 'bg-[#0F1326]/40 border border-white/10 text-[#d0c5b5] hover:border-[#E6C687]/20 hover:text-white'
+                        ? 'bg-[#e8e8e8] text-[#050505] '
+                        : 'bg-white/[0.04] border border-white/10 text-[#b8b8b8] hover:border-[#e8e8e8]/20 hover:text-white'
                       }`}
                   >
                     {page}
@@ -362,7 +362,7 @@ export default function HistoryPage() {
                   type="button"
                   disabled={currentPage === totalPages}
                   onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-                  className="w-10 h-10 rounded-xl bg-[#0F1326]/40 border border-white/10 flex items-center justify-center text-[#d0c5b5] hover:border-[#E6C687]/40 hover:text-[#ffe3ae] disabled:opacity-20 disabled:pointer-events-none transition-all cursor-pointer focus:outline-none"
+                  className="w-10 h-10 rounded-xl bg-white/[0.04] border border-white/10 flex items-center justify-center text-[#b8b8b8] hover:border-[#e8e8e8]/40 hover:text-[#ffffff] disabled:opacity-20 disabled:pointer-events-none transition-all cursor-pointer focus:outline-none"
                   title="Trang sau"
                 >
                   <ChevronRight className="w-4 h-4" />
@@ -371,17 +371,17 @@ export default function HistoryPage() {
             )}
           </>
         ) : (
-          <div className="py-24 text-center flex flex-col items-center justify-center gap-3 border border-dashed border-white/5 rounded-[32px] bg-[#0F1326]/10 backdrop-blur-md max-w-4xl mx-auto px-6 animate-in fade-in duration-500">
-            <HelpCircle className="w-10 h-10 text-[#d0c5b5]/20" />
-            <p className="text-[#d0c5b5]/20 text-3xl md:text-5xl font-black uppercase tracking-tighter leading-none select-none">
+          <div className="py-24 text-center flex flex-col items-center justify-center gap-3 border border-dashed border-white/5 rounded-[32px] glass-surface max-w-4xl mx-auto px-6 animate-in fade-in duration-300">
+            <HelpCircle className="w-10 h-10 text-[#808080]" />
+            <p className="text-[#808080] text-3xl md:text-5xl font-semibold uppercase tracking-tighter leading-none select-none">
               Chưa có phim
             </p>
-            <p className="text-[#d0c5b5]/40 font-semibold uppercase tracking-[0.2em] text-[10px] leading-relaxed max-w-md">
+            <p className="text-[#808080] font-semibold uppercase tracking-[0.2em] text-[10px] leading-relaxed max-w-md">
               Lịch sử xem hiện đang trống.
             </p>
             <Link
               href="/home"
-              className="mt-4 px-6 py-2.5 bg-[#E6C687]/10 hover:bg-[#E6C687] border border-[#E6C687]/20 text-[#E6C687] hover:text-[#402d00] text-[10px] font-bold uppercase tracking-widest rounded-xl transition-all duration-300 active:scale-95 shadow-md"
+              className="mt-4 px-6 py-2.5 bg-[#e8e8e8]/10 hover:bg-[#e8e8e8] border border-[#e8e8e8]/20 text-[#e8e8e8] hover:text-[#050505] text-[10px] font-bold uppercase tracking-widest rounded-xl transition-all duration-300 active:scale-95 shadow-md"
             >
               Khám phá ngay
             </Link>

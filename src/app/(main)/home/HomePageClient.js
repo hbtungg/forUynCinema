@@ -106,7 +106,7 @@ export default function HomePageClient({
           <HeroSlider movies={allMovies} />
         </div>
 
-        <div className="px-5 xl:px-12 py-8 space-y-12" style={{ fontFamily: "'Be Vietnam Pro', sans-serif" }}>
+        <div className="px-5 xl:px-12 py-8 space-y-12" style={{ fontFamily: "var(--font-main)" }}>
           
           <ContinueWatching />
 
@@ -118,15 +118,15 @@ export default function HomePageClient({
       </div>
 
       <aside 
-        className="hidden xl:flex flex-col w-[300px] 2xl:w-[320px] flex-shrink-0 my-4 mr-6 rounded-[32px] border border-white/5 bg-[#0F1326]/40 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.6)] p-5 space-y-6 z-10 h-full"
-        style={{ fontFamily: "'Be Vietnam Pro', sans-serif" }}
+        className="hidden xl:flex flex-col w-[300px] 2xl:w-[320px] flex-shrink-0 my-4 mr-6 rounded-[32px] border border-white/5 glass-surface  p-5 space-y-6 z-10 h-full"
+        style={{ fontFamily: "var(--font-main)" }}
       >
         <section className="space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#d0c5b5]/80 flex items-center gap-1.5">
-              <Compass className="w-3.5 h-3.5 text-[#E6C687]" /> Danh sách phổ biến
+            <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#b8b8b8] flex items-center gap-1.5">
+              <Compass className="w-3.5 h-3.5 text-[#e8e8e8]" /> Danh sách phổ biến
             </h3>
-            <Link href="/danh-sach" className="text-[9px] font-bold text-[#d0c5b5]/40 hover:text-[#ffe3ae] uppercase tracking-wider transition-colors duration-300">
+            <Link href="/danh-sach" className="text-[9px] font-bold text-[#808080] hover:text-[#ffffff] uppercase tracking-wider transition-colors duration-300">
               Xem tất cả
             </Link>
           </div>
@@ -135,10 +135,10 @@ export default function HomePageClient({
               <Link 
                 key={label} 
                 href={href}
-                className="flex items-center gap-2 px-3 py-2.5 rounded-2xl bg-white/[0.02] hover:bg-white/5 border border-white/5 hover:border-[#E6C687]/20 transition-all duration-300 group"
+                className="flex items-center gap-2 px-3 py-2.5 rounded-2xl bg-white/[0.02] hover:bg-white/5 border border-white/5 hover:border-[#e8e8e8]/20 transition-all duration-300 group"
               >
                 <span className="text-sm leading-none filter grayscale group-hover:grayscale-0 transition-all">{icon}</span>
-                <span className="text-[10px] font-bold text-[#d0c5b5]/60 group-hover:text-[#e8e1da] transition-colors truncate uppercase tracking-wider">{label}</span>
+                <span className="text-[10px] font-bold text-[#b8b8b8] group-hover:text-[#ffffff] transition-colors truncate uppercase tracking-wider">{label}</span>
               </Link>
             ))}
           </div>
@@ -147,8 +147,8 @@ export default function HomePageClient({
         {topRated && topRated.length > 0 && (
           <section className="space-y-4 pt-2">
             <div className="flex items-center justify-between">
-              <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#d0c5b5]/80 flex items-center gap-1.5">
-                <Star className="w-3.5 h-3.5 text-[#E6C687]" /> Top Đánh Giá
+              <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#b8b8b8] flex items-center gap-1.5">
+                <Star className="w-3.5 h-3.5 text-[#e8e8e8]" /> Top Đánh Giá
               </h3>
             </div>
             <div className="space-y-1">
@@ -158,27 +158,27 @@ export default function HomePageClient({
                   href={`/watch/${movie.slug}`}
                   className="flex items-center gap-3 p-2 rounded-2xl hover:bg-white/5 border border-transparent hover:border-white/5 transition-all duration-300 group"
                 >
-                  <span className={`flex-shrink-0 w-5 text-center text-xs font-black tabular-nums ${
-                    i === 0 ? 'text-[#E6C687] drop-shadow-[0_0_6px_rgba(230,198,135,0.5)]' : i === 1 ? 'text-zinc-400' : i === 2 ? 'text-amber-700' : 'text-[#d0c5b5]/20'
+                  <span className={`flex-shrink-0 w-5 text-center text-xs font-semibold tabular-nums ${
+                    i === 0 ? 'text-[#e8e8e8] ' : i === 1 ? 'text-zinc-400' : i === 2 ? 'text-neutral-300' : 'text-[#808080]'
                   }`}>
                     {String(i + 1).padStart(2, '0')}
                   </span>
                   
-                  <div className="w-9 h-12 flex-shrink-0 rounded-xl overflow-hidden bg-[#0F1326] border border-white/5">
+                  <div className="w-9 h-12 flex-shrink-0 rounded-xl overflow-hidden bg-[#0b0b0b] border border-white/5">
                     <img 
                       src={getAsideCleanImage(movie)} 
                       alt={movie.name} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
                     />
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <p className="text-[11px] font-bold text-[#e8e1da] truncate leading-none group-hover:text-[#ffe3ae] transition-colors">
+                    <p className="text-[11px] font-bold text-[#ffffff] truncate leading-none group-hover:text-[#ffffff] transition-colors">
                       {movie.name}
                     </p>
                     <div className="flex items-center justify-between gap-2 mt-2">
-                      <p className="text-[9px] text-[#d0c5b5]/40 font-mono font-semibold">{movie.year || '2026'}</p>
-                      <div className="flex items-center gap-1 bg-[#ffe3ae]/10 px-1.5 py-0.5 rounded-md text-[9px] font-black text-[#ffe3ae]">
+                      <p className="text-[9px] text-[#808080] font-mono font-semibold">{movie.year || '2026'}</p>
+                      <div className="flex items-center gap-1 bg-[#ffffff]/10 px-1.5 py-0.5 rounded-md text-[9px] font-semibold text-[#ffffff]">
                         <Star className="w-2 h-2 fill-current" />
                         <span>{movie.fakeRating || movie.rating || '8.5'}</span>
                       </div>

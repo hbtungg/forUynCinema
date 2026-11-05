@@ -43,7 +43,7 @@ export default function OnlineUsersMenu() {
   return (
     <section className="px-5 py-5 border-b border-white/[0.04]">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white">
+        <h3 className="text-[10px] font-semibold uppercase tracking-[0.3em] text-white">
           Đang online
         </h3>
         <span className="text-[9px] font-bold text-green-500 uppercase tracking-wider">
@@ -65,7 +65,7 @@ export default function OnlineUsersMenu() {
               className="flex items-center gap-3 p-2 rounded-xl bg-white/[0.015] hover:bg-white/[0.04] transition-all"
             >
               <div className="relative flex-shrink-0">
-                <div className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center text-[12px] font-black text-white">
+                <div className="w-8 h-8 rounded-full bg-neutral-700 flex items-center justify-center text-[12px] font-semibold text-white">
                   {(user.name || user.email || "U").charAt(0).toUpperCase()}
                 </div>
                 <span className="absolute -right-0.5 -bottom-0.5 w-2.5 h-2.5 rounded-full bg-green-500 border-2 border-[#0c0c0f]" />

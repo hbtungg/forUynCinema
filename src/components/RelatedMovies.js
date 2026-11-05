@@ -111,24 +111,24 @@ export default function RelatedMovies({ allCategories, isEpo = false, actor = ''
               <img 
                 src={item.thumb_url} 
                 alt="" 
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
                 onError={(e) => { e.target.src = item.poster_url; }} // Sửa lỗi rụng link ảnh của NguồnC
               />
               {item.quality && (
-                <span className="absolute bottom-0.5 right-0.5 text-[7px] font-black tracking-tight px-1 py-0.2 bg-black/60 rounded text-zinc-400 border border-white/5 scale-90 origin-bottom-right">
+                <span className="absolute bottom-0.5 right-0.5 text-[7px] font-semibold tracking-tight px-1 py-0.2 bg-black/60 rounded text-zinc-400 border border-white/5 scale-90 origin-bottom-right">
                   {item.quality}
                 </span>
               )}
             </div>
 
             <div className="flex-1 min-w-0 pr-1">
-              <h4 className="text-[11px] font-bold text-zinc-300 truncate leading-tight group-hover:text-red-500 transition-colors uppercase tracking-wide">
+              <h4 className="text-[11px] font-bold text-zinc-300 truncate leading-tight group-hover:text-neutral-300 transition-colors uppercase tracking-wide">
                 {item.name}
               </h4>
               <p className="text-[9px] text-zinc-600 font-medium tracking-normal mt-1 flex items-center gap-1.5">
                 <span>{item.year || '2026'}</span>
                 {item.episode && <span className="text-zinc-700">·</span>}
-                {item.episode && <span className="text-red-500/80 font-bold">Tập {String(item.episode).replace(/^(tập|tập|tâp|tap|ep|episode)\s*/i, '').trim()}</span>}
+                {item.episode && <span className="text-neutral-300/80 font-bold">Tập {String(item.episode).replace(/^(tập|tập|tâp|tap|ep|episode)\s*/i, '').trim()}</span>}
               </p>
             </div>
           </Link>
@@ -141,8 +141,8 @@ export default function RelatedMovies({ allCategories, isEpo = false, actor = ''
   return (
     <div className="mt-16 border-t border-zinc-900/30 pt-10 pb-16 w-full">
       <div className="flex items-center gap-4 mb-8 px-1">
-        <div className={`w-1.5 h-6 ${isEpo ? 'bg-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.5)]' : 'bg-red-600 shadow-[0_0_20px_rgba(220,38,38,0.5)]'} rounded-full`}></div>
-        <h2 className="text-base md:text-lg font-black uppercase tracking-widest text-zinc-400 italic">
+        <div className={`w-1.5 h-6 ${isEpo ? 'bg-neutral-800 ' : 'bg-neutral-700 '} rounded-full`}></div>
+        <h2 className="text-base md:text-lg font-semibold uppercase tracking-widest text-zinc-400 italic">
           {isEpo && actor ? `PHIM CỦA DIỄN VIÊN: ${actor}` : "CHẮC LÀ EM THÍCH"}
         </h2>
       </div>
@@ -162,7 +162,7 @@ export default function RelatedMovies({ allCategories, isEpo = false, actor = ''
           {related.length > 0 && related.map((item) => {
             const MovieCard = require('./MovieCard').default; 
             return (
-              <div key={item.id || item.slug} className="hover:translate-y-[-6px] transition-all duration-500">
+              <div key={item.id || item.slug} className="hover:translate-y-[-6px] transition-all duration-300">
                 <MovieCard movie={item} />
               </div>
             );

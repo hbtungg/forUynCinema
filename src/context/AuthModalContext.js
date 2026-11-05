@@ -35,20 +35,20 @@ export function AuthModalProvider({ children }) {
             className="absolute inset-0 bg-black/60 backdrop-blur-md"
           />
 
-          <div className="relative w-full max-w-sm bg-[#111114]/90 border border-white/10 rounded-3xl p-6 shadow-2xl text-center origin-center animate-in zoom-in-95 duration-200 ease-out text-sm">
-            <div className="w-12 h-12 rounded-full bg-red-600/10 text-red-500 flex items-center justify-center mx-auto mb-4 border border-red-600/20">
+          <div role="dialog" aria-modal="true" aria-label="Đăng nhập để xem phim" className="relative w-full max-w-sm glass-surface border border-white/10 rounded-3xl p-6 shadow-2xl text-center origin-center animate-in zoom-in-95 duration-200 ease-out text-sm">
+            <div className="w-12 h-12 rounded-full bg-white/10 text-white flex items-center justify-center mx-auto mb-4 border border-white/20">
               <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
             </div>
 
-            <h3 className="text-base font-black text-white tracking-tight mb-2">
+            <h3 className="text-base font-semibold text-white tracking-tight mb-2">
               Chân trời điện ảnh đang chờ bạn
             </h3>
             
             <p className="text-[11px] font-medium text-zinc-400 tracking-wide leading-relaxed mb-6 px-2">
               {movieName ? (
-                <>Bạn cần có tài khoản để thưởng thức <span className="text-red-400 font-bold">“{movieName}”</span>. Đăng nhập để lưu lại tiến trình xem phim nhé! 🎬</>
+                <>Bạn cần có tài khoản để thưởng thức <span className="text-white font-bold">“{movieName}”</span>. Đăng nhập để lưu lại tiến trình xem phim nhé! 🎬</>
               ) : (
                 'Vui lòng đăng nhập tài khoản để có thể xem trọn vẹn toàn bộ kho phim Premium của hệ thống. ❤️'
               )}
@@ -58,7 +58,7 @@ export function AuthModalProvider({ children }) {
               <Link
                 href="/login"
                 onClick={() => { setIsOpen(false); setMovieName(''); }} // Chỉ khi chủ động bấm Đăng nhập mới tắt bảng thông báo
-                className="w-full py-3 bg-red-600 hover:bg-red-500 text-white text-[11px] font-black uppercase tracking-widest rounded-xl transition-all active:scale-95 shadow-[0_10px_20px_rgba(220,38,38,0.2)]"
+                className="w-full py-3 button-primary text-[11px] font-semibold uppercase tracking-widest rounded-xl transition-all active:scale-95 "
               >
                 Đăng nhập ngay
               </Link>
@@ -66,7 +66,7 @@ export function AuthModalProvider({ children }) {
               <Link
                 href="/register"
                 onClick={() => { setIsOpen(false); setMovieName(''); }} // Chỉ khi chủ động bấm Đăng ký mới tắt bảng thông báo
-                className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 text-zinc-300 hover:text-white text-[11px] font-black uppercase tracking-widest rounded-xl transition-all active:scale-95"
+                className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 text-zinc-300 hover:text-white text-[11px] font-semibold uppercase tracking-widest rounded-xl transition-all active:scale-95"
               >
                 Tạo tài khoản mới
               </Link>

@@ -9,9 +9,9 @@ export default function LoveGallery() {
     <section className="mt-20 px-4 md:px-0 overflow-x-hidden">
       {/* TIÊU ĐỀ */}
       <div className="flex items-center mb-10 gap-4">
-        <div className="w-1.5 h-8 bg-red-600 rounded-full shadow-[0_0_20px_rgba(220,38,38,0.5)] animate-pulse"></div>
+        <div className="w-1.5 h-8 bg-neutral-700 rounded-full  animate-pulse"></div>
         <div>
-          <h2 className="text-2xl md:text-3xl font-black text-white uppercase italic tracking-tighter">
+          <h2 className="text-2xl md:text-3xl font-semibold text-white uppercase italic tracking-tighter">
             PHIM GIẢ TÌNH THẬT 🎬
           </h2>
           <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-[0.4em] mt-1">Exclusive Original Content for Thu Uyn</p>

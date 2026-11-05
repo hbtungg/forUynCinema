@@ -188,8 +188,10 @@ function normalizeListResponse(data, provider = "nguonc") {
   const totalPages =
     pagination.total_pages ||
     pagination.total_page ||
+    pagination.totalPages ||
     params.pagination?.totalPages ||
     params.pagination?.total_pages ||
+    (params.pagination?.totalItems ? Math.ceil(params.pagination.totalItems / (params.pagination.totalItemsPerPage || 24)) : 0) ||
     dataNode.total_pages ||
     1;
 
@@ -198,7 +200,7 @@ function normalizeListResponse(data, provider = "nguonc") {
     items: items.map((item) => normalizeMovie(item, provider)),
     paginate: {
       ...pagination,
-      current_page: pagination.current_page || params.pagination?.currentPage || 1,
+      current_page: pagination.current_page || pagination.currentPage || params.pagination?.currentPage || 1,
       total_pages: totalPages,
       total_page: totalPages,
     },

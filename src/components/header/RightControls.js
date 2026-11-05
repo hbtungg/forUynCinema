@@ -21,7 +21,7 @@ export default function RightControls({
           md:hidden w-8 h-8 flex items-center justify-center rounded-lg
           transition-all duration-200
           ${isSearchOpen
-            ? "text-red-400 bg-white/[0.06]"
+            ? "text-neutral-300 bg-white/[0.06]"
             : "text-zinc-500 hover:text-white hover:bg-white/[0.05]"
           }
         `}
@@ -59,12 +59,12 @@ export default function RightControls({
           className="flex items-center gap-1.5 px-1.5 py-1 rounded-lg hover:bg-white/[0.05] transition-all"
         >
           {/* Avatar */}
-          <div className="w-7 h-7 rounded-full bg-red-950 border border-red-800/40 flex items-center justify-center text-[11px] font-bold text-red-300 flex-shrink-0 select-none">
+          <div className="w-7 h-7 rounded-full bg-neutral-950 border border-neutral-600/40 flex items-center justify-center text-[11px] font-bold text-neutral-300 flex-shrink-0 select-none">
             H
           </div>
 
           {/* Premium indicator */}
-          <span className="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0" title="Premium" />
+          <span className="w-1.5 h-1.5 rounded-full bg-neutral-700 flex-shrink-0" title="Premium" />
 
           {/* Chevron */}
           <svg

@@ -10,7 +10,7 @@ export default function MiniPlayerDock({
   playerRef,
 }) {
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#0d0d11]/95 border-t border-zinc-800/60 backdrop-blur-xl px-4 py-2.5 flex items-center gap-4 shadow-[0_-8px_32px_rgba(0,0,0,0.6)]">
+    <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#0d0d11]/95 border-t border-zinc-800/60 backdrop-blur-xl px-4 py-2.5 flex items-center gap-4 ">
       
       {/* Khối bên trái: Ảnh thu nhỏ + Tên phim */}
       <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -22,10 +22,10 @@ export default function MiniPlayerDock({
           />
         )}
         <div className="min-w-0">
-          <p className="text-[11px] font-black uppercase tracking-wide text-white truncate leading-none">
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-white truncate leading-none">
             {movie.name}
           </p>
-          <p className="text-[10px] text-red-500 font-bold mt-0.5">
+          <p className="text-[10px] text-neutral-300 font-bold mt-0.5">
             Đang phát · Tập {String(epName || '').replace(/^(tập|tập|tâp|tap|ep|episode)\s*/i, '').trim()}
           </p>
         </div>
@@ -43,7 +43,7 @@ export default function MiniPlayerDock({
         </button>
         
         {/* Nút Tạm dừng */}
-        <button className="w-9 h-9 flex items-center justify-center rounded-lg bg-red-600 text-white text-sm transition-all active:scale-95">
+        <button className="w-9 h-9 flex items-center justify-center rounded-lg bg-neutral-700 text-white text-sm transition-all active:scale-95">
           ⏸
         </button>
         

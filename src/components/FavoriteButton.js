@@ -78,7 +78,7 @@ export default function FavoriteButton({ phim, compact = false }) {
         type="button"
         onClick={toggleFavorite} 
         className={`w-full h-full flex items-center justify-center transition-transform active:scale-75 ${
-          isFavorite ? 'text-red-500' : 'text-zinc-400 hover:text-white'
+          isFavorite ? 'text-neutral-300' : 'text-zinc-400 hover:text-white'
         }`}
       >
         <svg className="w-4 h-4 transition-colors" fill={isFavorite ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -95,14 +95,14 @@ export default function FavoriteButton({ phim, compact = false }) {
       onClick={toggleFavorite} 
       className={`group/btn flex items-center gap-2 px-4 py-2 rounded-full border-2 transition-all active:scale-90 ${
         isFavorite 
-          ? 'bg-red-600 border-red-500 text-white shadow-[0_0_15px_rgba(220,38,38,0.5)]' 
+          ? 'bg-neutral-700 border-neutral-600 text-white ' 
           : 'bg-black/40 border-white/20 text-white'
       }`}
     >
       <svg className="w-4 h-4" fill={isFavorite ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
         <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
       </svg>
-      <span className="text-[9px] font-black uppercase">{isFavorite ? "Đã thích" : "Yêu thích"}</span>
+      <span className="text-[9px] font-semibold uppercase">{isFavorite ? "Đã thích" : "Yêu thích"}</span>
     </button>
   );
 }

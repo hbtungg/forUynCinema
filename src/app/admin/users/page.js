@@ -204,15 +204,15 @@ export default function AdminUsersPage() {
       {/* HEADER */}
       <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.04] pb-5">
         <div className="flex items-center gap-3">
-          <div className="w-1.5 h-6 bg-red-600 shadow-[0_0_20px_rgba(220,38,38,0.6)] rounded-full" />
+          <div className="w-1.5 h-6 bg-neutral-700  rounded-full" />
           <div>
-            <h1 className="text-xl font-black text-white uppercase tracking-wider">Hệ thống thành viên</h1>
-            <p className="text-[10px] text-zinc-500 mt-0.5 tracking-[0.1em] uppercase font-black">Giám sát tiến trình xem phim, trạng thái luồng trực tuyến và tài khoản rạp.</p>
+            <h1 className="text-xl font-semibold text-white uppercase tracking-wider">Hệ thống thành viên</h1>
+            <p className="text-[10px] text-zinc-500 mt-0.5 tracking-[0.1em] uppercase font-semibold">Giám sát tiến trình xem phim, trạng thái luồng trực tuyến và tài khoản rạp.</p>
           </div>
         </div>
         <button
           onClick={() => setShowAddForm(!showAddForm)}
-          className="bg-red-600 hover:bg-red-500 text-white font-bold uppercase text-[10px] tracking-widest px-4 py-2.5 rounded-xl transition-all active:scale-95 border border-red-500/10 shadow-[0_4px_15px_rgba(220,38,38,0.15)]"
+          className="bg-neutral-700 hover:bg-neutral-700 text-white font-bold uppercase text-[10px] tracking-widest px-4 py-2.5 rounded-xl transition-all active:scale-95 border border-neutral-600/10 "
         >
           {showAddForm ? 'Hủy bỏ' : '+ Thêm tài khoản'}
         </button>
@@ -229,28 +229,28 @@ export default function AdminUsersPage() {
           >
             <form onSubmit={handleAddUser} className="bg-white/[0.02] border border-white/[0.05] p-5 rounded-xl max-w-2xl flex flex-col sm:flex-row gap-3 items-end">
               <div className="flex-1 space-y-1.5 w-full">
-                <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest ml-1">Tên thành viên</label>
+                <label className="text-[9px] font-semibold text-zinc-500 uppercase tracking-widest ml-1">Tên thành viên</label>
                 <input
                   type="text"
                   required
                   placeholder="Nhập tên..."
                   value={newUserData.name}
                   onChange={(e) => setNewUserData({...newUserData, name: e.target.value})}
-                  className="w-full bg-black/40 border border-white/[0.06] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-red-600/40 select-text tracking-wide"
+                  className="w-full bg-black/40 border border-white/[0.06] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-neutral-600/40 select-text tracking-wide"
                 />
               </div>
               <div className="flex-1 space-y-1.5 w-full">
-                <label className="text-[9px] font-black text-zinc-500 uppercase tracking-widest ml-1">Email đăng nhập</label>
+                <label className="text-[9px] font-semibold text-zinc-500 uppercase tracking-widest ml-1">Email đăng nhập</label>
                 <input
                   type="email"
                   required
                   placeholder="xxx@gmail.com"
                   value={newUserData.email}
                   onChange={(e) => setNewUserData({...newUserData, email: e.target.value})}
-                  className="w-full bg-black/40 border border-white/[0.06] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-red-600/40 select-text tracking-wide"
+                  className="w-full bg-black/40 border border-white/[0.06] rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-neutral-600/40 select-text tracking-wide"
                 />
               </div>
-              <button type="submit" className="bg-zinc-100 hover:bg-white text-black font-black text-[10px] tracking-widest uppercase px-5 py-3 rounded-xl transition-colors h-[42px] w-full sm:w-auto flex-shrink-0">
+              <button type="submit" className="bg-zinc-100 hover:bg-white text-black font-semibold text-[10px] tracking-widest uppercase px-5 py-3 rounded-xl transition-colors h-[42px] w-full sm:w-auto flex-shrink-0">
                 Xác nhận
               </button>
             </form>
@@ -271,10 +271,10 @@ export default function AdminUsersPage() {
           <span className="absolute left-3 top-3 text-xs opacity-40">🔍</span>
         </div>
         <div className="flex gap-1 bg-white/[0.01] border border-white/[0.04] p-1 rounded-xl w-full sm:w-auto">
-          <button onClick={() => setFilter('all')} className={`flex-1 sm:flex-none px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${filter === 'all' ? 'bg-white/[0.06] text-white border border-white/[0.05]' : 'text-zinc-500 hover:text-zinc-300'}`}>
+          <button onClick={() => setFilter('all')} className={`flex-1 sm:flex-none px-4 py-1.5 rounded-lg text-[10px] font-semibold uppercase tracking-widest transition-all ${filter === 'all' ? 'bg-white/[0.06] text-white border border-white/[0.05]' : 'text-zinc-500 hover:text-zinc-300'}`}>
             Tất cả ({users.length})
           </button>
-          <button onClick={() => setFilter('online')} className={`flex-1 sm:flex-none px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${filter === 'online' ? 'bg-white/[0.06] text-white border border-white/[0.05]' : 'text-zinc-500 hover:text-zinc-300'}`}>
+          <button onClick={() => setFilter('online')} className={`flex-1 sm:flex-none px-4 py-1.5 rounded-lg text-[10px] font-semibold uppercase tracking-widest transition-all ${filter === 'online' ? 'bg-white/[0.06] text-white border border-white/[0.05]' : 'text-zinc-500 hover:text-zinc-300'}`}>
             Đang Online ({users.filter(u => u.isOnline).length})
           </button>
         </div>
@@ -288,7 +288,7 @@ export default function AdminUsersPage() {
           <div className="overflow-x-auto no-scrollbar rounded-2xl border border-white/[0.04] bg-[#0c0c0e]/40 backdrop-blur-2xl">
             <table className="w-full min-w-[550px] border-collapse text-left">
               <thead>
-                <tr className="border-b border-white/[0.04] text-zinc-500 text-[9px] font-black uppercase tracking-[0.15em] bg-white/[0.005]">
+                <tr className="border-b border-white/[0.04] text-zinc-500 text-[9px] font-semibold uppercase tracking-[0.15em] bg-white/[0.005]">
                   <th className="py-4 px-5">Thành viên</th>
                   <th className="py-4 px-5">Vai trò</th>
                   <th className="py-4 px-5">Trạng thái luồng</th>
@@ -318,7 +318,7 @@ export default function AdminUsersPage() {
                       <tr 
                         key={user.id}
                         onClick={() => setSelectedUser(user)}
-                        className={`group hover:bg-red-500/5 transition-all duration-300 cursor-pointer ${
+                        className={`group hover:bg-neutral-700/5 transition-all duration-300 cursor-pointer ${
                           isSelected ? 'bg-white/[0.02]' : ''
                         }`}
                       >
@@ -327,7 +327,7 @@ export default function AdminUsersPage() {
                           <div className={`w-8 h-8 rounded-full border flex items-center justify-center font-bold text-xs flex-shrink-0 transition-colors ${
                             user.isOnline 
                               ? 'border-green-500/30 bg-green-950/20 text-green-400' 
-                              : 'border-white/[0.05] bg-zinc-900 text-zinc-400 group-hover:bg-red-600/10 group-hover:text-red-400'
+                              : 'border-white/[0.05] bg-zinc-900 text-zinc-400 group-hover:bg-neutral-700/10 group-hover:text-neutral-300'
                           }`}>
                             {user.name?.charAt(0).toUpperCase() || 'U'}
                           </div>
@@ -335,7 +335,7 @@ export default function AdminUsersPage() {
                             <div className="flex items-center gap-1.5">
                               <span className="text-zinc-100 font-bold text-[13px] tracking-tight truncate">{user.name}</span>
                               {user.isOnline && (
-                                <span className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]" />
+                                <span className="w-1.5 h-1.5 rounded-full bg-green-500 " />
                               )}
                             </div>
                             <span className="text-zinc-600 text-[11px] truncate select-text mt-0.5">{user.email}</span>
@@ -346,9 +346,9 @@ export default function AdminUsersPage() {
                         <td className="py-4 px-5" onClick={(e) => e.stopPropagation()}>
                           <button
                             onClick={() => handleToggleRole(user)}
-                            className={`px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider border transition-all ${
+                            className={`px-2 py-0.5 rounded text-[9px] font-semibold uppercase tracking-wider border transition-all ${
                               user.role === 'admin'
-                                ? 'bg-red-600/10 border-red-500/20 text-red-500'
+                                ? 'bg-neutral-700/10 border-neutral-600/20 text-neutral-300'
                                 : 'bg-white/[0.02] border-white/[0.05] text-zinc-400 hover:text-white hover:border-white/[0.1]'
                             }`}
                           >
@@ -360,8 +360,8 @@ export default function AdminUsersPage() {
                         <td className="py-4 px-5">
                           {user.isOnline && user.watching ? (
                             <div className="flex flex-col max-w-[200px]">
-                              <span className="text-red-500 font-bold text-xs truncate tracking-tight flex items-center gap-1.5">
-                                <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-ping" />
+                              <span className="text-neutral-300 font-bold text-xs truncate tracking-tight flex items-center gap-1.5">
+                                <span className="w-1.5 h-1.5 rounded-full bg-neutral-700 animate-ping" />
                                 {user.watching.movieName}
                               </span>
                               <span className="text-zinc-600 text-[10px] mt-0.5">Khởi chạy: {user.watching.timeAt?.split(' ')[1] || ''}</span>
@@ -379,10 +379,10 @@ export default function AdminUsersPage() {
                           <button
                             onClick={() => handleDeleteUser(user.id, user.email)}
                             disabled={user.role === 'admin'}
-                            className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all border
+                            className={`px-3 py-1.5 rounded-lg text-[10px] font-semibold uppercase tracking-widest transition-all border
                               ${user.role === 'admin' 
                                 ? 'border-transparent text-zinc-800 cursor-not-allowed' 
-                                : 'border-transparent text-zinc-500 hover:text-red-400 hover:bg-red-500/5 hover:border-red-500/10'
+                                : 'border-transparent text-zinc-500 hover:text-neutral-300 hover:bg-neutral-700/5 hover:border-neutral-600/10'
                               }
                             `}
                           >
@@ -402,7 +402,7 @@ export default function AdminUsersPage() {
             <button
               onClick={() => setPage(p => Math.max(1, p - 1))}
               disabled={page === 1}
-              className={`px-3 py-1.5 text-[9px] font-black uppercase tracking-wider rounded-lg border transition-all ${
+              className={`px-3 py-1.5 text-[9px] font-semibold uppercase tracking-wider rounded-lg border transition-all ${
                 page === 1
                   ? 'border-transparent text-zinc-800 cursor-not-allowed'
                   : 'bg-white/[0.01] border-white/[0.04] text-zinc-400 hover:text-white hover:bg-white/[0.04]'
@@ -410,13 +410,13 @@ export default function AdminUsersPage() {
             >
               Trang trước
             </button>
-            <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
+            <span className="text-[10px] font-semibold text-zinc-500 uppercase tracking-widest">
               Trang {page} / {totalPages}
             </span>
             <button
               onClick={() => setPage(p => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
-              className={`px-3 py-1.5 text-[9px] font-black uppercase tracking-wider rounded-lg border transition-all ${
+              className={`px-3 py-1.5 text-[9px] font-semibold uppercase tracking-wider rounded-lg border transition-all ${
                 page === totalPages
                   ? 'border-transparent text-zinc-800 cursor-not-allowed'
                   : 'bg-white/[0.01] border-white/[0.04] text-zinc-400 hover:text-white hover:bg-white/[0.04]'
@@ -441,12 +441,12 @@ export default function AdminUsersPage() {
                     {selectedUser.name?.charAt(0).toUpperCase() || 'U'}
                   </div>
                   <div className="flex flex-col min-w-0">
-                    <h3 className="text-xs font-black text-white tracking-wide uppercase truncate">{selectedUser.name}</h3>
+                    <h3 className="text-xs font-semibold text-white tracking-wide uppercase truncate">{selectedUser.name}</h3>
                     <p className="text-[11px] text-zinc-500 select-text truncate mt-0.5">{selectedUser.email}</p>
                   </div>
                 </div>
                 {selectedUser.isOnline && (
-                  <span className="text-[8px] font-black uppercase tracking-wider bg-green-500/10 border border-green-500/20 text-green-400 px-1.5 py-0.5 rounded flex items-center gap-1.5">
+                  <span className="text-[8px] font-semibold uppercase tracking-wider bg-green-500/10 border border-green-500/20 text-green-400 px-1.5 py-0.5 rounded flex items-center gap-1.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
                     LIVE
                   </span>
@@ -455,12 +455,12 @@ export default function AdminUsersPage() {
 
               {/* Tiến trình xem phim thời gian thực */}
               <div className="space-y-2">
-                <h4 className="text-[9px] font-black text-zinc-600 uppercase tracking-widest pl-0.5">Tiến trình thực tế</h4>
+                <h4 className="text-[9px] font-semibold text-zinc-600 uppercase tracking-widest pl-0.5">Tiến trình thực tế</h4>
                 {selectedUser.isOnline && selectedUser.watching ? (
-                  <div className="bg-red-600/5 border border-red-500/10 p-3.5 rounded-xl flex flex-col gap-1 relative overflow-hidden group">
-                    <span className="text-xs font-black text-zinc-200 tracking-tight">{selectedUser.watching.movieName}</span>
-                    <span className="text-[10px] text-red-400 font-bold mt-1 inline-flex items-center gap-1">
-                      <span className="w-1 h-1 rounded-full bg-red-500 animate-ping" />
+                  <div className="bg-neutral-700/5 border border-neutral-600/10 p-3.5 rounded-xl flex flex-col gap-1 relative overflow-hidden group">
+                    <span className="text-xs font-semibold text-zinc-200 tracking-tight">{selectedUser.watching.movieName}</span>
+                    <span className="text-[10px] text-neutral-300 font-bold mt-1 inline-flex items-center gap-1">
+                      <span className="w-1 h-1 rounded-full bg-neutral-700 animate-ping" />
                       Khởi phát lúc: {selectedUser.watching.timeAt}
                     </span>
                     <div className="absolute right-3 bottom-2 text-xl opacity-10 group-hover:opacity-25 transition-opacity">🎬</div>
@@ -473,7 +473,7 @@ export default function AdminUsersPage() {
               {/* Lịch sử xem gần đây kết nối từ API history */}
               <div className="space-y-3 pt-1">
                 <div className="flex justify-between items-center">
-                  <h4 className="text-[9px] font-black text-zinc-600 uppercase tracking-widest pl-0.5">Nhật ký chiếu rạp</h4>
+                  <h4 className="text-[9px] font-semibold text-zinc-600 uppercase tracking-widest pl-0.5">Nhật ký chiếu rạp</h4>
                   <span className="text-[9px] font-bold text-zinc-500 font-mono">({selectedUserHistory.length} mục)</span>
                 </div>
 
@@ -500,7 +500,7 @@ export default function AdminUsersPage() {
                         <div key={i} className="flex justify-between items-start gap-4 text-[11px] p-2.5 rounded-lg bg-white/[0.005] border border-white/[0.02] hover:bg-white/[0.01] hover:border-white/[0.04] transition-all">
                           <div className="flex flex-col min-w-0 gap-0.5">
                             <span className="text-zinc-300 font-bold tracking-tight truncate">{hist.movie?.name || 'N/A'}</span>
-                            <span className="text-red-500/80 text-[9px] font-black uppercase tracking-wider">{epLabel}</span>
+                            <span className="text-neutral-300/80 text-[9px] font-semibold uppercase tracking-wider">{epLabel}</span>
                           </div>
                           <span className="text-zinc-600 text-[10px] font-medium whitespace-nowrap flex-shrink-0 mt-0.5">
                             {getRelativeTime(hist.updatedAt)}
@@ -518,7 +518,7 @@ export default function AdminUsersPage() {
             <div className="h-full flex flex-col items-center justify-center text-center py-20 space-y-3 opacity-30">
               <span className="text-xl">👁️</span>
               <div className="space-y-1">
-                <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">Giám sát thành viên</p>
+                <p className="text-[9px] font-semibold text-zinc-500 uppercase tracking-widest">Giám sát thành viên</p>
                 <p className="text-[11px] text-zinc-600 max-w-[190px] font-medium leading-normal">Bấm chọn một tài khoản bất kỳ bên bảng để xem chi tiết luồng hoạt động.</p>
               </div>
             </div>

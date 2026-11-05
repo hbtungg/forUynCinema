@@ -1,135 +1,136 @@
-/* DÒNG SỐ 1 - NHẬP FONT CHỮ CHÍNH THỨC TỪ DESIGN SYSTEM */
-@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,100;0,300;0,400;0,500;0,600;0,700;0,800;0,900&display=swap');
 @import "tailwindcss";
 
+/* Clear Refined Glass — shared material and monochrome design tokens. */
 @theme {
-  /* ── 🚀 TYPOGRAPHY CINEMATIC ── */
-  --font-main: 'Be Vietnam Pro', sans-serif;
-
-  /* ── 🎨 PALETTE MÀU TRONG FILE DESIGN.MD MỞ RỘNG ── */
-  --color-midnight-bg: #060814; /* Deep Night gốc cho màn hình OLED */
-  --color-surface: #15130f;
-  --color-surface-dim: #15130f;
-  --color-surface-bright: #3c3934;
-  
-  /* Cấp độ container theo kiến trúc Material Midnight */
-  --color-surface-lowest: #100e0a;
-  --color-surface-low: #1e1b17;
-  --color-surface-container: #221f1b;
-  --color-surface-high: #2d2a25;
-  --color-surface-highest: #38342f;
-
-  /* Chữ nghĩa tối ưu chống mỏi mắt */
-  --color-on-surface: #e8e1da;
-  --color-on-surface-variant: #d0c5b5;
-  
-  /* Ánh vàng mặt trăng (Moonlight Gold) */
-  --color-primary: #ffe3ae;
-  --color-on-primary: #402d00;
-  --color-primary-container: #e6c687;
-  --color-on-primary-container: #68511e;
-  --color-primary-glow: rgba(230, 198, 135, 0.25);
-
-  /* Xanh (Nebula Blue) */
-  --color-secondary: #bac3ff;
-  --color-on-secondary: #14277a;
-  --color-secondary-container: #2f3f91;
-  --color-on-secondary-container: #a3b0ff;
-  --color-secondary-accent: #5B6BBF;
-
-  /* Đường viền mảnh */
-  --color-outline: #998f81;
-  --color-outline-variant: #4d463a;
-  --color-border-subtle: rgba(148, 163, 184, 0.1);
-
-  /* ── 📐 SHAPES BO GÓC SOFT GEOMETRIC ── */
-  --radius-sm: 0.25rem;
-  --radius-default: 0.5rem;
-  --radius-md: 0.75rem;  /* Standard Containers (12px) */
-  --radius-lg: 1rem;    /* Feature Cards / Thumbnails (16px) */
-  --radius-xl: 1.5rem;   /* Interactive Buttons/Inputs (24px) */
+  --font-main: var(--font-be-vietnam-pro), Arial, sans-serif;
+  --color-midnight-bg: #050505;
+  --color-surface: #0b0b0b;
+  --color-surface-dim: #0b0b0b;
+  --color-surface-bright: #262626;
+  --color-surface-lowest: #050505;
+  --color-surface-low: #0b0b0b;
+  --color-surface-container: #121212;
+  --color-surface-high: #1c1c1c;
+  --color-surface-highest: #262626;
+  --color-on-surface: #ffffff;
+  --color-on-surface-variant: #b8b8b8;
+  --color-primary: #ffffff;
+  --color-on-primary: #050505;
+  --color-primary-container: #e8e8e8;
+  --color-on-primary-container: #050505;
+  --color-primary-glow: transparent;
+  --color-secondary: #e8e8e8;
+  --color-on-secondary: #050505;
+  --color-secondary-container: #262626;
+  --color-on-secondary-container: #b8b8b8;
+  --color-secondary-accent: #e8e8e8;
+  --color-outline: #808080;
+  --color-outline-variant: #383838;
+  --color-border-subtle: rgb(255 255 255 / .14);
+  --radius-sm: .375rem;
+  --radius-default: .75rem;
+  --radius-md: .875rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
 }
-
-/* Ép cấu hình font chữ tổng thể */
-* {
-  font-family: var(--font-main) !important;
+:root {
+  color-scheme: dark;
+  --glass-fill: rgb(255 255 255 / .055);
+  --glass-border: rgb(255 255 255 / .16);
+  --glass-blur: 22px;
+  --glass-highlight: inset 0 1px 0 rgb(255 255 255 / .12);
+  --glass-shadow: 0 8px 24px rgb(0 0 0 / .18);
+  --ease-refined: cubic-bezier(.2,.7,.2,1);
 }
-
 body {
-  /* Nền tảng Deep Night nằm dưới cùng làm bệ đỡ cho Shader */
-  background-color: #060814; 
-  color: #e8e1da;
+  background: #050505;
+  color: #fff;
+  font-family: var(--font-main);
   -webkit-font-smoothing: antialiased;
   margin: 0;
-  padding: 0;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
-
-/* ── Ẩn toàn bộ scrollbar hệ thống nhưng giữ chức năng cuộn mượt ── */
-* {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-*::-webkit-scrollbar {
-  display: none;
-}
-
-/* ==========================================================================
-   ── 🧪 CÁC THÀNH PHẦN HIỆU ỨNG TRONG SUỐT (MIDNIGHT UTILITIES) ──
-   ========================================================================== */
+* { scrollbar-width: thin; scrollbar-color: #383838 transparent; }
+::selection { background: rgb(255 255 255 / .22); color: white; }
 @layer utilities {
-  /* Lớp phủ Glassmorphism chuẩn chỉ đón Shader */
-  .midnight-glass {
-    background-color: rgba(24, 29, 56, 0.45) !important;
-    backdrop-filter: blur(20px) !important;
-    -webkit-backdrop-filter: blur(20px) !important;
-    border: 1px solid rgba(148, 163, 184, 0.08) !important;
-    box-shadow: inset 0 0.5px 0 rgba(255, 255, 255, 0.03);
+  .glass-surface, .midnight-glass {
+    background: var(--glass-fill);
+    border: 1px solid var(--glass-border);
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    backdrop-filter: blur(var(--glass-blur));
+    box-shadow: var(--glass-highlight), var(--glass-shadow);
   }
-
-  /* Nút bấm Moonlight Gold phát sáng mềm mại */
-  .btn-moonlight {
-    background-color: #e6c687 !important;
-    color: #402d00 !important;
-    border-radius: 24px !important;
+  .button-primary, .btn-moonlight {
+    background: #fff;
+    color: #050505;
+    border-radius: 14px;
+    min-height: 44px;
     font-weight: 600;
-    letter-spacing: 0.05em;
-    transition: all 400ms ease-in-out;
+    box-shadow: none;
+    transition: background 220ms var(--ease-refined), transform 220ms var(--ease-refined);
   }
-  .btn-moonlight:hover {
-    box-shadow: 0 0 20px rgba(230, 198, 135, 0.4);
-    transform: translateY(-2px);
-  }
-
-  /* Hover nhấc nhẹ tấm phimstrip */
-  .hover-float {
-    transition: transform 400ms ease-in-out !important;
-  }
-  .hover-float:hover {
-    transform: translateY(-4px) !important;
-  }
+  .button-primary:hover, .btn-moonlight:hover { background: #e8e8e8; }
+  .button-primary:active, .btn-moonlight:active { transform: scale(.98); }
+  .hover-float { transition: transform 240ms var(--ease-refined); }
+  .hover-float:hover { transform: translateY(-2px); }
 }
-
-@media (pointer: coarse) and (min-width: 768px) and (max-width: 1366px) {
-  
-  /* 1. Hạ bớt độ nhòe kính mờ xuống mức an toàn để GPU iPad không bị thắt nút cổ chai */
-  .backdrop-blur-2xl,
-  .backdrop-blur-xl,
-  .backdrop-blur-lg,
-  .midnight-glass {
-    --tw-backdrop-blur: blur(10px) !important;
-    backdrop-filter: blur(10px) !important;
-    -webkit-backdrop-filter: blur(10px) !important;
-    
-    /* Tăng nhẹ độ đặc của nền đêm (0.45 -> 0.7) để bù đắp thị giác, giữ độ sang chảnh */
-    background-color: rgba(15, 19, 38, 0.7) !important;
-  }
-
-  /* 2. Ép các phân khu hộp kén di chuyển liên tục (như thanh Header cố định) tăng tốc phần cứng */
-  header,
-  .fixed,
-  .sticky {
-    will-change: transform, opacity !important;
-    transform: translateZ(0) !important; /* Kích hoạt tăng tốc 3D layer trên WebKit */
-  }
+/* Restrict expensive blur to controls and floating surfaces. */
+header { --glass-blur: 22px; }
+header.glass-surface { background: rgb(5 5 5 / .48); }
+.glass-surface .glass-surface { -webkit-backdrop-filter: none;
+    backdrop-filter: none; box-shadow: var(--glass-highlight); }
+input, select, textarea { accent-color: #fff; }
+input::placeholder, textarea::placeholder { color: #808080; opacity: 1; }
+select option { background: #0b0b0b; color: #fff; }
+:where(button, a, input, select, textarea):focus-visible {
+  outline: 2px solid #e8e8e8;
+  outline-offset: 4px;
+}
+:where(button, a) { -webkit-tap-highlight-color: transparent; }
+:where(h1, h2, h3) { text-wrap: balance; }
+.cinema-hero { border-radius: 24px; border: 0; box-shadow: none; }
+.cinema-hero h1 { font-weight: 500; letter-spacing: -.035em; }
+.floating-navigation {
+  left: 12px;
+  right: 12px;
+  bottom: max(12px, env(safe-area-inset-bottom));
+  border: 1px solid var(--glass-border);
+  border-radius: 22px;
+  background: rgb(255 255 255 / .065);
+  box-shadow: var(--glass-highlight), var(--glass-shadow);
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+    backdrop-filter: blur(var(--glass-blur));
+}
+.floating-navigation a, .floating-navigation button { min-width: 44px; min-height: 44px; position: relative; }
+.floating-navigation [aria-current="page"]::after {
+  content: ""; position: absolute; bottom: 7px; width: 4px; height: 4px; background: white; border-radius: 50%;
+}
+.mobile-nav-clearance { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
+@media (min-width: 768px) { .mobile-nav-clearance { padding-bottom: 0; } }
+@media (max-width: 640px) {
+  header > div { padding-inline: 20px; }
+  .cinema-hero { min-height: 420px; max-height: 680px; }
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass-surface, .midnight-glass, .floating-navigation { background: rgb(11 11 11 / .96); }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .glass-surface, .midnight-glass, .floating-navigation { background: #0b0b0b; -webkit-backdrop-filter: none;
+    backdrop-filter: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}
+/* Image controls need a neutral scrim to remain readable over white posters. */
+.poster-control {
+  background: rgb(5 5 5 / .62);
+  border: 1px solid var(--glass-border);
+  -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+}
+.install-prompt { bottom: calc(96px + env(safe-area-inset-bottom)); }
+@media (min-width: 768px) { .install-prompt { bottom: 24px; } }
+@media (prefers-reduced-transparency: reduce) {
+  .poster-control { background: #0b0b0b; -webkit-backdrop-filter: none;
+    backdrop-filter: none; }
 }

@@ -42,8 +42,8 @@ export default function FavoriteList() {
     <section className="mt-16 group/fav overflow-x-hidden">
       {/* SỬA LẠI CỤM NÀY: Bọc thanh đỏ và tiêu đề vào một div để chúng đi cùng nhau sang bên trái */}
       <div className="flex items-center mb-10 pr-4 gap-4">
-        <div className="w-1.5 h-8 bg-red-600 rounded-full shadow-[0_0_20px_rgba(220,38,38,0.4)] flex-shrink-0"></div>
-        <h2 className="text-2xl font-black text-zinc-100 uppercase tracking-tight italic text-shadow">
+        <div className="w-1.5 h-8 bg-neutral-700 rounded-full  flex-shrink-0"></div>
+        <h2 className="text-2xl font-semibold text-zinc-100 uppercase tracking-tight italic text-shadow">
           PHIM EM THÍCH 🍿
         </h2>
       </div>

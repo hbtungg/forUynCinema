@@ -61,12 +61,12 @@ export default function AdminMoviesPage() {
         className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-900 pb-5"
       >
         <div className="flex items-center gap-4">
-          <div className="w-1.5 h-6 bg-red-600 shadow-[0_0_20px_rgba(220,38,38,0.6)] rounded-full" />
+          <div className="w-1.5 h-6 bg-neutral-700  rounded-full" />
           <div>
-            <h1 className="text-xl font-black uppercase tracking-wider text-white">
+            <h1 className="text-xl font-semibold uppercase tracking-wider text-white">
               Kho phim UynCinema
             </h1>
-            <p className="text-zinc-500 text-[10px] font-black uppercase tracking-[0.2em] mt-0.5">
+            <p className="text-zinc-500 text-[10px] font-semibold uppercase tracking-[0.2em] mt-0.5">
               Movie database provider lookup
             </p>
           </div>
@@ -81,7 +81,7 @@ export default function AdminMoviesPage() {
             placeholder="Tìm phim theo tên hoặc từ khóa..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="bg-white/[0.01] border border-white/[0.05] rounded-xl px-4 py-2.5 pl-10 text-xs outline-none focus:border-red-600/40 text-white transition-all w-full placeholder:text-zinc-600 select-text"
+            className="bg-white/[0.01] border border-white/[0.05] rounded-xl px-4 py-2.5 pl-10 text-xs outline-none focus:border-neutral-600/40 text-white transition-all w-full placeholder:text-zinc-600 select-text"
           />
           <span className="absolute left-3.5 top-3 text-xs opacity-40">🔍</span>
           {search && (
@@ -93,9 +93,9 @@ export default function AdminMoviesPage() {
             </button>
           )}
         </div>
-        <div className="bg-zinc-900/60 border border-white/[0.04] rounded-xl px-4 py-2.5 text-[10px] font-black uppercase tracking-wider text-zinc-400 flex items-center justify-center gap-1.5 whitespace-nowrap">
+        <div className="bg-zinc-900/60 border border-white/[0.04] rounded-xl px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-zinc-400 flex items-center justify-center gap-1.5 whitespace-nowrap">
           <span>Tổng số trang:</span>
-          <span className="text-white bg-red-600/20 border border-red-500/10 px-1.5 py-0.5 rounded text-xs">{totalPages}</span>
+          <span className="text-white bg-neutral-700/20 border border-neutral-600/10 px-1.5 py-0.5 rounded text-xs">{totalPages}</span>
         </div>
       </div>
 
@@ -112,7 +112,7 @@ export default function AdminMoviesPage() {
       ) : movies.length === 0 ? (
         <div className="py-24 flex flex-col items-center justify-center text-center border border-dashed border-white/[0.03] rounded-2xl">
           <div className="text-4xl mb-4">🎬</div>
-          <h2 className="text-white font-black text-lg mb-1">Không tìm thấy phim</h2>
+          <h2 className="text-white font-semibold text-lg mb-1">Không tìm thấy phim</h2>
           <p className="text-zinc-600 text-xs font-medium">Hệ thống chưa tìm được tựa phim nào khớp.</p>
         </div>
       ) : (
@@ -128,14 +128,14 @@ export default function AdminMoviesPage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: (idx % 12) * 0.02 }}
-                className="group relative rounded-xl overflow-hidden border border-white/[0.03] bg-[#0c0c0e]/60 flex flex-col justify-between hover:border-red-600/30 transition-all duration-300"
+                className="group relative rounded-xl overflow-hidden border border-white/[0.03] bg-[#0c0c0e]/60 flex flex-col justify-between hover:border-neutral-600/30 transition-all duration-300"
               >
                 {/* Poster & Badges */}
                 <div className="relative aspect-[2/3] overflow-hidden bg-black/40">
                   <img
                     src={movie.thumb_url || "/next.svg"}
                     alt={movie.name}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                     onError={(e) => {
                       e.target.onerror = null;
                       e.target.src = "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=500&auto=format&fit=crop";
@@ -143,12 +143,12 @@ export default function AdminMoviesPage() {
                   />
                   
                   {/* Badges */}
-                  <div className="absolute top-2 left-2 z-10 px-1.5 py-0.5 rounded text-[8px] font-black bg-red-600 text-white">
+                  <div className="absolute top-2 left-2 z-10 px-1.5 py-0.5 rounded text-[8px] font-semibold bg-neutral-700 text-white">
                     {movie.episode_current || movie.quality || 'HD'}
                   </div>
 
                   {movie.year && (
-                    <div className="absolute bottom-2 left-2 z-10 px-1.5 py-0.5 rounded text-[8px] font-black bg-black/60 backdrop-blur-sm text-zinc-400">
+                    <div className="absolute bottom-2 left-2 z-10 px-1.5 py-0.5 rounded text-[8px] font-semibold bg-black/60 backdrop-blur-sm text-zinc-400">
                       {movie.year}
                     </div>
                   )}
@@ -164,7 +164,7 @@ export default function AdminMoviesPage() {
                 {/* Details */}
                 <div className="p-3 space-y-1 bg-[#0c0c0e] flex-1 flex flex-col justify-between">
                   <div className="space-y-0.5">
-                    <h3 className="font-bold text-[11px] sm:text-xs text-zinc-200 line-clamp-1 group-hover:text-red-500 transition-colors">
+                    <h3 className="font-bold text-[11px] sm:text-xs text-zinc-200 line-clamp-1 group-hover:text-neutral-300 transition-colors">
                       {movie.name}
                     </h3>
                     <p className="text-[9px] text-zinc-500 line-clamp-1 font-medium italic">
@@ -179,7 +179,7 @@ export default function AdminMoviesPage() {
                     <Link
                       href={`/watch/${movie.slug}`}
                       target="_blank"
-                      className="text-[9px] font-black uppercase text-red-500 hover:text-red-400 tracking-wider whitespace-nowrap active:scale-95 transition-all"
+                      className="text-[9px] font-semibold uppercase text-neutral-300 hover:text-neutral-300 tracking-wider whitespace-nowrap active:scale-95 transition-all"
                     >
                       Kiểm tra rạp →
                     </Link>
@@ -194,7 +194,7 @@ export default function AdminMoviesPage() {
             <button
               onClick={handlePrevPage}
               disabled={page === 1}
-              className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all border ${
+              className={`px-4 py-2 text-[10px] font-semibold uppercase tracking-widest rounded-xl transition-all border ${
                 page === 1
                   ? 'border-transparent text-zinc-700 cursor-not-allowed'
                   : 'bg-white/[0.01] border-white/[0.04] text-zinc-300 hover:bg-white/[0.04] active:scale-95'
@@ -202,13 +202,13 @@ export default function AdminMoviesPage() {
             >
               ← Trang trước
             </button>
-            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500">
               Trang <span className="text-white font-mono text-sm mx-1">{page}</span> / {totalPages}
             </span>
             <button
               onClick={handleNextPage}
               disabled={page === totalPages}
-              className={`px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all border ${
+              className={`px-4 py-2 text-[10px] font-semibold uppercase tracking-widest rounded-xl transition-all border ${
                 page === totalPages
                   ? 'border-transparent text-zinc-700 cursor-not-allowed'
                   : 'bg-white/[0.01] border-white/[0.04] text-zinc-300 hover:bg-white/[0.04] active:scale-95'

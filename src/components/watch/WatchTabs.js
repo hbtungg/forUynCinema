@@ -31,9 +31,9 @@ const MOCK_COMMENTS = [
 function PlaybackIndicator() {
   return (
     <span className="flex items-end gap-[2px] h-2.5 shrink-0 pt-0.5">
-      <span className="w-[1.5px] rounded-full bg-[#E6C687] shadow-[0_0_8px_#E6C687] animate-[sb_0.8s_ease-in-out_infinite]" style={{ height: '100%' }} />
-      <span className="w-[1.5px] rounded-full bg-[#E6C687] shadow-[0_0_8px_#E6C687] animate-[sb_0.8s_ease-in-out_0.2s_infinite]" style={{ height: '60%' }} />
-      <span className="w-[1.5px] rounded-full bg-[#E6C687] shadow-[0_0_8px_#E6C687] animate-[sb_0.8s_ease-in-out_0.4s_infinite]" style={{ height: '80%' }} />
+      <span className="w-[1.5px] rounded-full bg-[#e8e8e8]  animate-[sb_0.8s_ease-in-out_infinite]" style={{ height: '100%' }} />
+      <span className="w-[1.5px] rounded-full bg-[#e8e8e8]  animate-[sb_0.8s_ease-in-out_0.2s_infinite]" style={{ height: '60%' }} />
+      <span className="w-[1.5px] rounded-full bg-[#e8e8e8]  animate-[sb_0.8s_ease-in-out_0.4s_infinite]" style={{ height: '80%' }} />
     </span>
   );
 }
@@ -65,7 +65,7 @@ export default function WatchTabs({
   const displayEpisodes = episodeChunks[activeChunk] || currentEpisodes;
 
   return (
-    <div className="space-y-5 font-sans select-none" style={{ fontFamily: "'Be Vietnam Pro', sans-serif" }}>
+    <div className="space-y-5 font-sans select-none" style={{ fontFamily: "var(--font-main)" }}>
       
       {/* ── HIGH-END TAB BAR ── */}
       <div className="flex items-center gap-2 border-b border-white/5">
@@ -74,18 +74,18 @@ export default function WatchTabs({
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`relative flex items-center gap-2 px-4 pb-3 pt-1 text-[11px] font-bold uppercase tracking-widest transition-all duration-300 cursor-pointer focus:outline-none ${
-              activeTab === tab.id ? 'text-[#ffe3ae]' : 'text-[#d0c5b5]/30 hover:text-[#e8e1da]'
+              activeTab === tab.id ? 'text-[#ffffff]' : 'text-[#808080] hover:text-[#ffffff]'
             }`}
           >
-            <span className={activeTab === tab.id ? 'text-[#E6C687]' : 'opacity-50'}>{tab.icon}</span>
+            <span className={activeTab === tab.id ? 'text-[#e8e8e8]' : 'opacity-50'}>{tab.icon}</span>
             <span>{tab.label}</span>
             {tab.badge && (
               <span className={`px-1.5 py-0.5 rounded-md text-[8px] font-mono font-bold transition-colors ${
-                activeTab === tab.id ? 'bg-[#E6C687]/20 text-[#ffe3ae] border border-[#E6C687]/30' : 'bg-white/5 text-[#d0c5b5]/30'
+                activeTab === tab.id ? 'bg-[#e8e8e8]/20 text-[#ffffff] border border-[#e8e8e8]/30' : 'bg-white/5 text-[#808080]'
               }`}>{tab.badge}</span>
             )}
             {activeTab === tab.id && (
-              <span className="absolute bottom-0 inset-x-2 h-px bg-[#E6C687] shadow-[0_0_10px_#E6C687]" />
+              <span className="absolute bottom-0 inset-x-2 h-px bg-[#e8e8e8] " />
             )}
           </button>
         ))}
@@ -105,14 +105,14 @@ export default function WatchTabs({
               <button
                 type="button"
                 onClick={() => setIsProviderMenuOpen((prev) => !prev)}
-                className="bg-[#0F1326]/40 border border-white/10 px-3.5 py-1.5 rounded-xl text-[10px] font-bold text-[#d0c5b5]/70 hover:text-[#ffe3ae] flex items-center gap-2 cursor-pointer transition-all duration-300 focus:outline-none hover:border-[#E6C687]/30"
+                className="bg-white/[0.04] border border-white/10 px-3.5 py-1.5 rounded-xl text-[10px] font-bold text-[#b8b8b8] hover:text-[#ffffff] flex items-center gap-2 cursor-pointer transition-all duration-300 focus:outline-none hover:border-[#e8e8e8]/30"
               >
-                <span className="w-1 h-1 rounded-full bg-[#E6C687] shadow-[0_0_6px_#E6C687] animate-pulse" />
+                <span className="w-1 h-1 rounded-full bg-[#e8e8e8]  animate-pulse" />
                 <span>{selectedProvider === 'nguonc' ? 'Nguồn C' : selectedProvider === 'kkphim' ? 'KKPhim' : 'Tự động'}</span>
-                <ChevronDown className={`w-3 h-3 text-[#d0c5b5]/40 transition-transform duration-300 ${isProviderMenuOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`w-3 h-3 text-[#808080] transition-transform duration-300 ${isProviderMenuOpen ? 'rotate-180' : ''}`} />
               </button>
 
-              <div className={`absolute left-0 top-full mt-2 w-40 bg-[#0F1326]/95 backdrop-blur-2xl border border-white/10 rounded-2xl p-1 shadow-2xl transition-all duration-200 z-50 origin-top-left ${isProviderMenuOpen ? 'opacity-100 visible scale-100' : 'opacity-0 invisible scale-95'}`}>
+              <div className={`absolute left-0 top-full mt-2 w-40 glass-surface border border-white/10 rounded-2xl p-1 shadow-2xl transition-all duration-200 z-50 origin-top-left ${isProviderMenuOpen ? 'opacity-100 visible scale-100' : 'opacity-0 invisible scale-95'}`}>
                 {/* Options bọc kính mờ */}
                 {[
                   { value: 'auto', label: 'Tự động' },
@@ -128,12 +128,12 @@ export default function WatchTabs({
                     }}
                     className={`w-full text-left px-3 py-2 rounded-xl text-[10px] font-bold uppercase transition-all duration-300 flex items-center justify-between cursor-pointer focus:outline-none ${
                       selectedProvider === option.value
-                        ? 'bg-[#E6C687]/10 text-[#ffe3ae] border border-[#E6C687]/20 shadow-[0_0_10px_rgba(230,198,135,0.15)]'
-                        : 'text-[#d0c5b5]/50 hover:text-white hover:bg-white/5'
+                        ? 'bg-[#e8e8e8]/10 text-[#ffffff] border border-[#e8e8e8]/20 '
+                        : 'text-[#b8b8b8] hover:text-white hover:bg-white/5'
                     }`}
                   >
                     <span>{option.label}</span>
-                    {selectedProvider === option.value && <span className="text-[#E6C687] text-[6px]">●</span>}
+                    {selectedProvider === option.value && <span className="text-[#e8e8e8] text-[6px]">●</span>}
                   </button>
                 ))}
               </div>
@@ -145,14 +145,14 @@ export default function WatchTabs({
                 <button
                   type="button"
                   onClick={() => setIsServerMenuOpen((prev) => !prev)}
-                  className="bg-[#0F1326]/40 border border-white/10 px-3.5 py-1.5 rounded-xl text-[10px] font-bold text-[#d0c5b5]/70 hover:text-[#ffe3ae] flex items-center gap-2 cursor-pointer transition-all duration-300 focus:outline-none hover:border-[#E6C687]/30"
+                  className="bg-white/[0.04] border border-white/10 px-3.5 py-1.5 rounded-xl text-[10px] font-bold text-[#b8b8b8] hover:text-[#ffffff] flex items-center gap-2 cursor-pointer transition-all duration-300 focus:outline-none hover:border-[#e8e8e8]/30"
                 >
-                  <span className="w-1 h-1 rounded-full bg-[#E6C687] shadow-[0_0_6px_#E6C687] animate-pulse" />
+                  <span className="w-1 h-1 rounded-full bg-[#e8e8e8]  animate-pulse" />
                   <span>{servers[selectedServer]?.server_name || `Mùa ${selectedServer + 1}`}</span>
-                  <ChevronDown className={`w-3 h-3 text-[#d0c5b5]/40 transition-transform duration-300 ${isServerMenuOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`w-3 h-3 text-[#808080] transition-transform duration-300 ${isServerMenuOpen ? 'rotate-180' : ''}`} />
                 </button>
 
-                <div className={`absolute left-0 top-full mt-2 w-40 bg-[#0F1326]/95 backdrop-blur-2xl border border-white/10 rounded-2xl p-1 shadow-2xl transition-all duration-200 z-50 origin-top-left ${isServerMenuOpen ? 'opacity-100 visible scale-100' : 'opacity-0 invisible scale-95'}`}>
+                <div className={`absolute left-0 top-full mt-2 w-40 glass-surface border border-white/10 rounded-2xl p-1 shadow-2xl transition-all duration-200 z-50 origin-top-left ${isServerMenuOpen ? 'opacity-100 visible scale-100' : 'opacity-0 invisible scale-95'}`}>
                   <div className="max-h-48 overflow-y-auto custom-scrollbar space-y-0.5">
                     {servers.map((s, i) => {
                       const isSelected = selectedServer === i;
@@ -166,12 +166,12 @@ export default function WatchTabs({
                           }}
                           className={`w-full text-left px-3 py-2 rounded-xl text-[10px] font-bold uppercase transition-all duration-300 flex items-center justify-between cursor-pointer focus:outline-none ${
                             isSelected
-                              ? 'bg-[#E6C687]/10 text-[#ffe3ae] border border-[#E6C687]/20 shadow-[0_0_10px_rgba(230,198,135,0.15)]'
-                              : 'text-[#d0c5b5]/50 hover:text-white hover:bg-white/5'
+                              ? 'bg-[#e8e8e8]/10 text-[#ffffff] border border-[#e8e8e8]/20 '
+                              : 'text-[#b8b8b8] hover:text-white hover:bg-white/5'
                           }`}
                         >
                           <span>{s.server_name || `Mùa ${i + 1}`}</span>
-                          {isSelected && <span className="text-[#E6C687] text-[6px]">●</span>}
+                          {isSelected && <span className="text-[#e8e8e8] text-[6px]">●</span>}
                         </button>
                       );
                     })}
@@ -189,8 +189,8 @@ export default function WatchTabs({
                     onClick={() => setActiveChunk(i)}
                     className={`px-3 py-1.5 rounded-xl text-[9px] font-bold uppercase tracking-wider transition-all duration-300 border cursor-pointer focus:outline-none ${
                       activeChunk === i
-                        ? 'bg-[#E6C687]/10 border-[#E6C687]/40 text-[#ffe3ae] shadow-[0_0_12px_rgba(230,198,135,0.15)]'
-                        : 'bg-white/[0.01] border-white/5 text-[#d0c5b5]/30 hover:text-[#e8e1da] hover:bg-white/5'
+                        ? 'bg-[#e8e8e8]/10 border-[#e8e8e8]/40 text-[#ffffff] '
+                        : 'bg-white/[0.01] border-white/5 text-[#808080] hover:text-[#ffffff] hover:bg-white/5'
                     }`}
                   >
                     {chunk[0].name}–{chunk[chunk.length - 1].name}
@@ -212,32 +212,32 @@ export default function WatchTabs({
                   <button
                     key={idx}
                     onClick={() => handleEpisodeChange(idx, ep.name)}
-                    className={`shrink-0 w-[140px] sm:w-[160px] aspect-[16/10] rounded-xl overflow-hidden relative border transition-all duration-400 group flex flex-col justify-end text-left focus:outline-none cursor-pointer ${
+                    className={`shrink-0 w-[140px] sm:w-[160px] aspect-[16/10] rounded-xl overflow-hidden relative border transition-all duration-300 group flex flex-col justify-end text-left focus:outline-none cursor-pointer ${
                       isActive
-                        ? 'border-[#E6C687]/50 shadow-[0_4px_25px_rgba(230,198,135,0.2)]'
+                        ? 'border-[#e8e8e8]/50 '
                         : 'border-white/5 hover:border-white/20'
                     }`}
                   >
                     <img
                       src={movie?.poster_url || movie?.thumb_url}
                       alt=""
-                      className="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:opacity-70 group-hover:scale-105 transition-all duration-500 pointer-events-none"
+                      className="absolute inset-0 w-full h-full object-cover opacity-90 group-hover:opacity-70 group-hover:scale-105 transition-all duration-300 pointer-events-none"
                       loading="lazy"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#0F1326] via-[#0F1326]/40 to-transparent z-0" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0b0b0b] via-[#0b0b0b]/40 to-transparent z-0" />
 
                     {/* Biểu tượng Play / Sóng âm kính mờ lơ lửng tâm card */}
-                    <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-[#0F1326]/80 backdrop-blur-md border border-white/10 flex items-center justify-center transition-all duration-300 z-10 ${
-                      isActive ? 'opacity-100 scale-100 bg-[#E6C687]/20 border-[#E6C687]/30' : 'opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100'
+                    <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 rounded-full glass-surface border border-white/10 flex items-center justify-center transition-all duration-300 z-10 ${
+                      isActive ? 'opacity-100 scale-100 bg-[#e8e8e8]/20 border-[#e8e8e8]/30' : 'opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100'
                     }`}>
                       {isActive ? <PlaybackIndicator /> : <Play className="w-2.5 h-2.5 text-white fill-current pl-[1px]" />}
                     </div>
 
                     <div className="relative z-10 p-3 w-full">
-                      <p className={`text-[11px] font-bold tracking-wide leading-none ${isActive ? 'text-[#ffe3ae]' : 'text-[#e8e1da]'}`}>
+                      <p className={`text-[11px] font-bold tracking-wide leading-none ${isActive ? 'text-[#ffffff]' : 'text-[#ffffff]'}`}>
                         {label}
                       </p>
-                      <p className="text-[9px] font-semibold text-[#d0c5b5]/30 uppercase tracking-wider mt-1 truncate">
+                      <p className="text-[9px] font-semibold text-[#808080] uppercase tracking-wider mt-1 truncate">
                         {label} · 45 phút
                       </p>
                     </div>
@@ -249,9 +249,9 @@ export default function WatchTabs({
 
           {/* Ghi chú trạng thái tinh tế dưới chân khay thẻ */}
           {selectedEpisode !== null && currentEpisodes[selectedEpisode] && (
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#E6C687]/5 border border-[#E6C687]/10 w-fit">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#E6C687] shadow-[0_0_8px_#E6C687] animate-pulse shrink-0" />
-              <p className="text-[9px] font-bold text-[#ffe3ae]/80 uppercase tracking-widest">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#e8e8e8]/5 border border-[#e8e8e8]/10 w-fit">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#e8e8e8]  animate-pulse shrink-0" />
+              <p className="text-[9px] font-bold text-[#ffffff]/80 uppercase tracking-widest">
                 Đang phát: {formatEpisodeLabel(currentEpisodes[selectedEpisode].name)}
               </p>
             </div>
@@ -264,14 +264,14 @@ export default function WatchTabs({
         <div className="space-y-2.5 animate-in fade-in duration-300">
           
           {/* Ô nhập bình luận */}
-          <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-[#0F1326]/40 border border-white/5 mb-4 focus-within:border-[#E6C687]/30 transition-colors">
+          <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-white/[0.04] border border-white/5 mb-4 focus-within:border-[#e8e8e8]/30 transition-colors">
             <span className="text-sm">😊</span>
             <input 
               type="text" 
               placeholder="Viết bình luận..." 
-              className="flex-1 bg-transparent text-xs text-[#e8e1da] placeholder-[#d0c5b5]/20 outline-none font-medium" 
+              className="flex-1 bg-transparent text-xs text-[#ffffff] placeholder-[#b8b8b8]/20 outline-none font-medium" 
             />
-            <button className="shrink-0 w-7 h-7 flex items-center justify-center rounded-xl bg-[#E6C687]/10 hover:bg-[#E6C687] border border-[#E6C687]/20 text-[#E6C687] hover:text-[#402d00] transition-all duration-300 active:scale-95 cursor-pointer focus:outline-none">
+            <button className="shrink-0 w-7 h-7 flex items-center justify-center rounded-xl bg-[#e8e8e8]/10 hover:bg-[#e8e8e8] border border-[#e8e8e8]/20 text-[#e8e8e8] hover:text-[#050505] transition-all duration-300 active:scale-95 cursor-pointer focus:outline-none">
               <Send className="w-3 h-3" />
             </button>
           </div>
@@ -280,15 +280,15 @@ export default function WatchTabs({
           <div className="space-y-1">
             {MOCK_COMMENTS.map(c => (
               <div key={c.id} className="group flex items-start gap-3.5 px-3 py-3 rounded-2xl hover:bg-white/[0.02] border border-transparent hover:border-white/5 transition-all duration-300">
-                <div className="shrink-0 w-9 h-9 rounded-full bg-[#0F1326]/60 border border-white/5 flex items-center justify-center text-base shadow-inner">
+                <div className="shrink-0 w-9 h-9 rounded-full bg-white/[0.04] border border-white/5 flex items-center justify-center text-base shadow-inner">
                   {c.avatar}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-baseline gap-2 mb-1">
-                    <span className="text-[11px] font-bold text-[#e8e1da]">{c.name}</span>
-                    <span className="text-[9px] text-[#d0c5b5]/30 font-semibold uppercase font-mono tracking-wider">{c.time}</span>
+                    <span className="text-[11px] font-bold text-[#ffffff]">{c.name}</span>
+                    <span className="text-[9px] text-[#808080] font-semibold uppercase font-mono tracking-wider">{c.time}</span>
                   </div>
-                  <p className="text-xs text-[#d0c5b5]/70 leading-relaxed font-medium">{c.text}</p>
+                  <p className="text-xs text-[#b8b8b8] leading-relaxed font-medium">{c.text}</p>
                 </div>
               </div>
             ))}

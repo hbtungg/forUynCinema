@@ -44,18 +44,18 @@ function findEpisodeIndex(items = [], target = "") {
 // 🚀 SỬA CHÍ MẠNG: Skeleton trong suốt đón Shader, gọt bỏ Header/Sidebar thừa
 function WatchSkeleton() {
   return (
-    <div className="w-full min-h-screen bg-transparent text-[#e8e1da] py-6 font-sans">
+    <div className="w-full min-h-screen bg-transparent text-[#ffffff] py-6 font-sans">
       <div className="max-w-[1800px] mx-auto grid grid-cols-1 xl:grid-cols-[1fr_300px] 2xl:grid-cols-[1fr_340px] gap-6">
         <div className="space-y-4">
-          <div className="w-full aspect-video bg-[#0F1326]/40 border border-white/5 rounded-2xl animate-pulse" />
+          <div className="w-full aspect-video bg-white/[0.04] border border-white/5 rounded-2xl animate-pulse" />
           <div className="space-y-3">
-            <div className="h-7 w-2/3 bg-[#0F1326]/40 border border-white/5 rounded-lg animate-pulse" />
-            <div className="h-4 w-1/3 bg-[#0F1326]/40 border border-white/5 rounded-lg animate-pulse" />
+            <div className="h-7 w-2/3 bg-white/[0.04] border border-white/5 rounded-lg animate-pulse" />
+            <div className="h-4 w-1/3 bg-white/[0.04] border border-white/5 rounded-lg animate-pulse" />
           </div>
         </div>
         <div className="space-y-4">
-          <div className="h-12 bg-[#0F1326]/40 border border-white/5 rounded-xl animate-pulse" />
-          <div className="h-64 bg-[#0F1326]/40 border border-white/5 rounded-2xl animate-pulse" />
+          <div className="h-12 bg-white/[0.04] border border-white/5 rounded-xl animate-pulse" />
+          <div className="h-64 bg-white/[0.04] border border-white/5 rounded-2xl animate-pulse" />
         </div>
       </div>
     </div>
@@ -81,7 +81,10 @@ export default function WatchClient({ slug }) {
   const [favLoading, setFavLoading] = useState(false);
 
   const epFromUrl = searchParams.get("ep");
-  const [selectedProvider, setSelectedProvider] = useState("auto");
+  const [selectedProvider, setSelectedProvider] = useState(() => {
+    const provider = searchParams.get('provider');
+    return ['nguonc', 'kkphim'].includes(provider) ? provider : 'auto';
+  });
   const [selectedServer, setSelectedServer] = useState(0);
   const [selectedEpisode, setSelectedEpisode] = useState(0);
   const [activeChunk, setActiveChunk] = useState(0);
@@ -89,12 +92,26 @@ export default function WatchClient({ slug }) {
   const playerRef = useRef(null);
   const historyTimerRef = useRef(null);
   const loadingTimerRef = useRef(null);
+  const playbackRef = useRef({});
+  const [resumePoint, setResumePoint] = useState(null);
 
   const fetchKeyRef = useRef("");
 
   const currentEpisodes = useMemo(() => servers[selectedServer]?.items || [], [servers, selectedServer]);
   const episodeChunks = useMemo(() => chunkEpisodes(currentEpisodes, 20), [currentEpisodes]);
   const currentEp = useMemo(() => currentEpisodes[selectedEpisode] || null, [currentEpisodes, selectedEpisode]);
+
+  useEffect(() => {
+    let cancelled = false;
+    playbackRef.current = {};
+    if (!session?.user?.email || !movie?.canonicalKey || !currentEp?.name) return;
+    fetch('/api/history').then(r => r.ok ? r.json() : []).then(items => {
+      if (cancelled) return;
+      const saved = (Array.isArray(items) ? items : []).find(item => item.canonicalKey === movie.canonicalKey && item.episode === currentEp.name);
+      setResumePoint({ key: `${movie.canonicalKey}:${currentEp.name}`, seconds: Number(saved?.positionSeconds) || 0 });
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [session?.user?.email, movie?.canonicalKey, currentEp?.name]);
 
   useEffect(() => {
     if (!slug) return;
@@ -195,17 +212,6 @@ export default function WatchClient({ slug }) {
   }, [slug, session, selectedProvider]);
 
   useEffect(() => {
-    const eps = servers[selectedServer]?.items || [];
-    if (epFromUrl && eps.length > 0) {
-      const idx = findEpisodeIndex(eps, epFromUrl);
-      if (idx !== -1) {
-        setSelectedEpisode(idx);
-        setActiveChunk(Math.floor(idx / 20));
-      }
-    }
-  }, [servers, selectedServer, epFromUrl]);
-
-  useEffect(() => {
     clearTimeout(loadingTimerRef.current);
     loadingTimerRef.current = setTimeout(() => setIsLoading(false), 12000);
     return () => clearTimeout(loadingTimerRef.current);
@@ -213,8 +219,8 @@ export default function WatchClient({ slug }) {
 
   useEffect(() => {
     if (!movie || !currentEp) return;
-    clearTimeout(historyTimerRef.current);
-    historyTimerRef.current = setTimeout(async () => {
+    clearInterval(historyTimerRef.current);
+    historyTimerRef.current = setInterval(async () => {
       const item = {
         slug,
         provider: movie.provider || "nguonc",
@@ -229,6 +235,7 @@ export default function WatchClient({ slug }) {
         episode: currentEp.name || "1",
         episodeIndex: selectedEpisode,
         serverIndex: selectedServer,
+        ...playbackRef.current,
       };
       try {
         const h = JSON.parse(localStorage.getItem("watchHistory") || "[]");
@@ -250,17 +257,20 @@ export default function WatchClient({ slug }) {
         } catch (_) { }
       }
     }, 30000);
-    return () => clearTimeout(historyTimerRef.current);
+    return () => clearInterval(historyTimerRef.current);
   }, [movie, slug, selectedEpisode, selectedServer, currentEp, session]);
 
   const handleToggleFavorite = async () => {
     if (favLoading || !movie) return;
+    if (!session?.user?.email) { router.push('/login'); return; }
     setFavLoading(true);
     try {
       const res = await fetch("/api/favorites", {
-        method: "POST",
+        method: isFavorite ? "DELETE" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          slug,
+          canonicalKey: movie.canonicalKey,
           movie: {
             slug,
             provider: movie.provider || "nguonc",
@@ -275,7 +285,10 @@ export default function WatchClient({ slug }) {
           userEmail: session?.user?.email,
         }),
       });
-      if (res.ok) setIsFavorite(prev => !prev);
+      if (res.ok) {
+        setIsFavorite(prev => !prev);
+        window.dispatchEvent(new Event('favoritesUpdated'));
+      }
     } catch (err) {
       console.error("Lỗi yêu thích:", err);
     } finally {
@@ -295,9 +308,9 @@ export default function WatchClient({ slug }) {
     setIframeError(false);
     setSelectedEpisode(index);
     setActiveChunk(Math.floor(index / 20));
-    router.replace(`/watch/${slug}?ep=${encodeURIComponent(epName)}`, { scroll: false });
+    router.replace(`/watch/${slug}?ep=${encodeURIComponent(epName)}&provider=${selectedProvider}`, { scroll: false });
     playerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, [selectedEpisode, router, slug]);
+  }, [selectedEpisode, router, slug, selectedProvider]);
 
   const handleServerChange = useCallback((index) => {
     if (index === selectedServer) return;
@@ -313,10 +326,10 @@ export default function WatchClient({ slug }) {
   if (!movie) {
     return (
       <div className="w-full min-h-[60vh] flex flex-col items-center justify-center gap-4 text-white">
-        <p className="text-sm font-bold text-[#E6C687]">Không thể tải tọa độ bộ phim này</p>
+        <p className="text-sm font-bold text-[#e8e8e8]">Không thể tải tọa độ bộ phim này</p>
         <button
           onClick={() => router.back()}
-          className="px-5 py-2 bg-[#0F1326]/60 border border-white/10 text-xs font-bold rounded-xl hover:text-[#ffe3ae] transition-all"
+          className="px-5 py-2 bg-white/[0.04] border border-white/10 text-xs font-bold rounded-xl hover:text-[#ffffff] transition-all"
         >
           Quay lại
         </button>
@@ -330,13 +343,13 @@ export default function WatchClient({ slug }) {
 
   return (
     /* 🚀 ĐÃ CẢI TẠO LUỒNG PHẲNG LỲ: Xóa sạch h-screen bọc ngoài, trong suốt hoàn toàn, items-start */
-    <div className="w-full min-h-screen bg-transparent text-[#e8e1da] font-sans antialiased select-none pb-24" style={{ fontFamily: "'Be Vietnam Pro', sans-serif" }}>
+    <div className="w-full min-h-screen bg-transparent text-[#ffffff] font-sans antialiased select-none pb-24" style={{ fontFamily: "var(--font-main)" }}>
 
       {/* NÚT QUAY LẠI PHÍA TRÊN BÊN TRÁI CHUẨN PHA LÊ MOONLIGHT */}
       <div className="max-w-[1800px] mx-auto px-4 md:px-8 xl:px-10 pt-2 pb-4">
         <button
           onClick={() => router.back()}
-          className="px-4 py-2 bg-[#0F1326]/60 backdrop-blur-md border border-white/10 text-[#d0c5b5] hover:text-[#ffe3ae] rounded-xl font-bold text-[10px] uppercase transition-all duration-300 hover:border-[#E6C687]/40 shadow-lg active:scale-95 flex items-center gap-2 cursor-pointer focus:outline-none"
+          className="px-4 py-2 glass-surface border border-white/10 text-[#b8b8b8] hover:text-[#ffffff] rounded-xl font-bold text-[10px] uppercase transition-all duration-300 hover:border-[#e8e8e8]/40 shadow-lg active:scale-95 flex items-center gap-2 cursor-pointer focus:outline-none"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           Quay lại
@@ -360,6 +373,8 @@ export default function WatchClient({ slug }) {
               setIsLoading={setIsLoading}
               setIframeError={setIframeError}
               collapsed={true}
+              onProgress={progress => { playbackRef.current = progress; }}
+              resumeSeconds={resumePoint?.key === `${movie.canonicalKey}:${currentEp?.name}` ? resumePoint.seconds : 0}
             />
           </div>
           <WatchMetadata
@@ -391,7 +406,7 @@ export default function WatchClient({ slug }) {
         </div>
 
         {/* KHỐI PHẢI: ASIDE PANEL GỌN GÀNG KÍNH MỜ XANH ĐÊM (CUỘN TRÔI THEO TRANG TRƠN TRU) */}
-        <aside className="w-full space-y-5 min-w-0 bg-[#0F1326]/40 backdrop-blur-2xl border border-white/5 p-4 rounded-[28px] shadow-[0_20px_50px_rgba(0,0,0,0.6)]">
+        <aside className="w-full space-y-5 min-w-0 glass-surface border border-white/5 p-4 rounded-[28px] ">
           <WatchServerDropdown servers={servers} selectedServer={selectedServer} handleServerChange={handleServerChange} />
           <WatchRightEpList
             currentEpisodes={currentEpisodes}
@@ -404,14 +419,14 @@ export default function WatchClient({ slug }) {
 
           {/* KHAY ĐỀ XUẤT LIÊN QUAN CHUẨN MOONLIGHT GOLD */}
           <div className="border-t border-white/5 pt-4">
-            <span className="block text-[10px] font-black uppercase tracking-[0.25em] text-[#d0c5b5]/40 px-1 mb-3">
+            <span className="block text-[10px] font-semibold uppercase tracking-[0.25em] text-[#808080] px-1 mb-3">
               Có thể bạn thích
             </span>
             {relatedMovies.length > 0 ? (
               <RelatedMovies key={`sb-${slug}`} initialMovies={relatedMovies} isSidebarMode={true} />
             ) : (
-              <div className="flex items-center justify-center py-8 gap-2 text-[#d0c5b5]/30 text-xs uppercase tracking-widest font-bold">
-                <Loader2 className="w-3.5 h-3.5 border-2 border-[#E6C687]/20 border-t-[#E6C687] rounded-full animate-spin text-[#E6C687]" />
+              <div className="flex items-center justify-center py-8 gap-2 text-[#808080] text-xs uppercase tracking-widest font-bold">
+                <Loader2 className="w-3.5 h-3.5 border-2 border-[#e8e8e8]/20 border-t-[#e8e8e8] rounded-full animate-spin text-[#e8e8e8]" />
                 <span>Đang tìm tọa độ...</span>
               </div>
             )}

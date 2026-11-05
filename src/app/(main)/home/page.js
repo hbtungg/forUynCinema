@@ -45,7 +45,7 @@ function HomeSkeleton() {
         </div>
       </div>
       {/* ASIDE PHẢI SKELETON */}
-      <div className="hidden xl:flex flex-col w-[300px] 2xl:w-[320px] flex-shrink-0 my-4 mr-6 rounded-[32px] border border-white/5 bg-[#0F1326]/20 p-5 space-y-6 h-[80vh]">
+      <div className="hidden xl:flex flex-col w-[300px] 2xl:w-[320px] flex-shrink-0 my-4 mr-6 rounded-[32px] border border-white/5 bg-white/[0.04] p-5 space-y-6 h-[80vh]">
         <div className="h-5 w-1/2 bg-white/10 rounded" />
         <div className="grid grid-cols-2 gap-2">
           {Array.from({ length: 4 }).map((_, i) => (
