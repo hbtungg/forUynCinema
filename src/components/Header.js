@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { Bell, Heart, User } from 'lucide-react'; // 🚀 ĐÃ THÊM: Icon User cho chế độ ẩn danh sang chảnh
 import SecretChat from './SecretChat';
-import EventButton from './EventButton';
 import SearchBox from './SearchBox';
 import UserMenu from './UserMenu';
 
@@ -15,59 +14,42 @@ export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
 
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [isNotifyOpen, setIsNotifyOpen] = useState(false);
+  const [menu, setMenu] = useState(null);
+  const showDropdown = menu?.path === pathname && menu.name === 'account';
+  const isNotifyOpen = menu?.path === pathname && menu.name === 'notifications';
+  const closeMenu = () => setMenu(null);
 
   const userMenuRef = useRef(null);
   const notifyRef = useRef(null);
 
   useEffect(() => {
-    setShowDropdown(false);
-    setIsNotifyOpen(false);
-  }, [pathname]);
-
-  useEffect(() => {
     const handler = (e) => {
-      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) setShowDropdown(false);
-      if (notifyRef.current && !notifyRef.current.contains(e.target)) setIsNotifyOpen(false);
+      if (!userMenuRef.current?.contains(e.target) && !notifyRef.current?.contains(e.target)) setMenu(null);
     };
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
+    const onKeyDown = event => {
+      if (event.key !== 'Escape') return;
+      const active = [userMenuRef.current, notifyRef.current].find(node => node?.contains(document.activeElement));
+      active?.querySelector('button')?.focus();
+      setMenu(null);
+    };
+    document.addEventListener('pointerdown', handler);
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('pointerdown', handler);
+      document.removeEventListener('keydown', onKeyDown);
+    };
   }, []);
 
   return (
-    <header className="fixed top-0 left-0 right-0 w-full z-50 glass-surface border-b border-[#e8e8e8]/10 h-[72px] flex items-center transition-all duration-300  select-none" style={{ fontFamily: "var(--font-main)" }}>
-      <div className="flex justify-between items-center px-6 md:px-16 w-full relative">
+    <header className="app-header fixed inset-x-0 top-0 z-50 flex items-center glass-surface" style={{ fontFamily: "var(--font-main)" }}>
+      <div className="flex w-full min-w-0 items-center justify-between gap-3">
 
-        {/* KHỐI TRÁI: LOGO ĐỊNH DANH */}
-        <div className="flex items-center gap-12">
-          {/* KHỐI TRÁI: LOGO ĐỊNH DANH - Premium Version */}
-          <div className="flex items-center gap-12">
-            <div
-              onClick={() => router.push('/home')}
-              className="group hover:scale-105 transition-all duration-300 cursor-pointer flex items-center gap-3 relative"
-            >
-
-
-              {/* Chữ UYNFLIX với hiệu ứng cao cấp */}
-              <div className="relative">
-                <span
-                  className="text-2xl font-bold tracking-[0.25em] text-[#e8e8e8] font-sans transition-all duration-300"
-                  style={{
-                    textShadow: 'none',
-                    letterSpacing: '0.25em'
-                  }}
-                >
-                  UYNFLIX
-                </span>
-
-                {/* Đường gạch chân animation */}
-                <div className="absolute -bottom-1 left-0 w-0 h-[2px] bg-gradient-to-r from-transparent via-[#e8e8e8] to-transparent transition-all duration-300 group-hover:w-full" />
-              </div>
-            </div>
-          </div>
-
-          <div className="hidden lg:flex items-center gap-6 text-xs font-bold tracking-wider uppercase">
+        <div className="flex min-w-0 items-center gap-6 xl:gap-10">
+          <Link href="/home" aria-label="Uynflix — Trang chủ"
+            className="inline-flex min-h-11 shrink-0 items-center text-lg font-bold tracking-[.18em] sm:text-xl">
+            UYNFLIX
+          </Link>
+          <div className="hidden lg:flex min-w-0 items-center gap-1 sm:gap-2 text-xs font-bold tracking-wider uppercase">
             <Link href="/home" className={`transition-colors duration-300 ${pathname === '/home' ? 'text-[#e8e8e8]' : 'text-[#808080] hover:text-[#e8e8e8]'}`}>Movies</Link>
             <Link href="/danh-sach" className={`transition-colors duration-300 ${pathname === '/danh-sach' ? 'text-[#e8e8e8]' : 'text-[#808080] hover:text-[#e8e8e8]'}`}>Discover</Link>
             <Link href="/history" className={`transition-colors duration-300 ${pathname === '/history' ? 'text-[#e8e8e8]' : 'text-[#808080] hover:text-[#e8e8e8]'}`}>History</Link>
@@ -77,24 +59,23 @@ export default function Header() {
         {/* KHỐI PHẢI: SEARCHBOX & ACCOUNT */}
         <div className="flex items-center gap-4">
 
-          <div className="hidden sm:block">
+          <div className="hidden md:block">
             <SearchBox />
           </div>
 
           <div className="hidden sm:flex items-center gap-1">
             <SecretChat />
-            {/* <EventButton /> */}
           </div>
 
           {/* Chuông Thông Báo */}
           <div className="relative" ref={notifyRef}>
-            <button aria-label="Thông báo" aria-expanded={isNotifyOpen} onClick={() => setIsNotifyOpen(!isNotifyOpen)} className="p-2 text-[#ffffff] hover:text-[#ffffff] hover:scale-110 transition-all duration-300 relative focus:outline-none cursor-pointer">
+            <button aria-label="Thông báo" aria-expanded={isNotifyOpen} onClick={() => isNotifyOpen ? closeMenu() : setMenu({ path: pathname, name: 'notifications' })} className="grid size-11 place-items-center text-[#ffffff] hover:text-[#ffffff] hover:scale-110 transition-all duration-300 relative focus:outline-none cursor-pointer">
               <Bell className="w-4 h-4" />
               <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-[#e8e8e8] rounded-full ring-2 ring-[#050505]"></span>
             </button>
 
             {isNotifyOpen && (
-              <div className="absolute right-0 mt-3 w-64 glass-surface border border-white/10 rounded-2xl p-1 shadow-2xl z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+              <div className="absolute right-0 mt-2 w-52 sm:w-64 bg-surface-container border border-white/10 rounded-2xl p-1 shadow-2xl z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                 <div className="px-4 py-2.5 border-b border-white/5 bg-white/[0.02] rounded-t-xl flex items-center gap-1.5">
                   <span className="text-[#e8e8e8] text-xs">🌙</span>
                   <p className="text-[9px] font-bold text-[#808080] uppercase tracking-[0.25em]">Anh Tùng có đôi lời</p>
@@ -116,7 +97,7 @@ export default function Header() {
           {/* Profile User Dropdown hoặc Nút đăng nhập pha lê tối ưu UI */}
           {status !== "loading" && session ? (
             <div className="relative" ref={userMenuRef}>
-              <button aria-label="Tài khoản" aria-expanded={showDropdown} onClick={() => setShowDropdown(!showDropdown)} className="p-0.5 text-[#ffffff] hover:ring-2 ring-[#e8e8e8]/40 rounded-full transition-all duration-300 border border-white/5 flex items-center justify-center bg-white/[0.04] focus:outline-none cursor-pointer">
+              <button aria-label="Tài khoản" aria-expanded={showDropdown} onClick={() => showDropdown ? closeMenu() : setMenu({ path: pathname, name: 'account' })} className="size-11 text-[#ffffff] hover:ring-2 ring-[#e8e8e8]/40 rounded-full transition-all duration-300 border border-white/5 flex items-center justify-center bg-white/[0.04] focus:outline-none cursor-pointer">
                 <div className="w-8 h-8 rounded-full bg-[#e8e8e8]/10 flex items-center justify-center overflow-hidden border border-[#e8e8e8]/20">
                   <span className="text-xs font-bold text-[#e8e8e8] uppercase font-mono">
                     {session.user?.name?.charAt(0) || "U"}
@@ -125,7 +106,7 @@ export default function Header() {
               </button>
 
               {showDropdown && (
-                <div className="absolute right-0 mt-3 w-56 glass-surface border border-white/10 rounded-2xl p-4  z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="absolute right-0 mt-2 w-56 bg-surface-container border border-white/10 rounded-2xl p-4  z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                   <UserMenu isMobile={false} />
                 </div>
               )}
@@ -133,8 +114,9 @@ export default function Header() {
           ) : status !== "loading" && (
             /* 🚀 FIX CHÍ MẠNG: Nút Đăng nhập dạng Avatar Pha Lê Ẩn Danh - Siêu gọn trên Mobile, Đẳng cấp trên Desktop */
             <button
+              aria-label="Đăng nhập"
               onClick={() => router.push('/login')}
-              className="group/login p-1 flex items-center gap-2 rounded-full border border-dashed border-[#e8e8e8]/30 bg-[#e8e8e8]/5 hover:bg-[#e8e8e8] text-[#e8e8e8] hover:text-[#050505] transition-all duration-300 focus:outline-none cursor-pointer"
+              className="group/login min-h-11 min-w-11 justify-center p-1 flex items-center gap-2 rounded-full border border-dashed border-[#e8e8e8]/30 bg-[#e8e8e8]/5 hover:bg-[#e8e8e8] text-[#e8e8e8] hover:text-[#050505] transition-all duration-300 focus:outline-none cursor-pointer"
             >
               <div className="w-7 h-7 rounded-full bg-[#e8e8e8]/10 group-hover/login:bg-black/10 flex items-center justify-center text-[#e8e8e8] group-hover/login:text-[#050505] transition-colors">
                 <User className="w-3.5 h-3.5" />

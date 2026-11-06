@@ -35,7 +35,7 @@ export default function WatchRightEpList({
         
         {episodeChunks.length > 1 && (
           <div className="relative flex items-center bg-white/[0.04] border border-white/10 rounded-lg px-2.5 py-1 transition-all hover:border-[#e8e8e8]/30 group">
-            <select 
+            <select aria-label="Khoảng tập"
               value={activeChunk} 
               onChange={e => setActiveChunk(Number(e.target.value))} 
               className="appearance-none bg-transparent text-[10px] font-bold text-[#b8b8b8] group-hover:text-[#ffffff] outline-none pr-4 cursor-pointer focus:ring-0 focus:border-none"
@@ -62,7 +62,8 @@ export default function WatchRightEpList({
 
           return (
             <button 
-              key={idx} 
+              key={ep.slug || `${ep.name}-${idx}`}
+              aria-current={isActive ? "true" : undefined}
               onClick={() => handleEpisodeChange(idx, ep.name)} 
               className={`w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all duration-300 group focus:outline-none cursor-pointer ${
                 isActive 

@@ -1,27 +1,22 @@
 import { MongoClient } from 'mongodb';
 
-const uri = process.env.MONGODB_URI;
-const options = {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-};
+let connection;
 
-let client;
-let clientPromise;
+export default async function getMongoClient() {
+  const uri = process.env.MONGODB_URI;
+  if (!uri) throw new Error('Thiếu MONGODB_URI trong Environment Variables');
 
-if (!uri) {
-  throw new Error('Thiếu MONGODB_URI trong Environment Variables rồi!');
-}
-
-if (process.env.NODE_ENV === 'development') {
-  if (!global._mongoClientPromise) {
-    client = new MongoClient(uri, options);
-    global._mongoClientPromise = client.connect();
+  if (process.env.NODE_ENV === 'development') {
+    globalThis._mongoClientPromise ??= new MongoClient(uri).connect().catch(error => {
+      globalThis._mongoClientPromise = undefined;
+      throw error;
+    });
+    return globalThis._mongoClientPromise;
   }
-  clientPromise = global._mongoClientPromise;
-} else {
-  client = new MongoClient(uri, options);
-  clientPromise = client.connect();
-}
 
-export default clientPromise;
+  connection ??= new MongoClient(uri).connect().catch(error => {
+    connection = undefined;
+    throw error;
+  });
+  return connection;
+}

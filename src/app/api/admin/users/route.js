@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth'; // Kết nối trực tiếp với file auth.js chứa callbacks của anh
-import clientPromise from '@/lib/mongodb'; 
+import getMongoClient from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
 
 // Tên Database và Collection thực tế trong hệ thống của anh
@@ -17,7 +17,7 @@ export async function GET(request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const client = await clientPromise;
+    const client = await getMongoClient();
     const db = client.db(DB_NAME);
 
     // Truy vấn dữ liệu từ collection users, xếp người mới nhất lên đầu
@@ -59,7 +59,7 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Missing name or email' }, { status: 400 });
     }
 
-    const client = await clientPromise;
+    const client = await getMongoClient();
     const db = client.db(DB_NAME);
 
     // Kiểm tra trùng lặp email trên hệ thống ForUynDB
@@ -105,7 +105,7 @@ export async function PATCH(request) {
       return NextResponse.json({ error: 'Missing user ID' }, { status: 400 });
     }
 
-    const client = await clientPromise;
+    const client = await getMongoClient();
     const db = client.db(DB_NAME);
 
     const userToUpdate = await db.collection(COLLECTION_NAME).findOne({ _id: new ObjectId(id) });
@@ -150,7 +150,7 @@ export async function DELETE(request) {
       return NextResponse.json({ error: 'Missing user ID' }, { status: 400 });
     }
 
-    const client = await clientPromise;
+    const client = await getMongoClient();
     const db = client.db(DB_NAME);
 
     // Ngăn chặn tuyệt đối hành vi vô tình xóa nhầm tài khoản admin sáng lập của anh

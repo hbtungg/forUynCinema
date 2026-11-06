@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
-import clientPromise from '@/lib/mongodb';
+import getMongoClient from '@/lib/mongodb';
 import { ObjectId } from 'mongodb';
 
 const DB_NAME = "ForUynDB";
@@ -15,7 +15,7 @@ export async function GET(request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const client = await clientPromise;
+    const client = await getMongoClient();
     const db = client.db(DB_NAME);
 
     // Sắp xếp giảm dần theo trường "updatedAt" (Phim ai vừa click xem xong sẽ nhảy lên đầu bảng ngay lập tức)
@@ -48,7 +48,7 @@ export async function DELETE(request) {
     const id = searchParams.get('id');
     const clearAll = searchParams.get('clearAll') === 'true';
 
-    const client = await clientPromise;
+    const client = await getMongoClient();
     const db = client.db(DB_NAME);
 
     if (clearAll) {

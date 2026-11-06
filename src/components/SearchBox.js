@@ -1,166 +1,94 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Search } from 'lucide-react';
+import MovieArtwork from './MovieArtwork';
 
 export default function SearchBox() {
   const router = useRouter();
   const [keyword, setKeyword] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
-  const searchContainerRef = useRef(null);
+  const [open, setOpen] = useState(false);
+  const [result, setResult] = useState(null);
+  const container = useRef(null);
+  const query = keyword.trim();
+  const showSuggestions = open && query.length >= 2;
+  const currentResult = result?.query === query ? result : null;
 
-  // Luồng tự động tìm kiếm tức thì (Debounce 400ms) giữ nguyên logic bọc thép
   useEffect(() => {
-    if (keyword.trim().length < 2) {
-      setSearchResults([]);
-      setIsOpen(false);
-      return;
-    }
-
-    const delayDebounceFn = setTimeout(async () => {
-      setLoading(true);
-      setIsOpen(true);
+    if (!showSuggestions || currentResult) return;
+    const controller = new AbortController();
+    const debounce = setTimeout(async () => {
+      const timeout = setTimeout(() => controller.abort('timeout'), 8000);
       try {
-        const res = await fetch(`https://phim.nguonc.com/api/films/search?keyword=${encodeURIComponent(keyword)}`);
-        if (res.ok) {
-          const data = await res.json();
-          const items = data.items || data.data?.items || [];
-          setSearchResults(items.slice(0, 5)); 
-        }
-      } catch (error) {
-        console.error("Lỗi tìm kiếm tức thì:", error);
+        const response = await fetch('https://phim.nguonc.com/api/films/search?keyword=' + encodeURIComponent(query), {
+          signal: controller.signal,
+        });
+        if (!response.ok) throw new Error('Search failed');
+        const data = await response.json();
+        if (!controller.signal.aborted) setResult({ query, items: (data.items || data.data?.items || []).slice(0, 5) });
+      } catch {
+        if (!controller.signal.aborted || controller.signal.reason === 'timeout') setResult({ query, error: true });
       } finally {
-        setLoading(false);
+        clearTimeout(timeout);
       }
     }, 400);
-
-    return () => clearTimeout(delayDebounceFn);
-  }, [keyword]);
+    return () => {
+      clearTimeout(debounce);
+      controller.abort();
+    };
+  }, [showSuggestions, query, currentResult]);
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
-        setIsOpen(false);
-      }
+    const dismiss = event => {
+      if (!container.current?.contains(event.target)) setOpen(false);
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('pointerdown', dismiss);
+    return () => document.removeEventListener('pointerdown', dismiss);
   }, []);
 
-  const executeSearch = () => {
-    const cleanKeyword = keyword.trim();
-    if (cleanKeyword) {
-      setIsOpen(false);
-      router.push(`/search?q=${encodeURIComponent(cleanKeyword)}`);
-    }
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      executeSearch();
-    }
-  };
-
-  // 🚀 ĐÃ THÊM: Chuẩn hóa ảnh mini cho Dropdown để không bị 404
-  const getMiniCleanImage = (movie) => {
-    if (!movie) return '';
-    const isKKPhim = movie.provider === 'kkphim' || 
-                     (movie.thumb_url && movie.thumb_url.includes('phimapi.com'));
-    let rawUrl = isKKPhim 
-      ? (movie.poster_url || movie.thumb_url || '')
-      : (movie.thumb_url || movie.poster_url || '');
-
-    if (!rawUrl) return '';
-    if (rawUrl.startsWith('http://') || rawUrl.startsWith('https://')) return rawUrl;
-    const baseDomain = isKKPhim ? 'https://img.phimapi.com' : 'https://phim.nguonc.com';
-    return `${baseDomain}/${rawUrl.replace(/^\//, '')}`;
-  };
-
   return (
-    <div ref={searchContainerRef} className="relative w-full flex items-center gap-2 justify-end lg:justify-start" style={{ fontFamily: "var(--font-main)" }}>
-      
-      {/* KHỐI HỘP NHẬP TEXT INPUT CHUẨN PHA LÊ ĐÊM TỐI GIẢN CAO CẤP */}
-      <div className="relative flex-1 max-w-xs lg:max-w-md">
-        {/* 🚀 VÁ UI CHÍ MẠNG: Tăng độ tương phản border-white/10 và nâng nền bg-white/[0.03] để hiện rõ khối trên Header */}
-        <div className="relative flex items-center bg-white/[0.03] backdrop-blur-md border border-white/10 rounded-full px-4 py-1.5 gap-2.5 focus-within:border-[#e8e8e8]/40 focus-within:bg-white/[0.04] focus-within: transition-all duration-300">
-          <Search className="w-3.5 h-3.5 text-[#b8b8b8] flex-shrink-0 transition-colors duration-300 group-focus-within:text-[#e8e8e8]" />
-          <input 
-            type="text"
-            aria-label="Tìm kiếm phim" 
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            onFocus={() => keyword.trim().length >= 2 && setIsOpen(true)}
-            onKeyDown={handleKeyDown}
-            placeholder="Tìm kiếm phim..." 
-            /* Tăng placeholder lên text-[#808080] để chữ không bị chìm nghỉm */
-            className="bg-transparent border-none outline-none text-xs text-[#ffffff] placeholder:text-[#808080] w-40 lg:w-52 font-sans tracking-wide font-medium"
-          />
-        </div>
-
-        {/* ── 🚀 KHAY DROPDOWN HIỂN THỊ KẾT QUẢ KÍNH MỜ XANH ĐÊM LUXURY ── */}
-        {isOpen && (
-          <div className="absolute top-full left-0 right-0 mt-3 glass-surface border border-white/10 rounded-2xl p-1.5  overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 z-50">
-            {loading ? (
-              <div className="flex items-center justify-center py-6 gap-2">
-                <div className="w-3 h-3 rounded-full border-2 border-[#e8e8e8]/20 border-t-[#e8e8e8] animate-spin" />
-                <span className="text-[9px] font-bold uppercase tracking-widest text-[#808080] font-mono">Scanning stars...</span>
-              </div>
-            ) : searchResults.length > 0 ? (
-              <div className="space-y-0.5">
-                <div className="px-3 py-2 text-[8px] font-semibold uppercase tracking-[0.25em] text-[#808080] border-b border-white/5 mb-1 flex items-center gap-1.5">
-                  <span className="text-[#e8e8e8]">✨</span> Phim phù hợp nhất
-                </div>
-                
-                {searchResults.map((movie) => (
-                  <Link
-                    key={movie.slug}
-                    href={`/watch/${movie.slug}`}
-                    onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/5 border border-transparent hover:border-white/5 transition-all duration-300 group/item"
-                  >
-                    {/* Ảnh poster mini bo góc tròn */}
-                    <div className="w-8 h-11 flex-shrink-0 rounded-lg overflow-hidden bg-[#0b0b0b] border border-white/5">
-                      <img 
-                        src={getMiniCleanImage(movie)} 
-                        alt="" 
-                        className="w-full h-full object-cover group-hover/item:scale-105 transition-transform duration-300" 
-                      />
-                    </div>
-                    
-                    {/* Thông tin chữ */}
-                    <div className="flex-1 min-w-0 text-left">
-                      <h4 className="text-[11px] font-bold text-[#ffffff] group-hover/item:text-[#ffffff] transition-colors truncate leading-tight tracking-wide">
-                        {movie.name}
-                      </h4>
-                      <p className="text-[9px] text-[#808080] font-bold uppercase tracking-wider truncate mt-1.5 font-sans">
-                        {movie.year || '2026'} • <span className="text-[#e8e8e8]/80 bg-[#e8e8e8]/10 px-1.5 py-0.5 rounded-md text-[8px]">{movie.current_episode || movie.episode_current || 'Full'}</span>
-                      </p>
-                    </div>
-
-                    <span className="text-[#808080] group-hover/item:text-[#e8e8e8] group-hover/item:translate-x-0.5 transition-all text-[9px] pr-1.5 font-mono">➔</span>
-                  </Link>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-6 text-[9px] text-[#808080] font-semibold uppercase tracking-widest font-mono">
-                Không tìm thấy tọa độ phim 📡
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* NÚT TÌM KIẾM DÀNH CHO MOBILE TINH GỌN PHẲNG LỲ */}
-      <button 
-        onClick={executeSearch}
-        className="lg:hidden bg-[#e8e8e8]/10 hover:bg-[#e8e8e8] text-[#e8e8e8] hover:text-[#050505] font-semibold text-[10px] uppercase tracking-widest px-4 py-2 rounded-full border border-[#e8e8e8]/20 transition-all duration-300 active:scale-95 flex-shrink-0 focus:outline-none"
-      >
-        Tìm
+    <form ref={container} role="search" aria-label="Tìm phim từ thanh điều hướng" className="relative flex min-w-0 items-center gap-1 rounded-full border border-border-subtle bg-surface-container px-2 focus-within:border-white/50"
+      onKeyDown={event => { if (event.key === 'Escape') setOpen(false); }}
+      onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false); }}
+      onSubmit={event => {
+        event.preventDefault();
+        if (!query) return;
+        setOpen(false);
+        router.push('/search?q=' + encodeURIComponent(query));
+      }}>
+      <input type="search" value={keyword} placeholder="Tìm phim" aria-label="Tìm kiếm phim"
+        enterKeyHint="search" autoComplete="off" className="min-h-11 w-32 min-w-0 bg-transparent pl-2 text-base sm:text-sm xl:w-44"
+        onFocus={() => setOpen(true)}
+        onChange={event => { setKeyword(event.target.value); setOpen(true); }} />
+      <button type="submit" aria-label="Tìm kiếm" className="grid size-11 shrink-0 place-items-center rounded-full text-on-surface-variant hover:text-white">
+        <Search size={18} aria-hidden="true" />
       </button>
-
-    </div>
+      {showSuggestions && (
+        <div className="absolute top-full right-0 z-50 mt-2 w-72 max-w-[90vw] rounded-xl border border-border-subtle bg-surface-container p-2 shadow-lg">
+          {!currentResult || currentResult.error || !currentResult.items.length ? (
+            <p role="status" className="p-3 text-sm text-on-surface-variant">
+              {!currentResult ? 'Đang tìm phim…' : currentResult.error ? 'Không tải được gợi ý. Nhấn Tìm kiếm để thử nguồn khác.' : 'Không tìm thấy gợi ý.'}
+            </p>
+          ) : (
+            <ul aria-label="Phim gợi ý">
+              {currentResult.items.map(movie => (
+                <li key={movie.slug}>
+                  <Link href={'/watch/' + movie.slug} prefetch={false} onClick={() => setOpen(false)}
+                    className="flex min-h-11 items-center gap-3 rounded-lg p-2 text-sm hover:bg-white/10">
+                    <MovieArtwork movie={movie} decorative sizes="32px" className="h-11 w-8 shrink-0 rounded object-cover" />
+                    <span className="min-w-0">
+                      <span className="block line-clamp-2">{movie.name}</span>
+                      {movie.year && <span className="text-xs text-on-surface-variant">{movie.year}</span>}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+    </form>
   );
 }

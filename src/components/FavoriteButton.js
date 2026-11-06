@@ -1,29 +1,30 @@
 'use client';
 import { useSession } from "next-auth/react";
-import { useMemo } from "react"; // 🚀 ĐÃ THÊM: Dùng useMemo thay thế hoàn toàn useEffect để check trạng thái
+import { useSyncExternalStore } from "react";
+
+function subscribe(listener) {
+  window.addEventListener("favoritesUpdated", listener);
+  window.addEventListener("storage", listener);
+  return () => {
+    window.removeEventListener("favoritesUpdated", listener);
+    window.removeEventListener("storage", listener);
+  };
+}
 
 export default function FavoriteButton({ phim, compact = false }) {
   const { data: session, status } = useSession();
 
-  // 🚀 ĐÃ TỐI ƯU TRIỆT ĐỂ: Tính toán trạng thái trực tiếp trong lúc render, không dùng State & Effect đồng bộ nữa!
-  const isFavorite = useMemo(() => {
-    // Nếu chưa đăng nhập thành công hoặc đang chạy Server, mặc định là false
-    if (status !== "authenticated" || !session?.user?.email || typeof window === 'undefined') {
-      return false;
-    }
-
+  const isFavorite = useSyncExternalStore(subscribe, () => {
+    if (status !== "authenticated" || !session?.user?.email) return false;
     try {
-      const storageKey = `favs_${session.user.email}`;
-      const localFavs = JSON.parse(localStorage.getItem(storageKey) || '[]');
-      return localFavs.some(f => (
-        (phim.canonicalKey && f.canonicalKey === phim.canonicalKey) ||
-        f.slug === phim.slug
+      const favorites = JSON.parse(localStorage.getItem(`favs_${session.user.email}`) || '[]');
+      return favorites.some(movie => (
+        (phim.canonicalKey && movie.canonicalKey === phim.canonicalKey) || movie.slug === phim.slug
       ));
-    } catch (e) {
-      console.error("Lỗi đọc trạng thái yêu thích từ LocalStorage:", e);
+    } catch {
       return false;
     }
-  }, [phim.slug, session, status]); // Tự động tính toán lại khi chuyển phim hoặc đổi tài khoản
+  }, () => false);
 
   // Luồng xử lý khi người dùng chủ động click thả tim / bỏ thả tim
   const toggleFavorite = async (e) => {
@@ -35,7 +36,13 @@ export default function FavoriteButton({ phim, compact = false }) {
     const storageKey = `favs_${session.user.email}`;
     
     // Đọc danh sách hiện tại ra để xử lý ghi đè
-    let localFavs = JSON.parse(localStorage.getItem(storageKey) || '[]');
+    let localFavs;
+    try {
+      localFavs = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      if (!Array.isArray(localFavs)) localFavs = [];
+    } catch {
+      localFavs = [];
+    }
     const isSameMovie = (f) => (
       (phim.canonicalKey && f.canonicalKey === phim.canonicalKey) ||
       f.slug === phim.slug
@@ -53,8 +60,7 @@ export default function FavoriteButton({ phim, compact = false }) {
       localFavs = [phim, ...localFavs];
     }
     
-    // Ghi lại vào LocalStorage - Lúc này useMemo ở trên sẽ tự động ăn theo dữ liệu mới và render lại mượt mà!
-    localStorage.setItem(storageKey, JSON.stringify(localFavs));
+    try { localStorage.setItem(storageKey, JSON.stringify(localFavs)); } catch {}
     
     // Bắn sự kiện thông báo cho toàn hệ thống (như RightPanel) đồng bộ theo
     window.dispatchEvent(new Event('favoritesUpdated'));
@@ -76,6 +82,8 @@ export default function FavoriteButton({ phim, compact = false }) {
     return (
       <button 
         type="button"
+        aria-label="Yêu thích"
+        aria-pressed={isFavorite}
         onClick={toggleFavorite} 
         className={`w-full h-full flex items-center justify-center transition-transform active:scale-75 ${
           isFavorite ? 'text-neutral-300' : 'text-zinc-400 hover:text-white'
@@ -92,8 +100,9 @@ export default function FavoriteButton({ phim, compact = false }) {
   return (
     <button 
       type="button"
+      aria-pressed={isFavorite}
       onClick={toggleFavorite} 
-      className={`group/btn flex items-center gap-2 px-4 py-2 rounded-full border-2 transition-all active:scale-90 ${
+      className={`group/btn flex min-h-11 items-center gap-2 px-4 py-2 rounded-full border-2 transition-all active:scale-90 ${
         isFavorite 
           ? 'bg-neutral-700 border-neutral-600 text-white ' 
           : 'bg-black/40 border-white/20 text-white'

@@ -1,4 +1,4 @@
-import clientPromise from "@/lib/mongodb";
+import getMongoClient from "@/lib/mongodb";
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 
@@ -6,7 +6,7 @@ export async function POST(req) {
   try {
     const { name, email, password } = await req.json();
     
-    const client = await clientPromise;
+    const client = await getMongoClient();
     const db = client.db("ForUynDB");
 
     // Kiểm tra trùng lặp email

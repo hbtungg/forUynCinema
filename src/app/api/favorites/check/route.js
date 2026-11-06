@@ -1,5 +1,5 @@
 import { requireUserEmail, apiError } from "@/lib/userApi";
-import clientPromise from "@/lib/mongodb";
+import getMongoClient from "@/lib/mongodb";
 import { NextResponse } from "next/server";
 
 // 🚀 Ép chạy môi trường Node.js truyền thống để hoạt động bất tử trên cả Netlify và Vercel
@@ -17,7 +17,7 @@ export async function GET(req) {
     }
 
     // Kết nối vào cụm MongoDB Atlas ForUynDB của anh
-    const client = await clientPromise;
+    const client = await getMongoClient();
     const db = client.db("ForUynDB");
 
     // Tìm kiếm xem bộ phim này đã được tài khoản này lưu vào mây chưa

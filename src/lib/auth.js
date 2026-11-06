@@ -1,5 +1,5 @@
 import CredentialsProvider from "next-auth/providers/credentials";
-import clientPromise from "@/lib/mongodb";
+import getMongoClient from "@/lib/mongodb";
 import bcrypt from "bcryptjs";
 
 export const authOptions = {
@@ -10,7 +10,7 @@ export const authOptions = {
       async authorize(credentials) {
         const { email, password } = credentials;
         try {
-          const client = await clientPromise;
+          const client = await getMongoClient();
           const user = await client.db("ForUynDB").collection("users").findOne({ email });
 
           if (!user) return null;

@@ -1,5 +1,5 @@
 import { requireUserEmail, apiError, validMovieKey } from "@/lib/userApi";
-import clientPromise from "@/lib/mongodb";
+import getMongoClient from "@/lib/mongodb";
 import { NextResponse } from "next/server";
 
 export async function GET(req) {
@@ -7,7 +7,7 @@ export async function GET(req) {
     const userEmail = await requireUserEmail(req);
     if (!userEmail) return NextResponse.json([]);
 
-    const client = await clientPromise;
+    const client = await getMongoClient();
     const db = client.db("ForUynDB");
     const favorites = await db.collection("favorites")
       .find({ userEmail })
@@ -23,7 +23,7 @@ export async function GET(req) {
 export async function POST(req) {
   try {
     const userEmail = await requireUserEmail(req);
-    const client = await clientPromise;
+    const client = await getMongoClient();
     const db = client.db("ForUynDB");
     const { movie } = await req.json();
     if (movie?.canonicalKey !== undefined && !validMovieKey(movie.canonicalKey)) return NextResponse.json({error:"Mã phim không hợp lệ"},{status:400});
@@ -47,7 +47,7 @@ export async function POST(req) {
 export async function DELETE(req) {
   try {
     const userEmail = await requireUserEmail(req);
-    const client = await clientPromise;
+    const client = await getMongoClient();
     const db = client.db("ForUynDB");
     const { slug, canonicalKey } = await req.json();
     if (canonicalKey !== undefined && !validMovieKey(canonicalKey)) return NextResponse.json({error:"Mã phim không hợp lệ"},{status:400});

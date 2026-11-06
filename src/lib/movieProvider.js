@@ -52,10 +52,11 @@ function withTimeout(ms = FETCH_TIMEOUT) {
 
 async function safeFetchJson(url, options = {}) {
   const { controller, timeout } = withTimeout(options.timeout || FETCH_TIMEOUT);
+  const signal = options.signal ? AbortSignal.any([options.signal, controller.signal]) : controller.signal;
   try {
     const res = await fetch(url, {
       ...options,
-      signal: controller.signal,
+      signal,
       headers: {
         Accept: "application/json",
         ...options.headers,
@@ -221,17 +222,17 @@ function normalizeDetailResponse(data, provider = "nguonc") {
   };
 }
 
-async function fetchNguonc(path, params = {}) {
-  const data = await safeFetchJson(buildNguoncUrl(path, params));
+async function fetchNguonc(path, params = {}, options) {
+  const data = await safeFetchJson(buildNguoncUrl(path, params), options);
   return data;
 }
 
-async function fetchKkphim(path, params = {}) {
-  const data = await safeFetchJson(buildUrl(KKPHIM_API, path, params));
+async function fetchKkphim(path, params = {}, options) {
+  const data = await safeFetchJson(buildUrl(KKPHIM_API, path, params), options);
   return data;
 }
 
-async function withFallback({ nguonc, kkphim, normalize, empty }) {
+async function withFallback({ nguonc, kkphim, normalize, empty, signal, distinguishUnavailable }) {
   const primary = await nguonc();
   logNguoncProxyError(primary, { provider: "nguonc" });
   const primaryResult = primary ? normalize(primary, "nguonc") : null;
@@ -244,7 +245,9 @@ async function withFallback({ nguonc, kkphim, normalize, empty }) {
     return primaryResult;
   }
 
+  signal?.throwIfAborted();
   const secondary = await kkphim();
+  signal?.throwIfAborted();
   const secondaryResult = secondary ? normalize(secondary, "kkphim") : null;
   if (hasProviderData(secondaryResult)) {
     logProviderInfo("Đang dùng API KKPhim.", {
@@ -254,6 +257,12 @@ async function withFallback({ nguonc, kkphim, normalize, empty }) {
       movie: Boolean(secondaryResult.movie),
     });
     return secondaryResult;
+  }
+
+  if (distinguishUnavailable) {
+    const validList = [primary, secondary].some(data => !data?._proxyError && Array.isArray(data?.data?.items || data?.items));
+    if (!validList) throw new Error("Movie search providers unavailable");
+    return empty;
   }
 
   logProviderWarning("Không có API phim nào trả dữ liệu hợp lệ.", {
@@ -312,10 +321,12 @@ export async function getProviderMovieDetail(slug, preferredProvider = null) {
   });
 }
 
-export async function searchProviderMovies(keyword, page = 1) {
+export async function searchProviderMovies(keyword, page = 1, options) {
   return withFallback({
-    nguonc: () => fetchNguonc("films/search", { keyword, page }),
-    kkphim: () => fetchKkphim("v1/api/tim-kiem", { keyword, page, limit: 24 }),
+    nguonc: () => fetchNguonc("films/search", { keyword, page }, options),
+    kkphim: () => fetchKkphim("v1/api/tim-kiem", { keyword, page, limit: 24 }, options),
+    signal: options?.signal,
+    distinguishUnavailable: options?.distinguishUnavailable,
     normalize: normalizeListResponse,
     empty: { items: [], paginate: { total_pages: 1, total_page: 1 }, source: "empty" },
   });

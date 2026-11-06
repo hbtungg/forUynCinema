@@ -1,4 +1,4 @@
-import clientPromise from "@/lib/mongodb";
+import getMongoClient from "@/lib/mongodb";
 import { NextResponse } from "next/server";
 
 // 🚀 NÂNG LÊN 60 GIÂY: Bù trừ độ trễ mạng, tránh hiện tượng Blink trạng thái
@@ -9,7 +9,7 @@ export async function GET(req) {
     const { searchParams } = new URL(req.url);
     const onlineOnly = searchParams.get("online") === "1";
     const userEmail = searchParams.get("userEmail");
-    const client = await clientPromise;
+    const client = await getMongoClient();
     const db = client.db("ForUynDB");
     const onlineSince = new Date(Date.now() - ONLINE_TTL_MS);
 
@@ -70,7 +70,7 @@ export async function POST(req) {
 
     const now = new Date();
     const isOnline = status !== "offline";
-    const client = await clientPromise;
+    const client = await getMongoClient();
     const db = client.db("ForUynDB");
 
     // 🚀 CẢI TIẾN ĐẮT GIÁ: Đọc nhanh bản ghi cũ để kiểm tra xem có thực sự cần ghi đè DB không

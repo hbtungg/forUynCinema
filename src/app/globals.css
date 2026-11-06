@@ -2,7 +2,7 @@
 
 /* Clear Refined Glass — shared material and monochrome design tokens. */
 @theme {
-  --font-main: var(--font-be-vietnam-pro), Arial, sans-serif;
+  --font-main: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --color-midnight-bg: #050505;
   --color-surface: #0b0b0b;
   --color-surface-dim: #0b0b0b;
@@ -83,13 +83,11 @@ input, select, textarea { accent-color: #fff; }
 input::placeholder, textarea::placeholder { color: #808080; opacity: 1; }
 select option { background: #0b0b0b; color: #fff; }
 :where(button, a, input, select, textarea):focus-visible {
-  outline: 2px solid #e8e8e8;
+  outline: 2px solid #e8e8e8 !important;
   outline-offset: 4px;
 }
 :where(button, a) { -webkit-tap-highlight-color: transparent; }
 :where(h1, h2, h3) { text-wrap: balance; }
-.cinema-hero { border-radius: 24px; border: 0; box-shadow: none; }
-.cinema-hero h1 { font-weight: 500; letter-spacing: -.035em; }
 .floating-navigation {
   left: 12px;
   right: 12px;
@@ -102,15 +100,6 @@ select option { background: #0b0b0b; color: #fff; }
     backdrop-filter: blur(var(--glass-blur));
 }
 .floating-navigation a, .floating-navigation button { min-width: 44px; min-height: 44px; position: relative; }
-.floating-navigation [aria-current="page"]::after {
-  content: ""; position: absolute; bottom: 7px; width: 4px; height: 4px; background: white; border-radius: 50%;
-}
-.mobile-nav-clearance { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
-@media (min-width: 768px) { .mobile-nav-clearance { padding-bottom: 0; } }
-@media (max-width: 640px) {
-  header > div { padding-inline: 20px; }
-  .cinema-hero { min-height: 420px; max-height: 680px; }
-}
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .glass-surface, .midnight-glass, .floating-navigation { background: rgb(11 11 11 / .96); }
 }
@@ -134,3 +123,114 @@ select option { background: #0b0b0b; color: #fff; }
   .poster-control { background: #0b0b0b; -webkit-backdrop-filter: none;
     backdrop-filter: none; }
 }
+/* Cinema layout and safe-area offsets shared by the header, dock and player. */
+:root {
+  --app-header-height: calc(64px + env(safe-area-inset-top, 0px));
+  --app-dock-clearance: calc(84px + env(safe-area-inset-bottom, 0px));
+  --cinema-gutter: clamp(12px, 2.5vw, 32px);
+}
+html { scroll-padding-top: calc(var(--app-header-height) + 12px); }
+.app-header {
+  height: var(--app-header-height);
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-inline: max(var(--cinema-gutter), env(safe-area-inset-left, 0px)) max(var(--cinema-gutter), env(safe-area-inset-right, 0px));
+}
+.app-header.glass-surface, .floating-navigation {
+  --glass-blur: 10px;
+  background: rgb(11 11 11 / .93);
+}
+.app-sidebar { top: var(--app-header-height); }
+.app-content { padding-top: var(--app-header-height); }
+.app-main {
+  min-width: 0;
+  padding: 14px max(var(--cinema-gutter), env(safe-area-inset-right, 0px)) 24px max(var(--cinema-gutter), env(safe-area-inset-left, 0px));
+}
+.floating-navigation {
+  left: max(8px, env(safe-area-inset-left, 0px));
+  right: max(8px, env(safe-area-inset-right, 0px));
+  bottom: max(8px, env(safe-area-inset-bottom, 0px));
+}
+.floating-navigation [aria-current="page"] { background: rgb(255 255 255 / .10); }
+.mobile-nav-clearance { padding-bottom: var(--app-dock-clearance); }
+@media (min-width: 768px) {
+  .mobile-nav-clearance { padding-bottom: 0; }
+}
+@media (max-height: 450px) and (orientation: landscape) and (max-width: 767px) {
+  :root { --app-header-height: calc(48px + env(safe-area-inset-top, 0px)); }
+}
+.cinema-hero {
+  height: clamp(280px, 92vw, 410px);
+  min-height: 0;
+  border-radius: var(--radius-xl);
+}
+.cinema-hero-scrim { background: linear-gradient(0deg, #050505 0%, rgb(5 5 5 / .72) 38%, transparent 78%); }
+.cinema-hero .swiper { --swiper-navigation-size: 18px; --swiper-navigation-color: white; }
+.cinema-hero .swiper :is(.swiper-button-prev, .swiper-button-next) {
+  top: auto;
+  bottom: 2px;
+  margin: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: .75rem;
+}
+.cinema-hero .swiper .swiper-navigation-icon { width: 16px; height: 16px; }
+.hero-pause {
+  position: absolute;
+  z-index: 2;
+  right: 54px;
+  bottom: 2px;
+  min-height: 44px;
+  padding-inline: 8px;
+  font-size: .75rem;
+  color: #eee;
+}
+@media (min-width: 768px) {
+  .cinema-hero { height: clamp(320px, 40vw, 540px); }
+  .cinema-hero-scrim { background: linear-gradient(90deg, rgb(5 5 5 / .96), rgb(5 5 5 / .60) 44%, transparent 82%); }
+  .hero-pause { border-radius: .5rem; background: rgb(5 5 5 / .75); }
+}
+.film-rail, .film-genre-rail {
+  display: flex;
+  gap: .75rem;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scroll-snap-type: x proximity;
+  padding: 5px 5px 10px;
+}
+.film-rail > li {
+  flex: 0 0 44%;
+  min-width: 0;
+  scroll-snap-align: start;
+  scroll-margin-inline: 5px;
+}
+@media (min-width: 640px) { .film-rail > li { flex-basis: 29%; } }
+@media (min-width: 1024px) { .film-rail > li { flex-basis: 21%; } }
+@media (min-width: 1280px) { .film-rail > li { flex-basis: 17.5%; } }
+.rail-control {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: .75rem;
+  border: 1px solid var(--glass-border);
+}
+.rail-control:hover { background: rgb(255 255 255 / .1); }
+.movie-card-favorite {
+  width: 44px;
+  height: 44px;
+  border-radius: .75rem;
+  background: rgb(5 5 5 / .82);
+  border: 1px solid var(--glass-border);
+}
+.watch-frame { aspect-ratio: 16 / 9; }
+.watch-frame > :is(video, iframe) { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+.watch-episode-controls button, .watch-episode-controls select { min-height: 44px; }
+.html-content { overflow-wrap: anywhere; }
+.html-content img { max-width: 100%; height: auto; }
+.welcome-screen {
+  min-height: 100vh;
+  min-height: 100svh;
+  padding: env(safe-area-inset-top, 0px) max(var(--cinema-gutter), env(safe-area-inset-right, 0px)) env(safe-area-inset-bottom, 0px) max(var(--cinema-gutter), env(safe-area-inset-left, 0px));
+}
+.welcome-scrim { background: linear-gradient(90deg, rgb(5 5 5 / .88), rgb(5 5 5 / .35)); }

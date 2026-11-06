@@ -11,6 +11,8 @@ const nextConfig = {
   },
   images: {
     remotePatterns: [
+      { protocol: 'https', hostname: 'phim.nguonc.com', port: '', pathname: '/**', search: '' },
+      { protocol: 'https', hostname: 'img.phimapi.com', port: '', pathname: '/**', search: '' },
       {
         protocol: 'https',
         hostname: 'scontent.fdad3-1.fna.fbcdn.net',

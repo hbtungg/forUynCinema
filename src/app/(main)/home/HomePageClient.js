@@ -1,196 +1,98 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
-import Link from "next/link";
-import { Compass, Star } from "lucide-react";
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import HeroSlider from '@/components/HeroSlider';
+import MovieSection from '@/components/MovieSection';
+import ContinueWatching from '@/components/ContinueWatching';
+import IOSInstallPrompt from '@/components/IOSInstallPrompt';
+import { getMovies, getMoviesByCountry, getMoviesByCategory } from '@/lib/clientMovies';
 
-import HistoryPopup from "@/components/HistoryPopup";
-import HeroSlider from "@/components/HeroSlider";
-import MovieSection from "@/components/MovieSection";
-import ContinueWatching from "@/components/ContinueWatching";
+const TTL = 5 * 60 * 1000;
+const lists = [
+  ['latest', 'Phim mới cập nhật', '/danh-sach?type=phim-moi-cap-nhat', () => getMovies(1)],
+  ['korea', 'Phim Hàn Quốc', '/danh-sach?type=han-quoc', () => getMoviesByCountry('han-quoc', 1)],
+  ['anime', 'Phim hoạt hình', '/danh-sach?type=hoat-hinh', () => getMoviesByCategory('hoat-hinh', 1)],
+];
 
-export const metadata = {
-  title: 'Trang chủ - Uynflix',
-  description: 'Watch series online, watch films online free',
-};
+const genres = [
+  ['Hành động', 'hanh-dong'], ['Kinh dị', 'kinh-di'], ['Tâm lý', 'tam-ly'],
+  ['Viễn tưởng', 'vien-tuong'], ['Hình sự', 'hinh-su'], ['Tình cảm', 'tinh-cam'],
+  ['Hoạt hình', 'hoat-hinh'], ['Tài liệu', 'tai-lieu'],
+];
 
-export default function HomePageClient({
-  allMovies,
-  koreaMovies,
-  actionMovies, 
-  chinaMovies,  
-  animeMovies,
-  topRated,
-  genres,
-}) {
-  const { data: session, status } = useSession();
-  const [liveContinueItems, setLiveContinueItems] = useState([]);
+const pending = new Map();
 
-  const loadRightPanelHistory = async () => {
-    if (status === "authenticated" && session?.user?.email) {
+function loadList(key, fetchList) {
+  const storageKey = 'uynflix.home.v2.' + key;
+  try {
+    const cached = JSON.parse(sessionStorage.getItem(storageKey));
+    if (cached && Date.now() - cached.time < TTL) return Promise.resolve(cached.items);
+  } catch {}
+
+  if (!pending.has(key)) {
+    const request = fetchList().then(result => {
+      if (!result || result.source === 'empty') throw new Error('Không tải được danh sách phim');
+      const items = result.items.slice(0, 12);
       try {
-        const res = await fetch(`/api/history?userEmail=${session.user.email}`);
-        if (res.ok) {
-          const data = await res.json();
-          
-          const historyList = data.movies || (Array.isArray(data) ? data : []);
-          setLiveContinueItems(historyList.slice(0, 4));
-        }
-      } catch (error) {
-        console.error("Lỗi lấy lịch sử tại HomePageClient:", error);
-      }
-    } else {
-      setLiveContinueItems([]);
-    }
-  };
+        sessionStorage.setItem(storageKey, JSON.stringify({ time: Date.now(), items }));
+      } catch {}
+      return items;
+    }).finally(() => pending.delete(key));
+    pending.set(key, request);
+  }
+  return pending.get(key);
+}
+
+function HomeRow({ config, onLoad }) {
+  const [key, title, href, fetchList] = config;
+  const [attempt, setAttempt] = useState(0);
+  const [items, setItems] = useState(undefined);
 
   useEffect(() => {
-    // 🚀 VỊ TRÍ THÊM LOG 2: Chặn bắt toàn cục tiến trình fetch gọi tới API History
-    if (typeof window !== 'undefined' && !window.fetchProxySet) {
-      window.fetchProxySet = true;
-      const originalFetch = window.fetch;
-      window.fetch = async function (...args) {
-        const url = args[0];
-        const response = await originalFetch.apply(this, args);
-        
-        if (typeof url === 'string' && url.includes('/api/history')) {
-          const clonedResponse = response.clone();
-          try {
-            const data = await clonedResponse.json();
-            console.log(`%c[FETCH LOG DETECTED] URL: ${url}`, 'background: #222; color: #bada55; padding: 2px;');
-            console.log('[FETCH DATA REAL]:', data);
-            
-            if (data && typeof data === 'object' && !Array.isArray(data)) {
-              console.warn('[FETCH WARNING]: Dữ liệu trả về là OBJECT phân trang, nếu component nào dùng .map() trực tiếp lên cục này sẽ bị CRASH!');
-            }
-          } catch (err) {
-            console.error('[FETCH LOG ERROR]: Không thể đọc JSON', err);
-          }
-        }
-        return response;
-      };
-    }
-
-    if (status === "authenticated") {
-      loadRightPanelHistory();
-    } else {
-      setLiveContinueItems([]);
-    }
-    window.addEventListener('historyUpdated', loadRightPanelHistory);
-    return () => window.removeEventListener('historyUpdated', loadRightPanelHistory);
-  }, [status, session]);
-
-  const getAsideCleanImage = (movie) => {
-    if (!movie) return '';
-    const isKKPhim = movie.provider === 'kkphim' || 
-                     (movie.thumb_url && movie.thumb_url.includes('phimapi.com'));
-    
-    let rawUrl = isKKPhim 
-      ? (movie.thumb_url || movie.poster_url || '')
-      : (movie.poster_url || movie.thumb_url || '');
-
-    if (!rawUrl) return '';
-    if (rawUrl.startsWith('http://') || rawUrl.startsWith('https://')) return rawUrl;
-
-    const baseDomain = isKKPhim ? 'https://img.phimapi.com' : 'https://phim.nguonc.com';
-    return `${baseDomain}/${rawUrl.replace(/^\//, '')}`;
-  };
+    let active = true;
+    const apply = result => {
+      if (!active) return;
+      setItems(result);
+      onLoad?.(result);
+    };
+    loadList(key, fetchList).then(apply, () => apply(null));
+    return () => { active = false; };
+  }, [key, fetchList, attempt, onLoad]);
 
   return (
-    <div className="w-full flex flex-row min-w-0 min-h-screen select-none font-sans items-start">
-      
-      <div className="flex-1 min-w-0 pb-24">
-        
-        <div className="px-5 xl:px-12 pt-4">
-          <HeroSlider movies={allMovies} />
-        </div>
+    <MovieSection title={title} movies={items} viewAllLink={href} onRetry={() => {
+      setItems(undefined);
+      onLoad?.(undefined);
+      setAttempt(value => value + 1);
+    }} />
+  );
+}
 
-        <div className="px-5 xl:px-12 py-8 space-y-12" style={{ fontFamily: "var(--font-main)" }}>
-          
-          <ContinueWatching />
+export default function HomePageClient() {
+  const [featured, setFeatured] = useState(undefined);
 
-          <MovieSection title="Phim Mới Cập Nhật" movies={allMovies.slice(0, 12)} viewAllLink="/danh-sach?type=phim-moi-cap-nhat" />
-          <MovieSection title="Phim Hàn Quốc" movies={koreaMovies.slice(0, 12)} viewAllLink="/danh-sach?type=han-quoc" />
-          <MovieSection title="Phim Hoạt Hình" movies={animeMovies.slice(0, 12)} viewAllLink="/danh-sach?type=hoat-hinh" />
+  return (
+    <div className="mx-auto w-full max-w-[1600px] space-y-5 md:space-y-8">
+      <h1 className="sr-only">Khám phá phim trên Uynflix</h1>
+      {featured?.length ? <HeroSlider movies={featured} /> : featured === undefined && (
+        <div className="cinema-hero animate-pulse bg-surface-container" aria-hidden="true" />
+      )}
 
-        </div>
-      </div>
+      <nav aria-label="Thể loại phim" className="film-genre-rail">
+        {genres.map(([label, slug]) => (
+          <Link key={slug} prefetch={false} href={'/danh-sach?type=' + slug}
+            className="inline-flex min-h-11 shrink-0 items-center rounded-full border border-border-subtle bg-surface-container px-4 text-sm text-on-surface-variant hover:text-white">
+            {label}
+          </Link>
+        ))}
+      </nav>
 
-      <aside 
-        className="hidden xl:flex flex-col w-[300px] 2xl:w-[320px] flex-shrink-0 my-4 mr-6 rounded-[32px] border border-white/5 glass-surface  p-5 space-y-6 z-10 h-full"
-        style={{ fontFamily: "var(--font-main)" }}
-      >
-        <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#b8b8b8] flex items-center gap-1.5">
-              <Compass className="w-3.5 h-3.5 text-[#e8e8e8]" /> Danh sách phổ biến
-            </h3>
-            <Link href="/danh-sach" className="text-[9px] font-bold text-[#808080] hover:text-[#ffffff] uppercase tracking-wider transition-colors duration-300">
-              Xem tất cả
-            </Link>
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-            {genres && genres.map(({ label, icon, href }) => (
-              <Link 
-                key={label} 
-                href={href}
-                className="flex items-center gap-2 px-3 py-2.5 rounded-2xl bg-white/[0.02] hover:bg-white/5 border border-white/5 hover:border-[#e8e8e8]/20 transition-all duration-300 group"
-              >
-                <span className="text-sm leading-none filter grayscale group-hover:grayscale-0 transition-all">{icon}</span>
-                <span className="text-[10px] font-bold text-[#b8b8b8] group-hover:text-[#ffffff] transition-colors truncate uppercase tracking-wider">{label}</span>
-              </Link>
-            ))}
-          </div>
-        </section>
-
-        {topRated && topRated.length > 0 && (
-          <section className="space-y-4 pt-2">
-            <div className="flex items-center justify-between">
-              <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#b8b8b8] flex items-center gap-1.5">
-                <Star className="w-3.5 h-3.5 text-[#e8e8e8]" /> Top Đánh Giá
-              </h3>
-            </div>
-            <div className="space-y-1">
-              {topRated.slice(0, 5).map((movie, i) => (
-                <Link 
-                  key={movie.slug} 
-                  href={`/watch/${movie.slug}`}
-                  className="flex items-center gap-3 p-2 rounded-2xl hover:bg-white/5 border border-transparent hover:border-white/5 transition-all duration-300 group"
-                >
-                  <span className={`flex-shrink-0 w-5 text-center text-xs font-semibold tabular-nums ${
-                    i === 0 ? 'text-[#e8e8e8] ' : i === 1 ? 'text-zinc-400' : i === 2 ? 'text-neutral-300' : 'text-[#808080]'
-                  }`}>
-                    {String(i + 1).padStart(2, '0')}
-                  </span>
-                  
-                  <div className="w-9 h-12 flex-shrink-0 rounded-xl overflow-hidden bg-[#0b0b0b] border border-white/5">
-                    <img 
-                      src={getAsideCleanImage(movie)} 
-                      alt={movie.name} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
-                    />
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[11px] font-bold text-[#ffffff] truncate leading-none group-hover:text-[#ffffff] transition-colors">
-                      {movie.name}
-                    </p>
-                    <div className="flex items-center justify-between gap-2 mt-2">
-                      <p className="text-[9px] text-[#808080] font-mono font-semibold">{movie.year || '2026'}</p>
-                      <div className="flex items-center gap-1 bg-[#ffffff]/10 px-1.5 py-0.5 rounded-md text-[9px] font-semibold text-[#ffffff]">
-                        <Star className="w-2 h-2 fill-current" />
-                        <span>{movie.fakeRating || movie.rating || '8.5'}</span>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
-      </aside>
-
+      <ContinueWatching />
+      {lists.map(config => (
+        <HomeRow key={config[0]} config={config} onLoad={config[0] === 'latest' ? setFeatured : undefined} />
+      ))}
+      <IOSInstallPrompt />
     </div>
   );
 }

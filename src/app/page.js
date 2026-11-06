@@ -1,168 +1,79 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useSession } from "next-auth/react";
-import dynamic from 'next/dynamic';
-import { Play, Info, Loader2, Sparkles } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
+import Image from 'next/image';
 import Link from 'next/link';
-import MidnightShader from "@/components/MidnightShader"; // 🚀 1. NẠP SHADER HUYỀN ẢO VÀO TRANG CHÀO
+import { ArrowRight, Play } from 'lucide-react';
 
-const MOVIE_BACKDROPS = [
+const backdrops = [
   'https://image.tmdb.org/t/p/original/628Dep6AxEtDxjZoGP78TsOxYbK.jpg',
   'https://image.tmdb.org/t/p/original/xJHokMbljvjADYdit5fK5VQsXEG.jpg',
   'https://image.tmdb.org/t/p/original/rqbCbjB19amtOtFQbb3K2lgm2zv.jpg',
 ];
 
-function WelcomePage() {
-  const router = useRouter();
-  const { data: session, status } = useSession(); 
-  const [isExiting, setIsExiting] = useState(false);
-  const [bgIndex, setBgIndex] = useState(0);
-  const [loaded, setLoaded] = useState(false);
+export default function WelcomePage() {
+  const { data: session, status } = useSession();
+  const [index, setIndex] = useState(0);
+  const [manual, setManual] = useState(false);
 
   useEffect(() => {
-    const animationFrame = requestAnimationFrame(() => {
-      setLoaded(true);
-    });
-
+    if (manual) return;
+    const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
     const interval = setInterval(() => {
-      setBgIndex((i) => (i + 1) % MOVIE_BACKDROPS.length);
-    }, 6000);
-
-    return () => {
-      cancelAnimationFrame(animationFrame);
-      clearInterval(interval);
-    };
-  }, []);
-
-  const handleEnter = () => {
-    setIsExiting(true);
-    setTimeout(() => router.push('/home'), 800);
-  };
-
-  const handleLogin = () => {
-    setIsExiting(true);
-    setTimeout(() => router.push('/login'), 800);
-  };
+      if (!motion.matches && document.visibilityState === 'visible') {
+        setIndex(value => (value + 1) % backdrops.length);
+      }
+    }, 6500);
+    return () => clearInterval(interval);
+  }, [manual]);
 
   return (
-    <main className="relative h-screen w-screen overflow-hidden select-none font-sans text-[#ffffff]" style={{ fontFamily: "var(--font-main)" }}>
-      
-      <title>Uynflix Việt Nam - Watch series online, watch films online free</title>
+    <main className="welcome-screen relative isolate flex flex-col bg-surface text-white">
+      <Image src={backdrops[index]} alt="" fill sizes="100vw" fetchPriority={index === 0 ? 'high' : 'auto'}
+        loading="eager" className="-z-20 object-cover object-center opacity-55" />
+      <div aria-hidden="true" className="welcome-scrim absolute inset-0 -z-10" />
 
-      {/* 🚀 2. GĂM SHADER CHẠY NGẦM: Tạo các dải hạt lơ lửng xuyên suốt chuyển cảnh */}
-      <MidnightShader />
-
-      {/* ── BACKDROP SLIDESHOW ── */}
-      {MOVIE_BACKDROPS.map((src, i) => (
-        <div
-          key={src}
-          className="absolute inset-0 bg-cover bg-center transition-opacity duration-[2000ms]"
-          style={{
-            /* Để opacity ảnh nền ở mức 0.35 - 0.45 để các dải lụa sáng của Shader phía sau có không gian len lỏi và tỏa sáng rực rỡ */
-            backgroundImage: `linear-gradient(to top, rgba(5,5,5,0.5), rgba(5,5,5,0.1)), url(${src})`,
-            opacity: i === bgIndex ? 0.4 : 0,
-          }}
-        />
-      ))}
-
-      {/* ── CINEMATIC OVERLAYS ── */}
-      <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, #050505 0%, rgba(5,5,5,0.1) 50%, rgba(5,5,5,0.4) 100%)' }} />
-      <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(5,5,5,0.4) 0%, transparent 60%)' }} />
-
-      {/* ── FADE OUT CHUYỂN CẢNH MƯỢT MÀ ── */}
-      <div className={`absolute inset-0 bg-[#050505] z-50 pointer-events-none transition-opacity duration-[800ms] ease-in-out ${isExiting ? 'opacity-100' : 'opacity-0'}`} />
-
-      {/* ── HIGH-END NAVBAR ── */}
-      <nav className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-8 md:px-16 py-6">
-        <Link href="/home" className="block transition-transform duration-300 hover:scale-105">
-          <span 
-            className="text-2xl font-bold tracking-[0.2em] text-[#e8e8e8] font-sans"
-            style={{ textShadow: 'none' }}
-          >
-            UYNFLIX
-          </span>
+      <nav aria-label="Điều hướng Uynflix" className="mx-auto flex w-full max-w-[1440px] items-center justify-between gap-3 py-3">
+        <Link href="/home" aria-label="Uynflix — Trang chủ" className="inline-flex min-h-11 items-center text-lg font-bold tracking-[.18em] sm:text-xl">
+          UYNFLIX
         </Link>
-        
-        {status === "loading" ? (
-          <div className="w-20 h-8 bg-white/[0.04] border border-white/5 rounded-xl flex items-center justify-center">
-            <Loader2 className="w-3.5 h-3.5 border-2 border-[#e8e8e8]/20 border-t-[#e8e8e8] rounded-full animate-spin text-[#e8e8e8]" />
-          </div>
-        ) : status === "authenticated" ? (
-          <span className="text-[10px] font-bold text-[#ffffff] uppercase tracking-[0.2em] bg-[#e8e8e8]/10 border border-[#e8e8e8]/20 px-4 py-2 rounded-xl backdrop-blur-md shadow-sm">
-            Welcome, {session?.user?.name || 'Thành viên'}
-          </span>
-        ) : (
-          <button
-            onClick={handleLogin}
-            className="px-5 py-2 bg-[#e8e8e8]/10 hover:bg-[#e8e8e8] border border-[#e8e8e8]/20 text-[#e8e8e8] hover:text-[#050505] font-bold text-xs uppercase tracking-widest rounded-xl transition-all duration-300 active:scale-95 cursor-pointer focus:outline-none shadow-md"
-          >
-            LOG IN
-          </button>
-        )}
+        {session ? (
+          <span className="max-w-[50%] truncate text-sm text-on-surface-variant">Xin chào, {session.user?.name || 'thành viên'}</span>
+        ) : status !== 'loading' ? (
+          <Link href="/login" className="inline-flex min-h-11 items-center rounded-xl border border-border-subtle bg-black/50 px-4 text-sm font-semibold hover:bg-white/10">
+            Đăng nhập
+          </Link>
+        ) : <span className="h-11 w-24" aria-hidden="true" />}
       </nav>
 
-      {/* ── HERO CONTENT BỀ THẾ CHUẨN IMAX ── */}
-      <div className={`absolute inset-0 z-10 flex flex-col justify-center px-8 md:px-16 lg:px-24 transition-all duration-300 ${loaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
-        <div className="max-w-3xl space-y-6">
-
-          <p className="text-[10px] font-bold uppercase tracking-[0.45em] text-[#e8e8e8] flex items-center gap-2">
-            <Sparkles className="w-3.5 h-3.5 animate-pulse" /> Premium Streaming Space
-          </p>
-
-          <h1 className="text-4xl sm:text-6xl md:text-7xl font-semibold text-white leading-[1.05] tracking-tight uppercase">
-            Trải nghiệm điện ảnh<br />
-            <span className="text-[#ffffff]" style={{ textShadow: 'none' }}>không giới hạn.</span>
-          </h1>
-
-          <p className="text-xs sm:text-sm text-[#b8b8b8] max-w-lg leading-relaxed font-medium text-justify">
-            Hàng ngàn bộ phim bom tấn chất lượng cao, cập nhật liên tục. Tuyệt đối (không) quảng cáo, truyền tải mượt mà trên mọi thiết bị.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-3 pt-3">
-            <button
-              onClick={handleEnter}
-              className="group flex items-center justify-center gap-2.5 px-8 py-3.5 bg-white hover:bg-[#ffffff] active:scale-[0.98] text-black font-bold text-xs uppercase tracking-widest rounded-xl transition-all duration-300 cursor-pointer shadow-lg"
-            >
-              <Play className="w-4 h-4 fill-current text-black" />
-              Bắt đầu xem ngay
-            </button>
-            <button
-              onClick={handleEnter}
-              className="flex items-center justify-center gap-2.5 px-8 py-3.5 bg-white/[0.04] hover:bg-white/5 border border-white/10 text-white font-bold text-xs uppercase tracking-widest rounded-xl backdrop-blur-md transition-all duration-300 cursor-pointer focus:outline-none"
-            >
-              <Info className="w-4 h-4" />
-              Khám phá thêm
-            </button>
+      <div className="mx-auto flex w-full max-w-[1440px] flex-1 items-center py-10 md:py-16">
+        <div className="max-w-2xl space-y-4">
+          <p className="text-xs font-semibold uppercase tracking-[.18em] text-on-surface-variant">Uynflix Cinema</p>
+          <h1 className="text-4xl font-semibold leading-[1.08] tracking-tight sm:text-5xl lg:text-7xl">Trải nghiệm điện ảnh cùng Uynflix</h1>
+          <p className="max-w-md text-base leading-relaxed text-on-surface-variant">Khám phá phim mới cập nhật, tìm bộ phim yêu thích và tiếp tục xem theo nhịp của bạn.</p>
+          <div className="flex flex-wrap gap-2 pt-2">
+            <Link href="/home" className="button-primary inline-flex items-center gap-2 px-4 text-sm">
+              <Play size={16} aria-hidden="true" /> Bắt đầu xem ngay
+            </Link>
+            <Link href="/home" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border-subtle bg-black/50 px-4 text-sm font-semibold hover:bg-white/10">
+              Khám phá thêm <ArrowRight size={16} aria-hidden="true" />
+            </Link>
           </div>
-
         </div>
       </div>
 
-      {/* ── BOTTOM BADGE STRIP CHUẨN ĐỒNG BỘ 2026 ── */}
-      <div className="absolute bottom-0 left-0 right-0 z-20 flex flex-col sm:flex-row items-center justify-between gap-4 px-8 md:px-16 py-5 border-t border-white/5 bg-gradient-to-t from-[#050505] to-transparent">
-        <div className="flex items-center gap-6 text-[#808080] text-[10px] uppercase tracking-widest font-bold font-mono">
-          <span>Saigon Observatory</span>
-          <span className="w-px h-3 bg-white/10" />
-          <span>HB.TUNGG · 2026</span>
+      <footer className="mx-auto flex w-full max-w-[1440px] flex-wrap items-center justify-between gap-x-3 border-t border-border-subtle py-2 text-xs text-on-surface-variant">
+        <p>© 2026 Uynflix · HB.TUNGG</p>
+        <div className="flex" role="group" aria-label="Chọn ảnh nền">
+          {backdrops.map((src, position) => (
+            <button type="button" key={src} aria-pressed={index === position} aria-label={'Ảnh nền ' + (position + 1)}
+              onClick={() => { setManual(true); setIndex(position); }} className="grid size-11 place-items-center rounded-lg hover:bg-white/10">
+              <span aria-hidden="true" className={index === position ? 'h-1.5 w-5 rounded-full bg-white' : 'size-1.5 rounded-full bg-white/50'} />
+            </button>
+          ))}
         </div>
-        <p className="text-[#808080] text-[9px] tracking-[0.25em] uppercase font-bold font-mono">© 2026 Uynflix</p>
-      </div>
-
-      {/* ── BACKDROP SLIDER DOTS BO TRÒN TĂM TẮP ── */}
-      <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-20 flex gap-2">
-        {MOVIE_BACKDROPS.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => setBgIndex(i)}
-            className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer focus:outline-none ${i === bgIndex ? 'w-8 bg-[#e8e8e8] ' : 'w-2 bg-white/20 hover:bg-white/40'}`}
-          />
-        ))}
-      </div>
-
+      </footer>
     </main>
   );
 }
-
-export default dynamic(() => Promise.resolve(WelcomePage), { ssr: false });

@@ -6,6 +6,8 @@ import "./globals.css";
 
 
 
+export const viewport = { viewportFit: "cover", themeColor: "#050505" };
+
 export const metadata = {
   // 🚀 ĐÃ SỬA: Thêm metadataBase để định vị domain thực tế trên Vercel của anh
   metadataBase: new URL("https://uynflix.vercel.app"),
@@ -14,7 +16,7 @@ export const metadata = {
     default: "Uynflix",
     template: "%s - Uynflix",
   },
-  description: "Uynflix - Watch series online, watch films online free",
+  description: "Khám phá phim mới, phim lẻ và phim bộ trên Uynflix.",
 
   appleWebApp: {
     capable: true,
@@ -24,7 +26,7 @@ export const metadata = {
 
   openGraph: {
     title: "Uynflix",
-    description: "Anh ơi em thích xem phim",
+    description: "Khám phá phim mới, phim lẻ và phim bộ trên Uynflix.",
     url: "https://uynflix.vercel.app",
     siteName: "Uynflix",
     images: [

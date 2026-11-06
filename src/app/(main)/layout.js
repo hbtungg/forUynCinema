@@ -14,10 +14,7 @@ export default function MainLayout({ children }) {
     <div className="relative min-h-screen text-[#FAFAFA] font-sans antialiased bg-transparent selection:bg-[#e8e8e8]/30">
       
       {/* 1. Thanh Header thắp sáng trọn vẹn kịch trần trên cùng (fixed h-[72px]) */}
-      <Header 
-        sidebarCollapsed={sidebarCollapsed} 
-        onToggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)} 
-      />
+      <Header />
 
       {/* 2. Thanh Sidebar trái (Cố thủ fixed dưới gầm h-[72px], không bao giờ che khuất Header) */}
       <Sidebar 
@@ -27,11 +24,11 @@ export default function MainLayout({ children }) {
 
       {/* 3. 🚀 KHỐI NỘI DUNG CHÍNH (Nằm hoàn toàn bên phải Sidebar và cuộn dọc tự nhiên) */}
       <div 
-        className={`pt-[72px] mobile-nav-clearance md:pb-0 min-h-screen flex flex-col transition-all duration-300 ease-in-out pl-0
+        className={`app-content mobile-nav-clearance min-h-screen flex flex-col
           ${sidebarCollapsed ? 'md:pl-16' : 'md:pl-64'}`}
       >
         {/* Ruột nội dung chính chứa các khay phim */}
-        <main className="p-4 md:p-6 flex-grow relative">
+        <main className="app-main flex-grow relative">
           {children}
         </main>
 

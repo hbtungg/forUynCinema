@@ -6,6 +6,7 @@ import { ChevronDown, Server } from 'lucide-react';
 export default function WatchServerDropdown({ servers, selectedServer, handleServerChange }) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const triggerRef = useRef(null);
 
   // Tự động đóng dropdown nếu người dùng bấm trượt ra ngoài vùng menu
   useEffect(() => {
@@ -14,18 +15,24 @@ export default function WatchServerDropdown({ servers, selectedServer, handleSer
         setIsOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('pointerdown', handleClickOutside);
+    return () => document.removeEventListener('pointerdown', handleClickOutside);
   }, []);
 
   if (!servers || servers.length <= 1) return null;
 
   return (
-    <div className="relative font-sans" style={{ fontFamily: "var(--font-main)" }} ref={dropdownRef}>
+    <div className="relative font-sans" style={{ fontFamily: "var(--font-main)" }} ref={dropdownRef} onKeyDown={event => {
+      if (event.key === "Escape" && isOpen) {
+        setIsOpen(false);
+        triggerRef.current?.focus();
+      }
+    }}>
       
       {/* NÚT BẤM KÍNH MỜ XANH ĐÊM KHỞI CHẠY DROPDOWN */}
       <button
-        type="button"
+        ref={triggerRef}
+        type="button" aria-expanded={isOpen}
         onClick={() => setIsOpen((prev) => !prev)}
         className="w-full bg-white/[0.04] border border-white/5 p-4 rounded-2xl flex items-center justify-between cursor-pointer hover:border-[#e8e8e8]/30 active:scale-[0.99] transition-all duration-300 focus:outline-none"
       >
@@ -57,10 +64,11 @@ export default function WatchServerDropdown({ servers, selectedServer, handleSer
             return (
               <button
                 key={idx}
-                type="button"
+                type="button" aria-pressed={isSelected}
                 onClick={() => {
                   handleServerChange(idx);
                   setIsOpen(false);
+                  triggerRef.current?.focus();
                 }}
                 className={`w-full text-left px-4 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-wide transition-all duration-300 flex items-center justify-between cursor-pointer focus:outline-none ${
                   isSelected

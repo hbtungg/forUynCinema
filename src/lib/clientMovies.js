@@ -15,8 +15,8 @@ export async function getMovieDetail(slug, preferredProvider = null) {
   return getProviderMovieDetail(slug, preferredProvider);
 }
 
-export async function searchMovies(keyword, page = 1) {
-  return searchProviderMovies(keyword, page);
+export async function searchMovies(keyword, page = 1, options) {
+  return searchProviderMovies(keyword, page, options);
 }
 
 export async function getMovies(page = 1) {

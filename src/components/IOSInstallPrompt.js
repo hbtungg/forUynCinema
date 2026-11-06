@@ -38,15 +38,16 @@ export default function IOSInstallPrompt() {
         
         {/* Nút đóng góc phải */}
         <button 
+          type="button" aria-label="Đóng hướng dẫn cài đặt"
           onClick={handleDismiss}
-          className="absolute top-3 right-3 w-6 h-6 rounded-full bg-white/5 border border-white/5 flex items-center justify-center text-[#808080] hover:text-white transition-colors focus:outline-none"
+          className="absolute top-2 right-2 size-11 rounded-full bg-white/5 border border-white/5 flex items-center justify-center text-[#808080] hover:text-white transition-colors focus:outline-none"
         >
           <X className="w-3.5 h-3.5" />
         </button>
 
         {/* Nội dung chỉ dẫn */}
         <div className="space-y-4">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 pr-10">
             <Sparkles className="w-4 h-4 text-[#e8e8e8] animate-pulse" />
             <h4 className="text-xs font-semibold uppercase tracking-widest text-[#e8e8e8]">Cài đặt Uynflix App</h4>
           </div>

@@ -38,9 +38,9 @@ export default function Sidebar({ collapsed, onToggleSidebar }) {
       {/* ========================================================================= */}
       <aside
         className={`
-          fixed top-[72px] left-0 bottom-0 z-40 flex flex-col items-center py-6 flex-shrink-0
+          app-sidebar fixed left-0 bottom-0 z-40 flex flex-col items-center py-6 flex-shrink-0
           glass-surface border-r border-[#383838]/10 shadow-2xl
-          transition-all duration-300 ease-in-out overflow-hidden hidden md:flex
+          transition-all duration-300 ease-in-out overflow-y-auto hidden md:flex
           ${collapsed ? 'w-16 px-0' : 'w-64 px-4'}
         `}
         style={{ fontFamily: "var(--font-main)" }}
@@ -141,7 +141,7 @@ export default function Sidebar({ collapsed, onToggleSidebar }) {
       {/* ========================================================================= */}
       {/* VỊ TRÍ 2: THANH BOTTOM NAVIGATION BAR DÀNH RIÊNG MOBILE (CHỈ HIỂN THỊ ICON) */}
       {/* ========================================================================= */}
-      <nav aria-label="Điều hướng trên điện thoại" className="floating-navigation fixed bottom-0 left-0 right-0 h-16 glass-surface border-t border-white/5 flex items-center justify-around px-2 md:hidden z-50 ">
+      <nav aria-label="Điều hướng trên điện thoại" className="floating-navigation fixed bottom-0 left-0 right-0 h-16 glass-surface flex items-center justify-around gap-0.5 p-1 md:hidden z-50 ">
         {navItems.map((item) => {
           const active = pathname === item.href;
           const IconComponent = item.icon;
@@ -152,10 +152,11 @@ export default function Sidebar({ collapsed, onToggleSidebar }) {
               href={item.href}
               aria-label={item.label}
               aria-current={active ? "page" : undefined}
-              className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 active:scale-90
-                ${active ? 'text-[#e8e8e8] ' : 'text-[#808080]/70'}`}
+              className={`flex min-w-0 flex-1 flex-col items-center justify-center gap-1 self-stretch rounded-2xl
+                ${active ? 'text-[#e8e8e8] ' : 'text-on-surface-variant'}`}
             >
-              <IconComponent className={`w-[22px] h-[22px] transition-transform duration-300 ${active ? 'scale-100' : 'scale-100'}`} />
+              <IconComponent className="size-5" aria-hidden="true" />
+              <span className="text-[10px] leading-tight">{item.label}</span>
             </Link>
           );
         })}
@@ -166,9 +167,10 @@ export default function Sidebar({ collapsed, onToggleSidebar }) {
             else router.push('/login');
           }}
           aria-label={isLoggedIn ? "Đăng xuất" : "Đăng nhập"}
-          className={`flex flex-col items-center justify-center flex-1 h-full transition-all duration-300 active:scale-90 focus:outline-none ${isLoggedIn ? 'text-neutral-300/80' : 'text-[#e8e8e8]/60'}`}
+          className={`flex min-w-0 flex-1 flex-col items-center justify-center gap-1 self-stretch rounded-2xl ${isLoggedIn ? 'text-neutral-300/80' : 'text-[#e8e8e8]/60'}`}
         >
-          {isLoggedIn ? <LogOut className="w-[22px] h-[22px]" /> : <LogIn className="w-[22px] h-[22px]" />}
+          {isLoggedIn ? <LogOut className="size-5" /> : <LogIn className="size-5" />}
+          <span className="text-[10px] leading-tight">{isLoggedIn ? 'Đăng xuất' : 'Đăng nhập'}</span>
         </button>
       </nav>
     </>
