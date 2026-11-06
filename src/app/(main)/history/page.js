@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { getMovieDetail } from '@/lib/clientMovies';
-import { ArrowLeft, X, Tv, Sparkles, Clock, Loader2, HelpCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, X, Sparkles, Clock, Loader2, HelpCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 
 function getEpisodeNumber(value) {
   const matches = String(value || '').match(/\d+/g);
@@ -265,69 +265,54 @@ export default function HistoryPage() {
         )}
 
         {isLoading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-6 md:gap-8">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:gap-5 lg:grid-cols-3 xl:grid-cols-4">
             {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
               <div
                 key={i}
-                className="aspect-video bg-white/[0.04] border border-white/5 rounded-2xl animate-pulse"
+                className="h-28 rounded-2xl border border-white/5 bg-white/[0.04] animate-pulse sm:h-auto sm:aspect-[4/3]"
               />
             ))}
           </div>
         ) : history.length > 0 ? (
           <>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-6 md:gap-8 md:gap-y-10">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:gap-5 lg:grid-cols-3 xl:grid-cols-4">
               {history.map((item) => {
+                const update = episodeUpdates[item.slug];
+                const episode = String(item.episode || '1');
+                const episodeLabel = /^full$/i.test(episode.trim()) ? 'Trọn phim' : `Tập ${getEpisodeLabel(episode)}`;
+
                 return (
-                  <div key={item.slug} className="group/card relative animate-in fade-in duration-300">
-
-                    {/* Tag báo tập mới */}
-                    {episodeUpdates[item.slug] && (
-                      <Link
-                        href={`/watch/${item.slug}?ep=${encodeURIComponent(episodeUpdates[item.slug].latestEpisodeName)}`}
-                        className="absolute top-3 left-3 z-20 rounded-full bg-[#e8e8e8]/10 border border-[#e8e8e8]/30 px-3 py-1 text-[9px] font-bold uppercase tracking-wider text-[#ffffff] shadow-xl backdrop-blur-md hover:bg-[#e8e8e8] hover:text-[#050505] transition-all duration-300 font-sans"
-                      >
-                        Mới: Tập {getEpisodeLabel(episodeUpdates[item.slug].latestEpisodeName)}
-                      </Link>
-                    )}
-
-                    <button
-                      type="button"
-                      aria-label={`Xoá ${item.name} khỏi lịch sử`}
-                      onClick={() => removeHistory(item.slug)}
-                      className="absolute top-3 right-3 w-8 h-8 bg-white/[0.04] border border-white/10 rounded-full flex items-center justify-center text-[#b8b8b8] hover:bg-neutral-800 hover:text-white transition-all z-20 shadow-xl md:opacity-0 md:group-hover/card:opacity-100 focus:outline-none cursor-pointer"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-
-                    <Link href={`/watch/${item.slug}?ep=${item.episode || '1'}`} className="block">
-                      <div className="relative aspect-video rounded-2xl overflow-hidden border border-white/5 group-hover/card:border-[#e8e8e8]/30 transition-all duration-300 bg-white/[0.04] shadow-2xl">
-                        <img
-                          src={getDisplayImage(item)}
-                          alt={item.name}
-                          // 🚀 FIX ĐỘ NÉT: Đặt độ nét 95% tĩnh và 100% khi tương tác chuột
-                          className="w-full h-full object-cover opacity-95 group-hover/card:opacity-100 group-hover/card:scale-105 transition-all duration-300"
-                          loading="lazy"
-                        />
-
-                        <div className="absolute inset-0 bg-gradient-to-t from-[#050505]/95 via-[#050505]/40 to-transparent p-4 flex flex-col justify-end">
-                          <h3 className="text-white font-bold text-sm uppercase truncate tracking-wide mb-1.5 group-hover/card:text-[#ffffff] transition-colors leading-snug">
-                            {item.name}
-                          </h3>
-
-                          <span className="w-fit text-[#ffffff] text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 bg-[#e8e8e8]/10 px-2 py-0.5 rounded border border-[#e8e8e8]/20">
-                            <Clock className="w-3 h-3 text-[#e8e8e8]" />
-                            Tập {getEpisodeLabel(item.episode)}
-                          </span>
-
-                          {episodeUpdates[item.slug] && (
-                            <span className="mt-2 w-fit text-[#808080] text-[9px] font-bold uppercase tracking-widest pl-0.5 flex items-center gap-1">
-                              <Tv className="w-3 h-3" /> Đã có Tập {getEpisodeLabel(episodeUpdates[item.slug].latestEpisodeName)}
-                            </span>
-                          )}
-                        </div>
+                  <article key={item.slug} className="group/card flex min-w-0 flex-col rounded-2xl border border-white/10 bg-white/[0.035] p-2.5">
+                    <Link href={`/watch/${item.slug}?ep=${encodeURIComponent(episode)}`}
+                      className="grid min-w-0 grid-cols-[minmax(0,2fr)_minmax(0,3fr)] items-center gap-3 rounded-xl sm:grid-cols-1 sm:items-start">
+                      <div className="aspect-video overflow-hidden rounded-xl bg-surface-container">
+                        <img src={getDisplayImage(item)} alt="" loading="lazy"
+                          className="h-full w-full object-cover motion-safe:transition-transform motion-safe:group-hover/card:scale-[1.03]" />
+                      </div>
+                      <div className="min-w-0 px-0.5">
+                        <h3 className="line-clamp-2 break-words text-sm font-semibold leading-snug">{item.name}</h3>
+                        <p className="mt-1.5 flex items-start gap-1.5 text-xs leading-snug text-on-surface-variant">
+                          <Clock className="size-3.5 shrink-0" aria-hidden="true" />
+                          <span className="min-w-0 break-words">Đã xem · {episodeLabel}</span>
+                        </p>
                       </div>
                     </Link>
-                  </div>
+
+                    <div className="mt-auto flex min-w-0 items-center justify-end gap-2 pt-2">
+                      {update && (
+                        <Link href={`/watch/${item.slug}?ep=${encodeURIComponent(update.latestEpisodeName)}`}
+                          className="glass-trim mr-auto inline-flex min-h-11 min-w-0 items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-white">
+                          <Sparkles className="size-3.5 shrink-0" aria-hidden="true" />
+                          <span className="min-w-0 break-words">Tập mới · {getEpisodeLabel(update.latestEpisodeName)}</span>
+                        </Link>
+                      )}
+                      <button type="button" aria-label={`Xoá ${item.name} khỏi lịch sử`}
+                        onClick={() => removeHistory(item.slug)}
+                        className="grid size-11 shrink-0 place-items-center rounded-xl text-on-surface-variant hover:bg-white/10 hover:text-white">
+                        <X className="size-4" aria-hidden="true" />
+                      </button>
+                    </div>
+                  </article>
                 );
               })}
             </div>

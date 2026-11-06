@@ -22,10 +22,10 @@ export default function Sidebar({ collapsed, onToggleSidebar }) {
   const { data: session } = useSession();
 
   const navItems = [
-    { href: '/home',       label: 'Trang Chủ', icon: Moon,        desc: 'New Moon' },
-    { href: '/danh-sach',  label: 'Thể Loại',  icon: Compass,     desc: 'Crescent Moon' },
-    { href: '/search',     label: 'Tìm Kiếm',  icon: Search,      desc: 'Half Moon' },
-    { href: '/account',    label: 'Cá Nhân',   icon: User,        desc: 'Full Moon' },
+    { href: '/home',       label: 'Trang Chủ', icon: Moon },
+    { href: '/danh-sach',  label: 'Thể Loại',  icon: Compass },
+    { href: '/search',     label: 'Tìm Kiếm',  icon: Search },
+    { href: '/account',    label: 'Cá Nhân',   icon: User },
   ];
 
   const isLoggedIn = !!session;
@@ -40,7 +40,7 @@ export default function Sidebar({ collapsed, onToggleSidebar }) {
         className={`
           app-sidebar fixed z-40 flex flex-col items-center py-2.5 flex-shrink-0
           clear-glass
-          overflow-y-auto hidden md:flex
+          overflow-x-hidden overflow-y-auto hidden md:flex
           ${collapsed ? 'w-[60px] px-1.5' : 'w-60 px-3'}
         `}
         style={{ fontFamily: "var(--font-main)" }}
@@ -54,6 +54,8 @@ export default function Sidebar({ collapsed, onToggleSidebar }) {
             </span>
           )}
           <button
+            type="button"
+            aria-expanded={!collapsed}
             onClick={() => onToggleSidebar?.()}
             className="w-11 h-11 flex items-center justify-center rounded-xl text-white hover:bg-white/10 transition-all duration-300 cursor-pointer focus:outline-none"
             title={collapsed ? "Mở rộng menu" : "Thu gọn menu"}
@@ -75,7 +77,7 @@ export default function Sidebar({ collapsed, onToggleSidebar }) {
               aria-label={item.label}
               aria-current={active ? "page" : undefined}
                 className={`group relative flex items-center h-12 rounded-xl transition-all duration-300 border border-transparent
-                  ${collapsed ? 'w-12 h-12 justify-center mx-auto' : 'w-full px-4 gap-4'}
+                  ${collapsed ? 'w-full h-12 justify-center' : 'w-full px-4 gap-4'}
                   ${active
                     ? 'text-white font-semibold'
                     : 'text-[#b8b8b8] hover:bg-[#262626]/20 hover:text-[#e8e8e8] '
@@ -85,11 +87,6 @@ export default function Sidebar({ collapsed, onToggleSidebar }) {
                 <IconComponent className={`transition-transform duration-300 group-hover:scale-110 ${collapsed ? 'w-[22px] h-[22px]' : 'w-5 h-5'}`} />
                 {!collapsed && <span className="text-sm tracking-wide font-medium">{item.label}</span>}
                 
-                {collapsed && (
-                  <div className="absolute left-full ml-4 px-3 py-1.5 bg-[#262626] text-[#ffffff] text-xs font-medium rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap pointer-events-none shadow-xl border border-[#383838]/30">
-                    {item.label} <span className="text-[10px] text-[#ffffff]/40 ml-1">({item.desc})</span>
-                  </div>
-                )}
               </Link>
             );
           })}
@@ -98,8 +95,9 @@ export default function Sidebar({ collapsed, onToggleSidebar }) {
           {isAdmin && (
             <Link
               href="/admin"
+              aria-label="Hệ Thống"
               className={`group relative flex items-center h-12 rounded-xl transition-all duration-300 border border-transparent
-                ${collapsed ? 'w-12 h-12 justify-center mx-auto' : 'w-full px-4 gap-4'}
+                ${collapsed ? 'w-full h-12 justify-center' : 'w-full px-4 gap-4'}
                 ${pathname === '/admin'
                   ? 'text-[#ffffff] bg-[#ffffff]/10 border border-[#ffffff]/20 font-bold'
                   : 'text-[#b8b8b8] hover:bg-[#262626]/20 hover:text-[#e8e8e8]'
@@ -114,22 +112,26 @@ export default function Sidebar({ collapsed, onToggleSidebar }) {
         {/* KHỐI TIỆN ÍCH DƯỚI CÙNG (Ngay ngắn tuyệt đối) */}
         <div className="w-full mt-2 flex flex-col gap-1 border-t border-white/15 pt-2">
           <Link 
-            href="/help" 
+            href="/help"
+            aria-label="Trợ Giúp"
+            title={collapsed ? "Trợ Giúp" : undefined}
             className={`group relative flex items-center h-12 rounded-xl text-[#b8b8b8] hover:bg-[#262626]/10 hover:text-[#e8e8e8] transition-all duration-300 ${
-              collapsed ? 'w-12 h-12 justify-center mx-auto' : 'w-full px-4 gap-4'
+              collapsed ? 'w-full h-12 justify-center' : 'w-full px-4 gap-4'
             } ${pathname === '/help' ? 'text-[#ffffff] bg-[#ffffff]/10 font-bold' : ''}`}
           >
             <HelpCircle className={`${collapsed ? 'w-[22px] h-[22px]' : 'w-5 h-5'}`} />
             {!collapsed && <span className="text-sm tracking-wide font-medium">Trợ Giúp</span>}
           </Link>
 
-          <button 
+          <button
+            type="button"
+            aria-label={isLoggedIn ? "Đăng xuất" : "Đăng nhập"}
             onClick={() => {
               if (isLoggedIn) signOut({ callbackUrl: '/home' });
               else router.push('/login');
             }} 
             className={`group relative flex items-center h-12 rounded-xl transition-all duration-300 cursor-pointer focus:outline-none
-              ${collapsed ? 'w-12 h-12 justify-center mx-auto' : 'w-full px-4 gap-4'} 
+              ${collapsed ? 'w-full h-12 justify-center' : 'w-full px-4 gap-4'}
               ${isLoggedIn ? 'text-[#b8b8b8] hover:bg-white/10 hover:text-white' : 'text-[#ffffff] hover:bg-[#ffffff]/10'}`}
           >
             {isLoggedIn ? <LogOut className={`${collapsed ? 'w-[22px] h-[22px]' : 'w-5 h-5'}`} /> : <LogIn className={`${collapsed ? 'w-[22px] h-[22px]' : 'w-5 h-5'}`} />}
