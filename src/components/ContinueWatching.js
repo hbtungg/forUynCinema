@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSession } from "next-auth/react";
 import Link from 'next/link';
+import { watchHref } from '@/lib/watchNavigation';
 import { X, Play } from 'lucide-react';
 
 export default function ContinueWatching() {
@@ -115,7 +116,7 @@ export default function ContinueWatching() {
 
               {/* CARD KHUNG HÌNH PHIM */}
               <Link
-                href={`/watch/${item.slug}?ep=${encodeURIComponent(item.episode || 1)}&provider=${encodeURIComponent(item.provider || 'auto')}`}
+                href={watchHref(item)}
                 className="block relative aspect-video rounded-2xl overflow-hidden bg-surface-container"
               >
                 <img

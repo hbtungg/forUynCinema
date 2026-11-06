@@ -1,7 +1,7 @@
 'use client';
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
-import { Clock, Heart, ShieldAlert, LogOut, ArrowRight, Loader2 } from "lucide-react";
+import { Clock, ShieldAlert, LogOut, ArrowRight, Loader2 } from "lucide-react";
 // 🚀 GIỮ NGUYÊN: Import component hiển thị người dùng online của anh
 import OnlineUsersMenu from "./OnlineUsersMenu"; 
 
@@ -80,8 +80,7 @@ export default function UserMenu({ isMobile = false }) {
       <nav className="flex flex-col gap-1">
         {session && (
           <>
-            <NavItem href="/history" icon={<Clock className="w-3.5 h-3.5" />} label="Phim đang xem" isMobile={isMobile} />
-            <NavItem href="/favorites" icon={<Heart className="w-3.5 h-3.5" />} label="Danh sách thích" isMobile={isMobile} />
+            <NavItem href="/history" icon={<Clock className="w-3.5 h-3.5" />} label="Lịch sử xem" isMobile={isMobile} />
           </>
         )}
       </nav>

@@ -49,11 +49,6 @@ export default function Header() {
             className="inline-flex min-h-11 shrink-0 items-center text-lg font-bold tracking-[.18em] sm:text-xl">
             UYNFLIX
           </Link>
-          <div className="hidden lg:flex min-w-0 items-center gap-1 sm:gap-2 text-xs font-bold tracking-wider uppercase">
-            <Link href="/home" className={`transition-colors duration-300 ${pathname === '/home' ? 'text-[#e8e8e8]' : 'text-[#c5c5c5] hover:text-white'}`}>Movies</Link>
-            <Link href="/danh-sach" className={`transition-colors duration-300 ${pathname === '/danh-sach' ? 'text-[#e8e8e8]' : 'text-[#808080] hover:text-[#e8e8e8]'}`}>Discover</Link>
-            <Link href="/history" className={`transition-colors duration-300 ${pathname === '/history' ? 'text-[#e8e8e8]' : 'text-[#808080] hover:text-[#e8e8e8]'}`}>History</Link>
-          </div>
         </div>
 
         {/* KHỐI PHẢI: SEARCHBOX & ACCOUNT */}

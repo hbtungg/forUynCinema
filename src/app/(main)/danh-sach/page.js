@@ -1,4 +1,5 @@
 'use client';
+import { countryLabels } from "@/lib/countryLabels";
 
 import { useState, useEffect, Suspense, useRef, use } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
@@ -151,7 +152,7 @@ function DanhSachContent() {
             onClick={() => setIsOpen(!isOpen)}
             className="px-5 py-2.5 rounded-xl glass-trim text-[11px] font-bold uppercase tracking-widest text-[#b8b8b8] hover:text-[#ffffff] transition-all flex items-center gap-3 min-w-[190px] justify-between active:scale-95 focus:outline-none"
           >
-            <span>Chọn thể loại</span>
+            <span>Chọn danh mục</span>
             <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
           </button>
 
@@ -181,6 +182,16 @@ function DanhSachContent() {
       </div>
 
       {/* ── LƯỚI KHUNG HIỂN THỊ POSTER PHIM CAO CẤP ── */}
+      <details className="mb-5 w-full rounded-xl border border-white/10 p-3">
+        <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold">Lọc theo quốc gia</summary>
+        <nav aria-label="Quốc gia" className="flex flex-wrap gap-2">
+          {Object.entries(countryLabels).map(([slug, label]) => (
+            <Link key={slug} href={'/country/' + slug} prefetch={false}
+              className="glass-trim inline-flex min-h-11 items-center rounded-lg px-3 text-sm">{label}</Link>
+          ))}
+        </nav>
+      </details>
+
       {loading ? (
         <div className="flex flex-col items-center justify-center py-40 gap-3">
           <Loader2 className="w-6 h-6 border-2 border-[#e8e8e8]/20 border-t-[#e8e8e8] rounded-full animate-spin text-[#e8e8e8]" />

@@ -52,6 +52,7 @@ export default function WatchTabs({
   handleEpisodeChange,
   movie,
   selectedProvider,
+  activeProvider,
   setSelectedProvider,
 }) {
   const [isServerMenuOpen, setIsServerMenuOpen] = useState(false);
@@ -65,13 +66,20 @@ export default function WatchTabs({
   const displayEpisodes = episodeChunks[activeChunk] || currentEpisodes;
 
   return (
-    <div className="space-y-5 font-sans select-none" style={{ fontFamily: "var(--font-main)" }}>
+    <div onKeyDown={event => {
+      if (event.key === "Escape") {
+        setIsProviderMenuOpen(false);
+        setIsServerMenuOpen(false);
+      }
+    }} className="space-y-5 font-sans select-none" style={{ fontFamily: "var(--font-main)" }}>
       
       {/* ── HIGH-END TAB BAR ── */}
-      <div className="flex items-center gap-2 border-b border-white/5">
+      <div className="flex flex-wrap items-center gap-2 border-b border-white/5">
         {TABS.map(tab => (
           <button
             key={tab.id}
+            type="button"
+            aria-pressed={activeTab === tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`relative flex items-center gap-2 px-4 pb-3 pt-1 text-[11px] font-bold uppercase tracking-widest transition-all duration-300 cursor-pointer focus:outline-none ${
               activeTab === tab.id ? 'text-[#ffffff]' : 'text-[#808080] hover:text-[#ffffff]'
@@ -104,6 +112,7 @@ export default function WatchTabs({
             <div className="relative">
               <button
                 type="button"
+                aria-expanded={isProviderMenuOpen}
                 onClick={() => setIsProviderMenuOpen((prev) => !prev)}
                 className="bg-white/[0.04] border border-white/10 px-3.5 py-1.5 rounded-xl text-[10px] font-bold text-[#b8b8b8] hover:text-[#ffffff] flex items-center gap-2 cursor-pointer transition-all duration-300 focus:outline-none hover:border-[#e8e8e8]/30"
               >
@@ -139,11 +148,19 @@ export default function WatchTabs({
               </div>
             </div>
 
+            {selectedProvider !== 'auto' && activeProvider && activeProvider !== selectedProvider && (
+              <p role="status" className="text-xs text-on-surface-variant">
+                Đang dùng nguồn dự phòng {activeProvider === 'kkphim' ? 'KKPhim' : 'Nguồn C'}.
+              </p>
+            )}
+
             {/* Bộ chọn Mùa / Server */}
             {servers.length > 1 && (
               <div className="relative">
                 <button
                   type="button"
+                  aria-expanded={isServerMenuOpen}
+                  aria-label="Đổi máy chủ phát"
                   onClick={() => setIsServerMenuOpen((prev) => !prev)}
                   className="bg-white/[0.04] border border-white/10 px-3.5 py-1.5 rounded-xl text-[10px] font-bold text-[#b8b8b8] hover:text-[#ffffff] flex items-center gap-2 cursor-pointer transition-all duration-300 focus:outline-none hover:border-[#e8e8e8]/30"
                 >
@@ -211,6 +228,7 @@ export default function WatchTabs({
                 return (
                   <button
                     key={idx}
+                    aria-current={isActive ? "true" : undefined}
                     onClick={() => handleEpisodeChange(idx, ep.name)}
                     className={`shrink-0 w-[140px] sm:w-[160px] aspect-[16/10] rounded-xl overflow-hidden relative border transition-all duration-300 group flex flex-col justify-end text-left focus:outline-none cursor-pointer ${
                       isActive

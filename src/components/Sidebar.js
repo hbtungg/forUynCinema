@@ -11,7 +11,8 @@ import {
   Search,      // Half Moon -> Tìm Kiếm
   User,        // Full Moon -> Cá Nhân
   ShieldAlert, // Settings -> Hệ Thống Admin
-  HelpCircle,  // Help
+  HelpCircle,
+  History,  // Help
   LogOut,      // Logout
   LogIn        // Login
 } from 'lucide-react';
@@ -23,9 +24,9 @@ export default function Sidebar({ collapsed, onToggleSidebar }) {
 
   const navItems = [
     { href: '/home',       label: 'Trang Chủ', icon: Moon },
-    { href: '/danh-sach',  label: 'Thể Loại',  icon: Compass },
+    { href: '/danh-sach',  label: 'Khám phá',  icon: Compass },
     { href: '/search',     label: 'Tìm Kiếm',  icon: Search },
-    { href: '/account',    label: 'Cá Nhân',   icon: User },
+    { href: '/account',    label: 'Tài khoản',   icon: User },
   ];
 
   const isLoggedIn = !!session;
@@ -66,8 +67,8 @@ export default function Sidebar({ collapsed, onToggleSidebar }) {
 
         {/* CỤM MENU ĐIỀU HƯỚNG CHÍNH (Icon to chuẩn w-[22px] kịch trần khi đóng) */}
         <nav aria-label="Điều hướng chính" className="w-full flex-1 flex flex-col gap-1">
-          {navItems.map((item) => {
-            const active = pathname === item.href;
+          {[...navItems, { href: '/history', label: 'Lịch sử xem', icon: History }].map((item) => {
+            const active = pathname === item.href || (item.href === '/danh-sach' && /^\/(category|country)\//.test(pathname || ''));
             const IconComponent = item.icon;
 
             return (

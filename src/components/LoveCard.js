@@ -1,7 +1,6 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import FavoriteButton from './FavoriteButton';
 
 export default function LoveCard({ movie }) {
     const [isPlaying, setIsPlaying] = useState(false);
@@ -88,7 +87,6 @@ export default function LoveCard({ movie }) {
                     <div className="absolute bottom-4 right-4 z-40 flex opacity-100 md:opacity-0 md:group-hover:opacity-100 scale-100 md:scale-90 md:group-hover:scale-100 transition-all duration-300">
                         <div className="flex items-center justify-center w-10 h-10 bg-black/60 backdrop-blur-xl border border-white/10 rounded-full shadow-lg active:scale-75 overflow-hidden">
                             <div className="[&_span]:hidden [&_p]:hidden [&_label]:hidden [&_button]:bg-transparent [&_button]:border-none [&_button]:p-0 [&_svg]:w-5 [&_svg]:h-5 [&_svg]:m-0 flex items-center justify-center">
-                                <FavoriteButton phim={movie} />
                             </div>
                         </div>
                     </div>

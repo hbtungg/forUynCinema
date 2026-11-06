@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { watchHref } from '@/lib/watchNavigation';
 import { useRouter } from 'next/navigation';
 import { Star, Play, Globe, CalendarDays, Film, Tv, History, ArrowLeft, Search, Layers } from 'lucide-react';
 import { getMovieDetail, getRelatedMovies } from '@/lib/clientMovies';
@@ -82,7 +83,8 @@ export default function MovieDetailClient({ movieSlug }) {
   // ── 🛠️ XỬ LÝ LOGIC PHÂN TRANG VÀ LỌC CHAPTERS ──
   const currentServer = episodes?.[activeServerIdx];
   const allEpisodes = currentServer?.server_data || currentServer?.items || [];
-  const watchUrl = episode => `/watch/${movieSlug}?ep=${encodeURIComponent(episode || "1")}&server=${activeServerIdx}`;
+  const watchUrl = episode => watchHref({ slug: movieSlug, episode: episode || '1',
+    provider: movie.provider, serverIndex: activeServerIdx, serverName: currentServer?.server_name });
 
   // Lọc theo thanh tìm kiếm
   const filteredEpisodes = allEpisodes.filter(ep =>

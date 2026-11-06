@@ -3,12 +3,14 @@
 import { useState, useEffect, useRef, useCallback, useMemo, useEffectEvent } from "react";
 import { useSession } from "next-auth/react";
 import { useSearchParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import RelatedMovies from "@/components/RelatedMovies";
 import { getMovieDetail } from "@/lib/clientMovies";
 import WatchPlayer from "@/components/watch/WatchPlayer";
 import WatchMetadata from "@/components/watch/WatchMetadata";
 import WatchTabs from "@/components/watch/WatchTabs";
-import WatchServerDropdown from "@/components/watch/WatchServerDropdown";
+import { authHref } from "@/lib/authNavigation";
+import { watchHref } from "@/lib/watchNavigation";
 import WatchRightEpList from "@/components/watch/WatchRightEpList";
 import { Loader2, ArrowLeft } from "lucide-react";
 
@@ -74,8 +76,6 @@ export default function WatchClient({ slug }) {
 
   const [activeTab, setActiveTab] = useState("episodes");
   const [isDescExpanded, setIsDescExpanded] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(false);
-  const [favLoading, setFavLoading] = useState(false);
 
   const epFromUrl = searchParams.get("ep");
   const [selectedProvider, setSelectedProvider] = useState(() => {
@@ -112,22 +112,14 @@ export default function WatchClient({ slug }) {
     playbackRef.current = {};
   }, [currentEp?.name, currentEp?.m3u8, currentEp?.embed]);
 
-  useEffect(() => {
-    if (!accountEmail) return;
-    const controller = new AbortController();
-    fetch("/api/favorites/check?slug=" + encodeURIComponent(slug), { signal: controller.signal })
-      .then(response => response.ok ? response.json() : null)
-      .then(data => { if (!controller.signal.aborted) setIsFavorite(Boolean(data?.isFavorite)); })
-      .catch(() => {});
-    return () => controller.abort();
-  }, [slug, accountEmail]);
-
   const getPreviousSelection = useEffectEvent(() => ({
     previousServerIndex: selectedServer,
     previousEpisodeIndex: selectedEpisode,
     previousEpisodeName: currentEp?.name || epFromUrl || "",
-    requestedEpisode: epFromUrl,
+    requestedEpisode: epFromUrl || currentEp?.name,
     requestedServer: Number(searchParams.get("server") ?? -1),
+    requestedServerName: searchParams.get("serverName"),
+    requestedProvider: searchParams.get("provider"),
   }));
 
   useEffect(() => {
@@ -135,7 +127,7 @@ export default function WatchClient({ slug }) {
     let active = true;
 
     async function fetchAll() {
-      const { previousServerIndex, previousEpisodeIndex, previousEpisodeName, requestedEpisode, requestedServer } = getPreviousSelection();
+      const { previousServerIndex, previousEpisodeIndex, previousEpisodeName, requestedEpisode, requestedServer, requestedServerName, requestedProvider } = getPreviousSelection();
 
       setIsFetching(true);
       setMovie(null);
@@ -166,8 +158,15 @@ export default function WatchClient({ slug }) {
             .catch(() => { if (active) setRelatedMovies([]); });
 
           if (requestedEpisode) {
-            let matchedEpisode = findEpisodeIndex(mappedServers[requestedServer]?.items, requestedEpisode);
-            let matchedServer = matchedEpisode === -1 ? -1 : requestedServer;
+            const sameProvider = (!requestedProvider || requestedProvider === resDetail.movie.provider)
+              && (selectedProvider === "auto" || selectedProvider === resDetail.movie.provider);
+            const preferredServer = sameProvider
+              ? requestedServerName
+                ? mappedServers.findIndex(server => server.server_name === requestedServerName)
+                : requestedServer
+              : -1;
+            let matchedEpisode = findEpisodeIndex(mappedServers[preferredServer]?.items, requestedEpisode);
+            let matchedServer = matchedEpisode === -1 ? -1 : preferredServer;
 
             for (let i = 0; matchedServer === -1 && i < mappedServers.length; i += 1) {
               const items = mappedServers[i]?.items || [];
@@ -184,10 +183,10 @@ export default function WatchClient({ slug }) {
               setSelectedEpisode(matchedEpisode);
               setActiveChunk(Math.floor(matchedEpisode / 20));
             } else {
-              const fallbackServerIndex = Math.max(0, Math.min(previousServerIndex, mappedServers.length - 1));
+              const fallbackServerIndex = Math.max(0, Math.min(sameProvider ? previousServerIndex : 0, mappedServers.length - 1));
               const fallbackItems = mappedServers[fallbackServerIndex]?.items || [];
               const fallbackByName = findEpisodeIndex(fallbackItems, previousEpisodeName);
-              const fallbackByIndex = fallbackItems[previousEpisodeIndex] ? previousEpisodeIndex : 0;
+              const fallbackByIndex = sameProvider && fallbackItems[previousEpisodeIndex] ? previousEpisodeIndex : 0;
               const finalFallbackIndex = fallbackByName !== -1 ? fallbackByName : fallbackByIndex;
 
               if (fallbackItems[finalFallbackIndex]) {
@@ -227,6 +226,7 @@ export default function WatchClient({ slug }) {
         episode: currentEp.name || "1",
         episodeIndex: selectedEpisode,
         serverIndex: selectedServer,
+        serverName: servers[selectedServer]?.server_name,
         ...playbackRef.current,
       };
       try {
@@ -250,60 +250,29 @@ export default function WatchClient({ slug }) {
       }
     }, 30000);
     return () => clearInterval(historyTimerRef.current);
-  }, [movie, slug, selectedEpisode, selectedServer, currentEp, session]);
-
-  const handleToggleFavorite = async () => {
-    if (favLoading || !movie) return;
-    if (!session?.user?.email) { router.push('/login'); return; }
-    setFavLoading(true);
-    try {
-      const res = await fetch("/api/favorites", {
-        method: isFavorite ? "DELETE" : "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          slug,
-          canonicalKey: movie.canonicalKey,
-          movie: {
-            slug,
-            provider: movie.provider || "nguonc",
-            providerSlug: movie.providerSlug || slug,
-            canonicalKey: movie.canonicalKey || `${movie.origin_name || movie.name || slug}-${movie.year || ""}`,
-            name: movie.name,
-            origin_name: movie.origin_name || movie.original_name || "",
-            year: movie.year || "",
-            thumb_url: movie.thumb_url || movie.poster_url,
-            poster_url: movie.poster_url || movie.thumb_url,
-          },
-          userEmail: session?.user?.email,
-        }),
-      });
-      if (res.ok) {
-        setIsFavorite(prev => !prev);
-        window.dispatchEvent(new Event('favoritesUpdated'));
-      }
-    } catch (err) {
-      console.error("Lỗi yêu thích:", err);
-    } finally {
-      setFavLoading(false);
-    }
-  };
+  }, [movie, slug, selectedEpisode, selectedServer, currentEp, session, servers]);
 
   const handleEpisodeChange = useCallback((index, epName) => {
     if (index === selectedEpisode) return;
     setSelectedEpisode(index);
     setActiveChunk(Math.floor(index / 20));
-    router.replace(`/watch/${slug}?ep=${encodeURIComponent(epName)}&provider=${selectedProvider}&server=${selectedServer}`, { scroll: false });
+    router.replace(watchHref({ slug, episode: epName, provider: movie?.provider, serverIndex: selectedServer,
+      serverName: servers[selectedServer]?.server_name }), { scroll: false });
     playerRef.current?.scrollIntoView({ block: "start" });
-  }, [selectedEpisode, router, slug, selectedProvider, selectedServer]);
+  }, [selectedEpisode, router, slug, movie?.provider, selectedServer, servers]);
 
   const handleServerChange = useCallback((index) => {
     if (index === selectedServer) return;
+    const server = servers[index];
+    if (!server?.items.length) return;
+    const match = findEpisodeIndex(server.items, currentEp?.name);
+    const episodeIndex = Math.max(0, match);
     setSelectedServer(index);
-    setSelectedEpisode(0);
-    setActiveChunk(0);
-    const episode = servers[index]?.items?.[0]?.name;
-    if (episode) router.replace(`/watch/${slug}?ep=${encodeURIComponent(episode)}&provider=${selectedProvider}&server=${index}`, { scroll: false });
-  }, [selectedServer, selectedProvider, servers, router, slug]);
+    setSelectedEpisode(episodeIndex);
+    setActiveChunk(Math.floor(episodeIndex / 20));
+    router.replace(watchHref({ slug, episode: server.items[episodeIndex].name, provider: movie?.provider,
+      serverIndex: index, serverName: server.server_name }), { scroll: false });
+  }, [selectedServer, servers, currentEp?.name, movie?.provider, router, slug]);
 
   if (isFetching) return <WatchSkeleton />;
 
@@ -321,7 +290,7 @@ export default function WatchClient({ slug }) {
     );
   }
 
-  const genre = movie.category?.["3"]?.list?.[0]?.name || "";
+  const genre = movie.category?.["2"]?.list?.[0]?.name || "";
   const country = movie.category?.["4"]?.list?.[0]?.name || "";
   const epName = currentEp?.name;
   const resumeSeconds = resumeHistory && resumeHistory.email === accountEmail && resumeHistory.key === movie.canonicalKey
@@ -334,39 +303,31 @@ export default function WatchClient({ slug }) {
 
       {/* NÚT QUAY LẠI PHÍA TRÊN BÊN TRÁI CHUẨN PHA LÊ MOONLIGHT */}
       <div className="max-w-[1800px] mx-auto md:px-4 xl:px-8 pt-2 pb-4">
-        <button
-          onClick={() => router.back()}
+        <Link href={`/movie/${encodeURIComponent(slug)}`}
           className="px-4 py-2 glass-surface border border-white/10 text-[#b8b8b8] hover:text-[#ffffff] rounded-xl font-bold text-[10px] uppercase transition-all duration-300 hover:border-[#e8e8e8]/40 shadow-lg active:scale-95 flex items-center gap-2 cursor-pointer focus:outline-none"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
-          Quay lại
-        </button>
+          Chi tiết phim
+        </Link>
       </div>
 
       {/* KHUNG KHỐI CHÍNH TĂNG ĐỘ RỘNG MAX-W-[1800PX] CHUẨN ĐIỆN ẢNH IMAX */}
-      <div className="w-full max-w-[1800px] mx-auto md:px-4 xl:px-8 grid grid-cols-1 xl:grid-cols-[1fr_300px] 2xl:grid-cols-[minmax(0,1fr)_340px] gap-6 items-start">
+      <div className="w-full max-w-[1800px] mx-auto md:px-4 xl:px-8 grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_300px] 2xl:grid-cols-[minmax(0,1fr)_340px] gap-6 items-start">
 
         {/* KHỐI TRÁI: PLAYER CHÍNH VÀ METADATA TẬP PHIM */}
         <div className="min-w-0 w-full space-y-5">
+          <h1 className="break-words text-xl font-semibold md:text-2xl">{movie.name}</h1>
           <div ref={playerRef}>
             <WatchPlayer
               movie={movie}
               currentEp={currentEp}
               epName={epName}
+              loginHref={authHref("/login", watchHref({ slug, episode: epName, provider: movie.provider,
+                serverIndex: selectedServer, serverName: servers[selectedServer]?.server_name }))}
               onProgress={progress => { playbackRef.current = progress; }}
               resumeSeconds={resumeSeconds}
             />
           </div>
-          <WatchMetadata
-            movie={movie}
-            genre={genre}
-            country={country}
-            isDescExpanded={isDescExpanded}
-            setIsDescExpanded={setIsDescExpanded}
-            isFavorite={Boolean(accountEmail && isFavorite)}
-            favLoading={favLoading}
-            onToggleFavorite={handleToggleFavorite}
-          />
           <div className="watch-episode-controls">
             <WatchTabs
               activeTab={activeTab}
@@ -382,22 +343,35 @@ export default function WatchClient({ slug }) {
               handleEpisodeChange={handleEpisodeChange}
               movie={movie}
               selectedProvider={selectedProvider}
+              activeProvider={movie.provider}
               setSelectedProvider={setSelectedProvider}
             />
           </div>
+          <WatchMetadata
+            movie={movie}
+            genre={genre}
+            country={country}
+            isDescExpanded={isDescExpanded}
+            setIsDescExpanded={setIsDescExpanded}
+          />
+          <details className="scroll-mt-20 rounded-xl border border-white/10 p-3 text-sm">
+            <summary className="cursor-pointer font-medium">Trợ giúp phát phim</summary>
+            <p className="mt-2 text-on-surface-variant">Nếu video không tải, kiểm tra kết nối rồi thử lại. Anh có thể chọn máy chủ khác trong Tập phim. Nếu máy chủ mới thiếu tập đang xem, danh sách sẽ mở tập đầu tiên của máy chủ đó.</p>
+          </details>
         </div>
 
         {/* KHỐI PHẢI: ASIDE PANEL GỌN GÀNG KÍNH MỜ XANH ĐÊM (CUỘN TRÔI THEO TRANG TRƠN TRU) */}
         <aside className="watch-episode-controls w-full space-y-5 min-w-0 glass-surface border border-white/5 p-4 rounded-[28px] ">
-          <WatchServerDropdown servers={servers} selectedServer={selectedServer} handleServerChange={handleServerChange} />
-          <WatchRightEpList
-            currentEpisodes={currentEpisodes}
-            episodeChunks={episodeChunks}
-            activeChunk={activeChunk}
-            setActiveChunk={setActiveChunk}
-            selectedEpisode={selectedEpisode}
-            handleEpisodeChange={handleEpisodeChange}
-          />
+          <div className="hidden xl:block">
+            <WatchRightEpList
+              currentEpisodes={currentEpisodes}
+              episodeChunks={episodeChunks}
+              activeChunk={activeChunk}
+              setActiveChunk={setActiveChunk}
+              selectedEpisode={selectedEpisode}
+              handleEpisodeChange={handleEpisodeChange}
+            />
+          </div>
 
           {/* KHAY ĐỀ XUẤT LIÊN QUAN CHUẨN MOONLIGHT GOLD */}
           <div className="border-t border-white/5 pt-4">

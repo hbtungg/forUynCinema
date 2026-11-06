@@ -50,7 +50,7 @@ function Playback({ stream, embed, title, onProgress, resumeSeconds }) {
       {state === 'error' ? (
         <div className="absolute inset-0 grid place-content-center gap-2 p-2 text-center">
           <p role="alert" className="text-sm">Không thể phát phim từ nguồn này.</p>
-          <p className="text-xs text-on-surface-variant">Thử lại hoặc chọn máy chủ khác.</p>
+          <p className="text-xs text-on-surface-variant">Kiểm tra kết nối hoặc chọn máy chủ khác trong Tập phim.</p>
           <button type="button" onClick={() => restart(stream ? 'hls' : 'embed')} className="button-primary justify-self-center px-4 text-sm">Thử lại</button>
         </div>
       ) : mode === 'hls' ? (
@@ -78,7 +78,7 @@ function Playback({ stream, embed, title, onProgress, resumeSeconds }) {
   );
 }
 
-export default function WatchPlayer({ movie, currentEp, epName, onProgress, resumeSeconds }) {
+export default function WatchPlayer({ movie, currentEp, epName, loginHref, onProgress, resumeSeconds }) {
   const { data: session, status } = useSession();
   const stream = currentEp?.m3u8;
   const embedUrl = currentEp?.embed;
@@ -95,7 +95,7 @@ export default function WatchPlayer({ movie, currentEp, epName, onProgress, resu
       <div className={frame + ' grid place-content-center justify-items-center gap-2 p-3 text-center'}>
         <Lock size={20} aria-hidden="true" />
         <p className="text-sm text-on-surface-variant">Đăng nhập để xem phim.</p>
-        <Link className="button-primary inline-flex items-center px-4 text-sm" href="/login">Đăng nhập</Link>
+        <Link className="button-primary inline-flex items-center px-4 text-sm" href={loginHref}>Đăng nhập</Link>
       </div>
     );
   }

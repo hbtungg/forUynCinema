@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { Star } from 'lucide-react';
-import FavoriteButton from './FavoriteButton';
 import MovieArtwork from './MovieArtwork';
 
 export default function MovieCard({ movie }) {
@@ -19,13 +18,10 @@ export default function MovieCard({ movie }) {
           </span>
         )}
         {language && (
-          <span className="absolute bottom-2 left-2 max-w-[calc(100%-4rem)] truncate rounded-md poster-tag px-2 py-1 text-[11px] font-medium text-white">
+          <span className="absolute bottom-2 left-2 max-w-[calc(100%-1rem)] truncate rounded-md poster-tag px-2 py-1 text-[11px] font-medium text-white">
             {language}
           </span>
         )}
-        <div className="movie-card-favorite clear-glass glass-action absolute right-2 bottom-2 z-10">
-          <FavoriteButton phim={movie} compact />
-        </div>
       </div>
       <Link href={'/movie/' + movie.slug} prefetch={false} className="block rounded-xl after:absolute after:inset-0 after:rounded-xl focus-visible:after:ring-2 focus-visible:after:ring-white">
         <h3 className="mt-2 min-h-10 break-words text-sm font-semibold leading-5 line-clamp-2">{movie.name}</h3>

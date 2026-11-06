@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Search } from 'lucide-react';
@@ -12,6 +12,7 @@ export default function SearchBox() {
   const [open, setOpen] = useState(false);
   const [result, setResult] = useState(null);
   const container = useRef(null);
+  const suggestionsId = useId();
   const query = keyword.trim();
   const showSuggestions = open && query.length >= 2;
   const currentResult = result?.query === query ? result : null;
@@ -59,14 +60,14 @@ export default function SearchBox() {
         router.push('/search?q=' + encodeURIComponent(query));
       }}>
       <input type="search" value={keyword} placeholder="Tìm phim" aria-label="Tìm kiếm phim"
-        enterKeyHint="search" autoComplete="off" className="min-h-11 w-32 min-w-0 bg-transparent pl-2 text-base sm:text-sm xl:w-44"
+        aria-controls={showSuggestions ? suggestionsId : undefined} enterKeyHint="search" autoComplete="off" className="min-h-11 w-32 min-w-0 bg-transparent pl-2 text-base sm:text-sm xl:w-44"
         onFocus={() => setOpen(true)}
         onChange={event => { setKeyword(event.target.value); setOpen(true); }} />
       <button type="submit" aria-label="Tìm kiếm" className="grid size-11 shrink-0 place-items-center rounded-full text-on-surface-variant hover:text-white">
         <Search size={18} aria-hidden="true" />
       </button>
       {showSuggestions && (
-        <div className="absolute top-full right-0 z-50 mt-2 w-72 max-w-[90vw] rounded-xl clear-glass glass-popover p-2">
+        <div id={suggestionsId} className="absolute top-full right-0 z-50 mt-2 w-72 max-w-[90vw] rounded-xl clear-glass glass-popover p-2">
           {!currentResult || currentResult.error || !currentResult.items.length ? (
             <p role="status" className="p-3 text-sm text-on-surface-variant">
               {!currentResult ? 'Đang tìm phim…' : currentResult.error ? 'Không tải được gợi ý. Nhấn Tìm kiếm để thử nguồn khác.' : 'Không tìm thấy gợi ý.'}
@@ -75,7 +76,7 @@ export default function SearchBox() {
             <ul aria-label="Phim gợi ý">
               {currentResult.items.map(movie => (
                 <li key={movie.slug}>
-                  <Link href={'/watch/' + movie.slug} prefetch={false} onClick={() => setOpen(false)}
+                  <Link href={'/movie/' + movie.slug} prefetch={false} onClick={() => setOpen(false)}
                     className="flex min-h-11 items-center gap-3 rounded-lg p-2 text-sm hover:bg-white/10">
                     <MovieArtwork movie={movie} decorative sizes="32px" className="h-11 w-8 shrink-0 rounded object-cover" />
                     <span className="min-w-0">

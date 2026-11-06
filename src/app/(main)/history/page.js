@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
+import { authHref } from '@/lib/authNavigation';
+import { watchHref } from '@/lib/watchNavigation';
 import { getMovieDetail } from '@/lib/clientMovies';
 import { ArrowLeft, X, Sparkles, Clock, Loader2, HelpCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -197,6 +199,16 @@ export default function HistoryPage() {
   const updatedMovies = history.filter((item) => episodeUpdates[item.slug]);
   const totalPages = Math.ceil(totalMovies / ITEMS_PER_PAGE);
 
+  if (status === 'unauthenticated') {
+    return (
+      <section className="mx-auto max-w-lg space-y-4 rounded-2xl border border-white/10 p-6 text-center">
+        <h1 className="text-xl font-semibold">Lịch sử xem</h1>
+        <p className="text-sm text-on-surface-variant">Đăng nhập để xem lại phim và tiếp tục từ tập đã lưu.</p>
+        <Link href={authHref('/login', '/history')} className="button-primary inline-flex items-center px-4 text-sm">Đăng nhập</Link>
+      </section>
+    );
+  }
+
   return (
     <div className="w-full min-h-screen bg-transparent text-[#ffffff] select-none font-sans" style={{ fontFamily: "var(--font-main)" }}>
       <div className="px-4 md:px-12 py-6">
@@ -231,7 +243,7 @@ export default function HistoryPage() {
 
         {error && (
           <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-neutral-600/20 bg-neutral-950/10 px-5 py-4">
-            <p className="text-xs font-semibold text-neutral-300 tracking-wide">{error}</p>
+            <p role="alert" className="text-sm font-medium text-neutral-300">{error}</p>
             <button
               type="button"
               onClick={() => loadHistory(currentPage)}
@@ -255,7 +267,8 @@ export default function HistoryPage() {
               </div>
 
               <Link
-                href={`/watch/${updatedMovies[0].slug}?ep=${encodeURIComponent(episodeUpdates[updatedMovies[0].slug]?.latestEpisodeName || '1')}`}
+                href={watchHref({ slug: updatedMovies[0].slug, provider: updatedMovies[0].provider,
+                  episode: episodeUpdates[updatedMovies[0].slug].latestEpisodeName })}
                 className="px-5 py-2.5 bg-[#e8e8e8]/10 hover:bg-[#e8e8e8] border border-[#e8e8e8]/20 text-[#e8e8e8] hover:text-[#050505] font-bold text-[10px] uppercase tracking-widest rounded-xl transition-all duration-300 active:scale-95 text-center shadow-md"
               >
                 Xem tập mới nhất
@@ -283,7 +296,7 @@ export default function HistoryPage() {
 
                 return (
                   <article key={item.slug} className="group/card flex min-w-0 flex-col rounded-2xl border border-white/10 bg-white/[0.035] p-2.5">
-                    <Link href={`/watch/${item.slug}?ep=${encodeURIComponent(episode)}`}
+                    <Link href={watchHref({ ...item, episode })}
                       className="grid min-w-0 grid-cols-[minmax(0,2fr)_minmax(0,3fr)] items-center gap-3 rounded-xl sm:grid-cols-1 sm:items-start">
                       <div className="aspect-video overflow-hidden rounded-xl bg-surface-container">
                         <img src={getDisplayImage(item)} alt="" loading="lazy"
@@ -300,7 +313,7 @@ export default function HistoryPage() {
 
                     <div className="mt-auto flex min-w-0 items-center justify-end gap-2 pt-2">
                       {update && (
-                        <Link href={`/watch/${item.slug}?ep=${encodeURIComponent(update.latestEpisodeName)}`}
+                        <Link href={watchHref({ slug: item.slug, episode: update.latestEpisodeName, provider: item.provider })}
                           className="glass-trim mr-auto inline-flex min-h-11 min-w-0 items-center gap-1.5 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-white">
                           <Sparkles className="size-3.5 shrink-0" aria-hidden="true" />
                           <span className="min-w-0 break-words">Tập mới · {getEpisodeLabel(update.latestEpisodeName)}</span>

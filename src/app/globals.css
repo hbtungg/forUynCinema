@@ -202,12 +202,6 @@ html { scroll-padding-top: calc(var(--header-clearance) + 12px); }
   border: 1px solid var(--glass-border);
 }
 .rail-control:hover { background: rgb(255 255 255 / .1); }
-.movie-card-favorite {
-  width: 44px;
-  height: 44px;
-  border-radius: .75rem;
-
-}
 .watch-frame { aspect-ratio: 16 / 9; }
 .watch-frame > :is(video, iframe) { position: absolute; inset: 0; width: 100%; height: 100%; }
 
@@ -361,3 +355,10 @@ html { scroll-padding-top: calc(var(--header-clearance) + 12px); }
 .watch-progress::-webkit-progress-bar { background: transparent; }
 .watch-progress::-webkit-progress-value { border-radius: 4px; background: white; }
 .watch-progress::-moz-progress-bar { border-radius: 4px; background: white; }
+
+.app-sidebar :focus-visible { outline-offset: -3px; }
+html { scroll-padding-bottom: var(--app-dock-clearance); }
+@media (min-width: 768px) { html { scroll-padding-bottom: 12px; } }
+@media (max-width: 639px) {
+  .cinema-hero { height: calc(clamp(270px, 84vw, 380px) + var(--hero-top-bleed)); }
+}

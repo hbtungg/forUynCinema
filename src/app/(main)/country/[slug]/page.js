@@ -4,71 +4,37 @@ import MovieCard from '@/components/MovieCard';
 import { ArrowLeft } from 'lucide-react';
 
 // 1. BẢNG TRA CỨU TÊN QUỐC GIA CÓ DẤU CHUẨN ĐIỆN ẢNH
-const countryMap = {
-  'han-quoc': 'Hàn Quốc',
-  'trung-quoc': 'Trung Quốc',
-  'nhat-ban': 'Nhật Bản',
-  'thai-lan': 'Thái Lan',
-  'au-my': 'Âu Mỹ',
-  'dai-loan': 'Đài Loan',
-  'an-do': 'Ấn Độ',
-  'hong-kong': 'Hồng Kông',
-  'viet-nam': 'Việt Nam',
-  'phap': 'Pháp',
-  'duc': 'Đức',
-  'anh': 'Anh',
-  'canada': 'Canada',
-};
+import { countryLabels } from "@/lib/countryLabels";
 
 // 2. CẬP NHẬT METADATA CHO TAB TRÌNH DUYỆT
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  const countryName = countryMap[slug] || slug.replace(/-/g, ' ');
+  const countryName = countryLabels[slug] || slug.replace(/-/g, ' ');
 
   return {
-    title: `Phim ${countryName} | Midnight Cinema`,
+    title: `Phim ${countryName}`,
   };
 }
 
 export default async function CountryPage({ params, searchParams }) {
   const { slug } = await params;
   const sParams = await searchParams;
-  const page = Number(sParams?.page || 1);
-  const typeFilter = sParams?.type || ''; 
+  const requestedPage = Number(sParams?.page);
+  const page = Number.isSafeInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+  const typeFilter = ['series', 'single'].includes(sParams?.type) ? sParams.type : '';
   
-  const displayName = countryMap[slug] || slug.replace(/-/g, ' ');
+  const displayName = countryLabels[slug] || slug.replace(/-/g, ' ');
 
-  // 1. LẤY DỮ LIỆU BAN ĐẦU ĐỂ BIẾT TỔNG SỐ TRANG
-  const initialData = await getMoviesByCountry(slug, page, typeFilter);
-  const totalPagesFromAPI = initialData.paginate?.total_pages || initialData.total_pages || (page + 50);
-
-  let finalItems = [];
-  let fetchPage = page;
-  const targetCount = 12;
-
-  // 2. MÁY HÚT PHIM XUYÊN TRANG THÔNG MINH BỌC THÉP
-  while (finalItems.length < targetCount && fetchPage <= totalPagesFromAPI && fetchPage < page + 10) {
-    const data = (fetchPage === page) ? initialData : await getMoviesByCountry(slug, fetchPage, typeFilter);
-    
-    if (!data.items || data.items.length === 0) break;
-
-    const filtered = data.items.filter(phim => {
-      if (typeFilter === '') return true;
-      const label = (phim.current_episode || "").toLowerCase();
-      const isSeries = label.includes('tập') || label.includes('/') || (phim.episode_total && phim.episode_total !== "1");
-      return typeFilter === 'series' ? isSeries : !isSeries;
-    });
-
-    finalItems = [...finalItems, ...filtered];
-    if (typeFilter === '') break; 
-    if (finalItems.length < targetCount) {
-      fetchPage++;
-    } else {
-      break;
-    }
-  }
-
-  const displayItems = finalItems.slice(0, 15);
+  const data = await getMoviesByCountry(slug, page, typeFilter);
+  const totalPagesFromAPI = data.paginate?.total_pages || data.total_pages || 1;
+  // Keep each provider page distinct when the provider does not filter by format.
+  const displayItems = (data.items || []).filter(movie => {
+    if (!typeFilter) return true;
+    const episode = String(movie.current_episode || '').toLowerCase();
+    const totalEpisodes = parseInt(movie.total_episodes || movie.episode_total, 10);
+    const isSeries = episode.includes('tập') || episode.includes('/') || totalEpisodes > 1;
+    return typeFilter === 'series' ? isSeries : !isSeries;
+  });
 
   return (
     /* 🚀 FIX CHÍ MẠNG: Đổi sang bg-transparent lộ Shader, gạt bỏ hoàn toàn Header/Footer thừa nội bộ */
@@ -129,7 +95,7 @@ export default async function CountryPage({ params, searchParams }) {
             ))
           ) : (
             <div className="col-span-full py-24 text-center text-[10px] text-[#808080] font-bold uppercase tracking-widest italic">
-              Hết phim thuộc quốc gia này rồi... 🌌
+              {data.source === "empty" ? "Chưa tải được danh sách phim." : "Trang này chưa có phim phù hợp với bộ lọc."}
             </div>
           )}
         </div>
@@ -164,7 +130,8 @@ export default async function CountryPage({ params, searchParams }) {
 
               return Array.from(new Set(pages)).filter(p => p <= totalPagesFromAPI).sort((a,b) => a - b).map(p => (
                 <Link 
-                  key={p} 
+                  key={p}
+                  aria-current={p === page ? "page" : undefined}
                   href={`/country/${slug}?type=${typeFilter}&page=${p}`}
                   className={`w-10 h-10 flex items-center justify-center rounded-xl font-bold font-mono text-xs transition-all duration-200 border ${
                     page === p 

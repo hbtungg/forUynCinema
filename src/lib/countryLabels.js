@@ -1,0 +1,15 @@
+export const countryLabels = {
+  'han-quoc': 'Hàn Quốc',
+  'trung-quoc': 'Trung Quốc',
+  'nhat-ban': 'Nhật Bản',
+  'thai-lan': 'Thái Lan',
+  'au-my': 'Âu Mỹ',
+  'dai-loan': 'Đài Loan',
+  'an-do': 'Ấn Độ',
+  'hong-kong': 'Hồng Kông',
+  'viet-nam': 'Việt Nam',
+  'phap': 'Pháp',
+  'duc': 'Đức',
+  'anh': 'Anh',
+  'canada': 'Canada',
+};
