@@ -11,7 +11,7 @@ export default function MainLayout({ children }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
 
   return (
-    <div className="relative min-h-screen text-[#FAFAFA] font-sans antialiased bg-transparent selection:bg-[#e8e8e8]/30">
+    <div data-rail-expanded={!sidebarCollapsed} className="app-shell relative min-h-screen text-[#FAFAFA] font-sans antialiased bg-transparent selection:bg-[#e8e8e8]/30">
       
       {/* 1. Thanh Header thắp sáng trọn vẹn kịch trần trên cùng (fixed h-[72px]) */}
       <Header />
@@ -24,8 +24,7 @@ export default function MainLayout({ children }) {
 
       {/* 3. 🚀 KHỐI NỘI DUNG CHÍNH (Nằm hoàn toàn bên phải Sidebar và cuộn dọc tự nhiên) */}
       <div 
-        className={`app-content mobile-nav-clearance min-h-screen flex flex-col
-          ${sidebarCollapsed ? 'md:pl-16' : 'md:pl-64'}`}
+        className="app-content mobile-nav-clearance min-h-screen flex flex-col"
       >
         {/* Ruột nội dung chính chứa các khay phim */}
         <main className="app-main flex-grow relative">

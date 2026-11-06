@@ -10,20 +10,20 @@ export default function MovieCard({ movie }) {
 
   return (
     <article className="group relative min-w-0">
-      <div className="relative aspect-[2/3] overflow-hidden rounded-xl border border-border-subtle bg-surface-container">
+      <div className="relative aspect-[2/3] overflow-hidden rounded-xl bg-surface-container">
         <MovieArtwork movie={movie} decorative sizes="(max-width: 639px) 45vw, (max-width: 1023px) 30vw, 18vw"
           className="h-full w-full object-cover motion-safe:transition-transform motion-safe:duration-300 [@media(hover:hover)]:group-hover:scale-[1.03]" />
         {episode && (
-          <span className="absolute left-2 top-2 max-w-[calc(100%-1rem)] truncate rounded-md bg-black/80 px-2 py-1 text-[11px] font-medium text-white">
+          <span className="absolute left-2 top-2 max-w-[calc(100%-1rem)] truncate rounded-md poster-tag px-2 py-1 text-[11px] font-medium text-white">
             {episode}
           </span>
         )}
         {language && (
-          <span className="absolute bottom-2 left-2 max-w-[calc(100%-4rem)] truncate rounded-md bg-black/80 px-2 py-1 text-[11px] font-medium text-white">
+          <span className="absolute bottom-2 left-2 max-w-[calc(100%-4rem)] truncate rounded-md poster-tag px-2 py-1 text-[11px] font-medium text-white">
             {language}
           </span>
         )}
-        <div className="movie-card-favorite absolute right-2 bottom-2 z-10">
+        <div className="movie-card-favorite clear-glass glass-action absolute right-2 bottom-2 z-10">
           <FavoriteButton phim={movie} compact />
         </div>
       </div>

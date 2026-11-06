@@ -35,7 +35,7 @@
 }
 :root {
   color-scheme: dark;
-  --glass-fill: rgb(255 255 255 / .055);
+  --glass-fill: rgb(255 255 255 / .065);
   --glass-border: rgb(255 255 255 / .16);
   --glass-blur: 22px;
   --glass-highlight: inset 0 1px 0 rgb(255 255 255 / .12);
@@ -75,8 +75,6 @@ body {
   .hover-float:hover { transform: translateY(-2px); }
 }
 /* Restrict expensive blur to controls and floating surfaces. */
-header { --glass-blur: 22px; }
-header.glass-surface { background: rgb(5 5 5 / .48); }
 .glass-surface .glass-surface { -webkit-backdrop-filter: none;
     backdrop-filter: none; box-shadow: var(--glass-highlight); }
 input, select, textarea { accent-color: #fff; }
@@ -88,17 +86,7 @@ select option { background: #0b0b0b; color: #fff; }
 }
 :where(button, a) { -webkit-tap-highlight-color: transparent; }
 :where(h1, h2, h3) { text-wrap: balance; }
-.floating-navigation {
-  left: 12px;
-  right: 12px;
-  bottom: max(12px, env(safe-area-inset-bottom));
-  border: 1px solid var(--glass-border);
-  border-radius: 22px;
-  background: rgb(255 255 255 / .065);
-  box-shadow: var(--glass-highlight), var(--glass-shadow);
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-    backdrop-filter: blur(var(--glass-blur));
-}
+
 .floating-navigation a, .floating-navigation button { min-width: 44px; min-height: 44px; position: relative; }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .glass-surface, .midnight-glass, .floating-navigation { background: rgb(11 11 11 / .96); }
@@ -125,22 +113,14 @@ select option { background: #0b0b0b; color: #fff; }
 }
 /* Cinema layout and safe-area offsets shared by the header, dock and player. */
 :root {
-  --app-header-height: calc(64px + env(safe-area-inset-top, 0px));
+  --app-header-height: 58px;
+  --header-top: max(8px, env(safe-area-inset-top, 0px));
+  --header-clearance: calc(var(--app-header-height) + var(--header-top));
   --app-dock-clearance: calc(84px + env(safe-area-inset-bottom, 0px));
   --cinema-gutter: clamp(12px, 2.5vw, 32px);
 }
-html { scroll-padding-top: calc(var(--app-header-height) + 12px); }
-.app-header {
-  height: var(--app-header-height);
-  padding-top: env(safe-area-inset-top, 0px);
-  padding-inline: max(var(--cinema-gutter), env(safe-area-inset-left, 0px)) max(var(--cinema-gutter), env(safe-area-inset-right, 0px));
-}
-.app-header.glass-surface, .floating-navigation {
-  --glass-blur: 10px;
-  background: rgb(11 11 11 / .93);
-}
-.app-sidebar { top: var(--app-header-height); }
-.app-content { padding-top: var(--app-header-height); }
+html { scroll-padding-top: calc(var(--header-clearance) + 12px); }
+
 .app-main {
   min-width: 0;
   padding: 14px max(var(--cinema-gutter), env(safe-area-inset-right, 0px)) 24px max(var(--cinema-gutter), env(safe-area-inset-left, 0px));
@@ -156,38 +136,45 @@ html { scroll-padding-top: calc(var(--app-header-height) + 12px); }
   .mobile-nav-clearance { padding-bottom: 0; }
 }
 @media (max-height: 450px) and (orientation: landscape) and (max-width: 767px) {
-  :root { --app-header-height: calc(48px + env(safe-area-inset-top, 0px)); }
+  :root { --app-header-height: 48px; }
 }
 .cinema-hero {
-  height: clamp(280px, 92vw, 410px);
-  min-height: 0;
-  border-radius: var(--radius-xl);
+  height: calc(clamp(280px, 92vw, 410px) + var(--hero-top-bleed));
+  margin: calc(-1 * var(--hero-top-bleed)) calc(-1 * var(--hero-edge-right)) 0 calc(-1 * (var(--rail-offset) + var(--hero-edge-left)));
+  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
 }
-.cinema-hero-scrim { background: linear-gradient(0deg, #050505 0%, rgb(5 5 5 / .72) 38%, transparent 78%); }
+.cinema-hero-scrim {
+  background: linear-gradient(0deg, #080808 0%, rgb(5 5 5 / .78) 21%, rgb(5 5 5 / .12) 53%, transparent 76%);
+}
 .cinema-hero .swiper { --swiper-navigation-size: 18px; --swiper-navigation-color: white; }
 .cinema-hero .swiper :is(.swiper-button-prev, .swiper-button-next) {
   top: auto;
-  bottom: 2px;
+  bottom: 14px;
   margin: 0;
   width: 44px;
   height: 44px;
   border-radius: .75rem;
 }
+.cinema-hero .swiper .swiper-button-prev { left: auto; right: calc(var(--hero-edge-right) + 52px); }
+.cinema-hero .swiper .swiper-button-next { right: calc(var(--hero-edge-right) + 4px); }
 .cinema-hero .swiper .swiper-navigation-icon { width: 16px; height: 16px; }
 .hero-pause {
   position: absolute;
   z-index: 2;
-  right: 54px;
-  bottom: 2px;
+  right: calc(var(--hero-edge-right) + 102px);
+  bottom: 14px;
   min-height: 44px;
   padding-inline: 8px;
   font-size: .75rem;
   color: #eee;
 }
 @media (min-width: 768px) {
-  .cinema-hero { height: clamp(320px, 40vw, 540px); }
-  .cinema-hero-scrim { background: linear-gradient(90deg, rgb(5 5 5 / .96), rgb(5 5 5 / .60) 44%, transparent 82%); }
-  .hero-pause { border-radius: .5rem; background: rgb(5 5 5 / .75); }
+  .cinema-hero { height: calc(clamp(340px, 40vw, 550px) + var(--hero-top-bleed)); }
+  .cinema-hero-scrim {
+    background:
+      linear-gradient(0deg, #080808, transparent 34%),
+      linear-gradient(90deg, rgb(5 5 5 / .40), rgb(5 5 5 / .76) 21%, rgb(5 5 5 / .49) 48%, transparent 84%);
+  }
 }
 .film-rail, .film-genre-rail {
   display: flex;
@@ -219,8 +206,7 @@ html { scroll-padding-top: calc(var(--app-header-height) + 12px); }
   width: 44px;
   height: 44px;
   border-radius: .75rem;
-  background: rgb(5 5 5 / .82);
-  border: 1px solid var(--glass-border);
+
 }
 .watch-frame { aspect-ratio: 16 / 9; }
 .watch-frame > :is(video, iframe) { position: absolute; inset: 0; width: 100%; height: 100%; }
@@ -234,3 +220,144 @@ html { scroll-padding-top: calc(var(--app-header-height) + 12px); }
   padding: env(safe-area-inset-top, 0px) max(var(--cinema-gutter), env(safe-area-inset-right, 0px)) env(safe-area-inset-bottom, 0px) max(var(--cinema-gutter), env(safe-area-inset-left, 0px));
 }
 .welcome-scrim { background: linear-gradient(90deg, rgb(5 5 5 / .88), rgb(5 5 5 / .35)); }
+
+/* The hero is part of the page, so its artwork is the backdrop for the fixed chrome. */
+.app-shell {
+  --rail-offset: 0px;
+  --main-top: 14px;
+  --hero-top-bleed: calc(var(--header-clearance) + var(--main-top));
+  --hero-edge-left: max(var(--cinema-gutter), env(safe-area-inset-left, 0px));
+  --hero-edge-right: max(var(--cinema-gutter), env(safe-area-inset-right, 0px));
+  background:
+    radial-gradient(ellipse 65% 440px at 0% 260px, rgb(255 255 255 / .085), transparent),
+    linear-gradient(100deg, #121212 0%, #090909 36%, #080808 78%);
+}
+.app-content { padding-top: var(--header-clearance); padding-left: var(--rail-offset); }
+.app-main { padding-top: var(--main-top); }
+.app-header {
+  top: var(--header-top);
+  left: max(8px, env(safe-area-inset-left, 0px));
+  right: max(8px, env(safe-area-inset-right, 0px));
+  height: var(--app-header-height);
+  padding-inline: clamp(10px, 1.65vw, 24px);
+  border-radius: 17px;
+}
+.app-header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.app-sidebar {
+  top: calc(var(--header-clearance) + 14px);
+  left: max(12px, env(safe-area-inset-left, 0px));
+  max-height: calc(100dvh - var(--header-clearance) - 30px);
+  border-radius: 21px;
+}
+.app-sidebar nav { min-height: min-content; }
+.app-sidebar :is(a, button), .floating-navigation :is(a, button) {
+  transition: background-color 180ms var(--ease-refined), color 180ms var(--ease-refined);
+}
+.app-sidebar [aria-current="page"], .floating-navigation [aria-current="page"] {
+  color: white;
+  background: linear-gradient(140deg, rgb(255 255 255 / .22), rgb(255 255 255 / .07));
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / .26);
+}
+.floating-navigation { border-radius: 20px; }
+@media (min-width: 768px) {
+  :root { --header-top: max(12px, env(safe-area-inset-top, 0px)); }
+  .app-shell { --rail-offset: 84px; }
+  .app-shell[data-rail-expanded="true"] { --rail-offset: 270px; }
+  .app-header {
+    left: max(12px, env(safe-area-inset-left, 0px));
+    right: max(12px, env(safe-area-inset-right, 0px));
+  }
+}
+.cinema-hero-copy {
+  padding: var(--header-clearance) clamp(16px, 4vw, 54px) 70px;
+  padding-left: calc(var(--rail-offset) + var(--hero-edge-left) + clamp(16px, 4vw, 54px));
+  padding-right: calc(var(--hero-edge-right) + clamp(16px, 4vw, 54px));
+}
+@media (min-width: 768px) {
+  .cinema-hero-copy { padding-bottom: 42px; }
+}
+
+/* One optical layer per floating surface. Edge reflections and trim use no filter. */
+.clear-glass, .app-header::before, .glass-trim {
+  --glass-wash: linear-gradient(145deg, rgb(255 255 255 / .16), rgb(255 255 255 / .04) 34%, transparent 67%, rgb(255 255 255 / .065));
+  background: var(--glass-wash), var(--optical-tint, rgb(9 9 9 / .27));
+  border: 1px solid rgb(255 255 255 / .20);
+  border-top-color: rgb(255 255 255 / .35);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / .12), inset 0 -1px 0 rgb(255 255 255 / .055), 0 10px 28px rgb(0 0 0 / .18);
+}
+.clear-glass, .app-header::before {
+  --optical-filter: blur(var(--optical-blur, 20px)) saturate(.22) brightness(var(--optical-brightness, .7));
+  -webkit-backdrop-filter: var(--optical-filter);
+  backdrop-filter: var(--optical-filter);
+}
+.app-header::before {
+  --optical-tint: rgb(10 10 10 / .19);
+  --optical-brightness: .8;
+  --optical-blur: 22px;
+}
+.glass-popover {
+  --optical-tint: rgb(9 9 9 / .52);
+  --optical-blur: 24px;
+}
+.glass-search {
+  --optical-tint: rgb(10 10 10 / .12);
+  --optical-blur: 10px;
+  border-radius: 12px;
+}
+.glass-search:focus-within { border-color: rgb(255 255 255 / .58); }
+.glass-trim {
+  --optical-tint: rgb(255 255 255 / .025);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / .065);
+}
+:is(.glass-trim, .glass-action):hover {
+  --optical-tint: rgb(255 255 255 / .13);
+  border-color: rgb(255 255 255 / .38);
+}
+.glass-action {
+  --optical-tint: rgb(9 9 9 / .29);
+  --optical-blur: 10px;
+  border-radius: 12px;
+}
+.film-genre-rail { padding-top: 8px; }
+.film-genre-rail .glass-trim { border-radius: 11px; }
+.poster-tag { background: rgb(7 7 7 / .54); }
+.continue-card-scrim { background: linear-gradient(0deg, rgb(5 5 5 / .92), rgb(5 5 5 / .35) 76%, transparent); }
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .clear-glass, .app-header::before { --optical-tint: rgb(17 17 17 / .94); }
+  .glass-action:hover { --optical-tint: #262626; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .clear-glass, .app-header::before, .glass-trim {
+    --optical-tint: #161616;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  :is(.glass-trim, .glass-action):hover { --optical-tint: #262626; }
+}
+
+.cinema-hero .swiper :is(.swiper-button-prev, .swiper-button-next) {
+  background: linear-gradient(145deg, rgb(255 255 255 / .16), rgb(255 255 255 / .045)), rgb(5 5 5 / .32);
+  border: 1px solid rgb(255 255 255 / .22);
+  border-top-color: rgb(255 255 255 / .35);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / .1);
+}
+.cinema-hero .swiper :is(.swiper-button-prev, .swiper-button-next):hover {
+  background-color: rgb(255 255 255 / .15);
+}
+.watch-progress {
+  appearance: none;
+  height: 3px;
+  border: 0;
+  border-radius: 4px;
+  background: rgb(255 255 255 / .22);
+}
+.watch-progress::-webkit-progress-bar { background: transparent; }
+.watch-progress::-webkit-progress-value { border-radius: 4px; background: white; }
+.watch-progress::-moz-progress-bar { border-radius: 4px; background: white; }

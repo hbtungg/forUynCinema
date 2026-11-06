@@ -57,7 +57,7 @@ export default function HistoryPopup() {
     <div className="fixed bottom-4 left-4 right-4 md:left-auto md:bottom-6 md:right-6 mx-auto md:mx-0 max-w-[calc(100%-32px)] md:w-[310px] z-[100] animate-in fade-in slide-in-from-bottom-10 duration-300 font-sans select-none" style={{ fontFamily: "var(--font-main)" }}>
       
       {/* HỘP KÉN PHA LÊ KÍNH MỜ XANH ĐÊM THẲM W-FULL TRÊN MOBILE */}
-      <div className="w-full glass-surface border border-white/5 p-5 md:p-6 rounded-[2rem] md:rounded-[2.5rem]  relative overflow-hidden group">
+      <div className="w-full clear-glass glass-popover p-5 md:p-6 rounded-[2rem] md:rounded-[2.5rem]  relative overflow-hidden group">
         
         {/* Viền hào quang vàng Moonlight ẩn hiện nhẹ nhàng khi hover */}
         <div className="absolute inset-0 border border-[#e8e8e8]/10 rounded-[2rem] md:rounded-[2.5rem] group-hover:border-[#e8e8e8]/30 transition-colors duration-300 pointer-events-none" />

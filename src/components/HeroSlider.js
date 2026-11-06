@@ -52,14 +52,15 @@ export default function HeroSlider({ movies }) {
   return (
     <section className="cinema-hero relative overflow-hidden bg-surface-container" aria-label="Phim nổi bật">
       <Swiper modules={[A11y, Autoplay, Navigation]} className="h-full w-full"
-        onSwiper={instance => { slider.current = instance; }} rewind navigation={slides.length > 1} watchSlidesProgress
+        rewind navigation={slides.length > 1} watchSlidesProgress
         a11y={{ prevSlideMessage: 'Phim trước', nextSlideMessage: 'Phim tiếp theo' }}
+        onSwiper={instance => { slider.current = instance; }}
         speed={reduceMotion ? 0 : 350}
         autoplay={slides.length > 1 && { delay: 6500, disableOnInteraction: false, pauseOnMouseEnter: true }}>
         {slides.map((movie, index) => (
           <SwiperSlide key={movie.canonicalKey || movie.slug}>
             {({ isActive }) => (
-              <div className="relative flex h-full items-end p-4 pb-12 sm:p-8 md:items-center md:px-16" inert={!isActive}>
+              <div className="cinema-hero-copy relative flex h-full items-end md:items-center" inert={!isActive}>
                 <HeroArtwork movie={movie} priority={index === 0} />
                 <div className="cinema-hero-scrim absolute inset-0" aria-hidden="true" />
                 <div className="relative w-full max-w-xl space-y-2 md:space-y-4">
@@ -75,7 +76,7 @@ export default function HeroSlider({ movies }) {
                     <Link prefetch={false} href={'/watch/' + movie.slug} className="button-primary inline-flex items-center gap-2 px-4 text-sm">
                       <Play size={16} aria-hidden="true" /> Xem phim
                     </Link>
-                    <Link prefetch={false} href={'/movie/' + movie.slug} className="inline-flex min-h-11 items-center rounded-xl border border-border-subtle bg-black/65 px-4 text-sm font-semibold">Chi tiết</Link>
+                    <Link prefetch={false} href={'/movie/' + movie.slug} className="clear-glass glass-action inline-flex min-h-11 items-center px-4 text-sm font-semibold">Chi tiết</Link>
                   </div>
                 </div>
               </div>
@@ -84,7 +85,7 @@ export default function HeroSlider({ movies }) {
         ))}
       </Swiper>
       {!reduceMotion && slides.length > 1 && (
-        <button type="button" className="hero-pause" onClick={() => setPaused(value => !value)}>
+        <button type="button" className="hero-pause clear-glass glass-action" onClick={() => setPaused(value => !value)}>
           {paused ? 'Phát trình chiếu' : 'Dừng trình chiếu'}
         </button>
       )}

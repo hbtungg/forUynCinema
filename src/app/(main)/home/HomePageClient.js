@@ -82,7 +82,7 @@ export default function HomePageClient() {
       <nav aria-label="Thể loại phim" className="film-genre-rail">
         {genres.map(([label, slug]) => (
           <Link key={slug} prefetch={false} href={'/danh-sach?type=' + slug}
-            className="inline-flex min-h-11 shrink-0 items-center rounded-full border border-border-subtle bg-surface-container px-4 text-sm text-on-surface-variant hover:text-white">
+            className="inline-flex min-h-11 shrink-0 items-center glass-trim px-4 text-sm text-white/85 hover:text-white">
             {label}
           </Link>
         ))}

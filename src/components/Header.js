@@ -41,7 +41,7 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="app-header fixed inset-x-0 top-0 z-50 flex items-center glass-surface" style={{ fontFamily: "var(--font-main)" }}>
+    <header className="app-header fixed z-50 flex items-center" style={{ fontFamily: "var(--font-main)" }}>
       <div className="flex w-full min-w-0 items-center justify-between gap-3">
 
         <div className="flex min-w-0 items-center gap-6 xl:gap-10">
@@ -50,7 +50,7 @@ export default function Header() {
             UYNFLIX
           </Link>
           <div className="hidden lg:flex min-w-0 items-center gap-1 sm:gap-2 text-xs font-bold tracking-wider uppercase">
-            <Link href="/home" className={`transition-colors duration-300 ${pathname === '/home' ? 'text-[#e8e8e8]' : 'text-[#808080] hover:text-[#e8e8e8]'}`}>Movies</Link>
+            <Link href="/home" className={`transition-colors duration-300 ${pathname === '/home' ? 'text-[#e8e8e8]' : 'text-[#c5c5c5] hover:text-white'}`}>Movies</Link>
             <Link href="/danh-sach" className={`transition-colors duration-300 ${pathname === '/danh-sach' ? 'text-[#e8e8e8]' : 'text-[#808080] hover:text-[#e8e8e8]'}`}>Discover</Link>
             <Link href="/history" className={`transition-colors duration-300 ${pathname === '/history' ? 'text-[#e8e8e8]' : 'text-[#808080] hover:text-[#e8e8e8]'}`}>History</Link>
           </div>
@@ -75,7 +75,7 @@ export default function Header() {
             </button>
 
             {isNotifyOpen && (
-              <div className="absolute right-0 mt-2 w-52 sm:w-64 bg-surface-container border border-white/10 rounded-2xl p-1 shadow-2xl z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+              <div className="absolute right-0 mt-2 w-52 sm:w-64 clear-glass glass-popover rounded-2xl p-1 shadow-2xl z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                 <div className="px-4 py-2.5 border-b border-white/5 bg-white/[0.02] rounded-t-xl flex items-center gap-1.5">
                   <span className="text-[#e8e8e8] text-xs">🌙</span>
                   <p className="text-[9px] font-bold text-[#808080] uppercase tracking-[0.25em]">Anh Tùng có đôi lời</p>
@@ -106,7 +106,7 @@ export default function Header() {
               </button>
 
               {showDropdown && (
-                <div className="absolute right-0 mt-2 w-56 bg-surface-container border border-white/10 rounded-2xl p-4  z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="absolute right-0 mt-2 w-56 clear-glass glass-popover rounded-2xl p-4  z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                   <UserMenu isMobile={false} />
                 </div>
               )}
@@ -116,9 +116,9 @@ export default function Header() {
             <button
               aria-label="Đăng nhập"
               onClick={() => router.push('/login')}
-              className="group/login min-h-11 min-w-11 justify-center p-1 flex items-center gap-2 rounded-full border border-dashed border-[#e8e8e8]/30 bg-[#e8e8e8]/5 hover:bg-[#e8e8e8] text-[#e8e8e8] hover:text-[#050505] transition-all duration-300 focus:outline-none cursor-pointer"
+              className="group/login min-h-11 min-w-11 justify-center p-1 flex items-center gap-2 rounded-full glass-trim hover:bg-white/10 text-[#e8e8e8] hover:text-white transition-all duration-300 focus:outline-none cursor-pointer"
             >
-              <div className="w-7 h-7 rounded-full bg-[#e8e8e8]/10 group-hover/login:bg-black/10 flex items-center justify-center text-[#e8e8e8] group-hover/login:text-[#050505] transition-colors">
+              <div className="w-7 h-7 rounded-full bg-[#e8e8e8]/10 group-hover/login:bg-white/10 flex items-center justify-center text-[#e8e8e8] group-hover/login:text-white transition-colors">
                 <User className="w-3.5 h-3.5" />
               </div>
               <span className="hidden md:inline pr-3 text-[11px] font-semibold tracking-widest uppercase font-sans">

@@ -149,7 +149,7 @@ function DanhSachContent() {
         <div className="relative flex-shrink-0" ref={dropdownRef}>
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="px-5 py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/5 border border-white/10 text-[11px] font-bold uppercase tracking-widest text-[#b8b8b8] hover:text-[#ffffff] transition-all flex items-center gap-3 min-w-[190px] justify-between active:scale-95 focus:outline-none"
+            className="px-5 py-2.5 rounded-xl glass-trim text-[11px] font-bold uppercase tracking-widest text-[#b8b8b8] hover:text-[#ffffff] transition-all flex items-center gap-3 min-w-[190px] justify-between active:scale-95 focus:outline-none"
           >
             <span>Chọn thể loại</span>
             <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
@@ -157,7 +157,7 @@ function DanhSachContent() {
 
           {/* Hộp kén danh sách thả xuống dạng kính mờ mượt mà */}
           {isOpen && (
-            <div className="absolute right-0 mt-3 w-56 bg-white/[0.04] border border-white/10 rounded-2xl  backdrop-blur-2xl z-50 p-1.5 grid grid-cols-1 max-h-[360px] overflow-y-auto custom-scrollbar animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="absolute right-0 mt-3 w-56 clear-glass glass-popover rounded-2xl z-50 p-1.5 grid grid-cols-1 max-h-[360px] overflow-y-auto custom-scrollbar animate-in fade-in slide-in-from-top-2 duration-200">
               {categories.map((cat) => {
                 const isSelected = currentCategory === cat.id;
                 return (

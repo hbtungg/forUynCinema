@@ -60,7 +60,7 @@ export default function CategoryMenu({ isMobile = false, closeMobileMenu }) {
           </button>
           <div className={`grid grid-cols-2 gap-2 overflow-hidden transition-all duration-300 ${openMenu === 'cat' ? 'max-h-[600px] pb-6' : 'max-h-0'}`}>
             {data.categories.map((cat) => (
-              <Link key={cat.slug} href={`/category/${cat.slug}`} onClick={closeMobileMenu} className="px-3 py-2.5 bg-zinc-900/80 rounded-xl text-zinc-400 text-[9px] font-semibold uppercase truncate">
+              <Link key={cat.slug} href={`/category/${cat.slug}`} onClick={closeMobileMenu} className="px-3 py-2.5 glass-trim rounded-xl text-zinc-400 text-[9px] font-semibold uppercase truncate">
                 {cat.name}
               </Link>
             ))}
@@ -73,7 +73,7 @@ export default function CategoryMenu({ isMobile = false, closeMobileMenu }) {
           </button>
           <div className={`grid grid-cols-2 gap-2 overflow-hidden transition-all duration-300 ${openMenu === 'count' ? 'max-h-[400px] pb-6' : 'max-h-0'}`}>
             {data.countries.map((c) => (
-              <Link key={c.slug} href={`/country/${c.slug}`} onClick={closeMobileMenu} className="px-3 py-2.5 bg-zinc-900/80 rounded-xl text-zinc-400 text-[9px] font-semibold uppercase truncate">
+              <Link key={c.slug} href={`/country/${c.slug}`} onClick={closeMobileMenu} className="px-3 py-2.5 glass-trim rounded-xl text-zinc-400 text-[9px] font-semibold uppercase truncate">
                 {c.name}
               </Link>
             ))}
@@ -88,14 +88,14 @@ export default function CategoryMenu({ isMobile = false, closeMobileMenu }) {
     <div className="flex items-center gap-4">
       {/* Dropdown Thể loại */}
       <div className="relative group" onMouseEnter={() => setOpenMenu('cat')} onMouseLeave={() => setOpenMenu(null)}>
-        <button className="px-5 py-2.5 bg-neutral-700 text-white text-[10px] font-semibold uppercase rounded-xl transition-transform active:scale-95 shadow-lg shadow-neutral-600/20">
+        <button className="px-5 py-2.5 glass-trim text-white text-[10px] font-semibold uppercase rounded-xl transition-transform active:scale-95 shadow-lg shadow-neutral-600/20">
           Thể Loại
         </button>
         {/* Lớp đệm kết nối tàng hình */}
         <div className="absolute top-full left-0 w-full h-4 bg-transparent"></div>
         
         {openMenu === 'cat' && (
-          <div className="absolute top-[calc(100%+8px)] left-1/2 -translate-x-1/2 w-[520px] bg-zinc-950/95 backdrop-blur-2xl border border-white/10 p-5 rounded-[2rem] grid grid-cols-3 gap-1  animate-in fade-in zoom-in-95 duration-200">
+          <div className="absolute top-[calc(100%+8px)] left-1/2 -translate-x-1/2 w-[520px] clear-glass glass-popover p-5 rounded-[2rem] grid grid-cols-3 gap-1  animate-in fade-in zoom-in-95 duration-200">
             {data.categories.map((cat) => (
               <Link key={cat.slug} href={`/category/${cat.slug}`} className={`px-4 py-2.5 text-[10px] font-semibold uppercase rounded-xl transition-all truncate ${cat.slug === 'phim-18' ? 'text-neutral-300 bg-neutral-700/5 hover:bg-neutral-700 hover:text-white' : 'text-zinc-400 hover:text-white hover:bg-zinc-900'}`}>
                 {cat.name}
@@ -107,13 +107,13 @@ export default function CategoryMenu({ isMobile = false, closeMobileMenu }) {
 
       {/* Dropdown Quốc gia */}
       <div className="relative group" onMouseEnter={() => setOpenMenu('count')} onMouseLeave={() => setOpenMenu(null)}>
-        <button className="px-5 py-2.5 bg-zinc-800 text-zinc-100 text-[10px] font-semibold uppercase rounded-xl border border-white/5 transition-transform active:scale-95">
+        <button className="px-5 py-2.5 glass-trim text-zinc-100 text-[10px] font-semibold uppercase rounded-xl border border-white/5 transition-transform active:scale-95">
           Quốc Gia
         </button>
         <div className="absolute top-full left-0 w-full h-4 bg-transparent"></div>
         
         {openMenu === 'count' && (
-          <div className="absolute top-[calc(100%+8px)] right-0 w-[300px] bg-zinc-950/95 backdrop-blur-2xl border border-white/10 p-5 rounded-[2rem] grid grid-cols-2 gap-1  animate-in fade-in zoom-in-95 duration-200">
+          <div className="absolute top-[calc(100%+8px)] right-0 w-[300px] clear-glass glass-popover p-5 rounded-[2rem] grid grid-cols-2 gap-1  animate-in fade-in zoom-in-95 duration-200">
             {data.countries.map((c) => (
               <Link key={c.slug} href={`/country/${c.slug}`} className="px-4 py-2.5 text-[10px] font-semibold uppercase text-zinc-400 hover:text-white hover:bg-zinc-900 rounded-xl transition-all truncate">
                 {c.name}

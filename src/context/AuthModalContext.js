@@ -32,10 +32,10 @@ export function AuthModalProvider({ children }) {
         <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 animate-in fade-in duration-200">
           <div 
             onClick={closeAuthModal} 
-            className="absolute inset-0 bg-black/60 backdrop-blur-md"
+            className="absolute inset-0 bg-black/40"
           />
 
-          <div role="dialog" aria-modal="true" aria-label="Đăng nhập để xem phim" className="relative w-full max-w-sm glass-surface border border-white/10 rounded-3xl p-6 shadow-2xl text-center origin-center animate-in zoom-in-95 duration-200 ease-out text-sm">
+          <div role="dialog" aria-modal="true" aria-label="Đăng nhập để xem phim" className="relative w-full max-w-sm clear-glass glass-popover rounded-3xl p-6 shadow-2xl text-center origin-center animate-in zoom-in-95 duration-200 ease-out text-sm">
             <div className="w-12 h-12 rounded-full bg-white/10 text-white flex items-center justify-center mx-auto mb-4 border border-white/20">
               <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />

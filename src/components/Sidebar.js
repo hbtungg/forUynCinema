@@ -38,16 +38,16 @@ export default function Sidebar({ collapsed, onToggleSidebar }) {
       {/* ========================================================================= */}
       <aside
         className={`
-          app-sidebar fixed left-0 bottom-0 z-40 flex flex-col items-center py-6 flex-shrink-0
-          glass-surface border-r border-[#383838]/10 shadow-2xl
-          transition-all duration-300 ease-in-out overflow-y-auto hidden md:flex
-          ${collapsed ? 'w-16 px-0' : 'w-64 px-4'}
+          app-sidebar fixed z-40 flex flex-col items-center py-2.5 flex-shrink-0
+          clear-glass
+          overflow-y-auto hidden md:flex
+          ${collapsed ? 'w-[60px] px-1.5' : 'w-60 px-3'}
         `}
         style={{ fontFamily: "var(--font-main)" }}
         /* 🚀 FIX CHÍ MẠNG: top-[72px] giúp hạ cánh Sidebar nằm dưới gầm Header vĩnh viễn, w-16 thu nhỏ tinh tế */
       >
         {/* NÚT ĐÓNG/MỞ SIDEBAR HAMBURGER TRÊN ĐỈNH */}
-        <div className={`mb-8 flex w-full items-center ${collapsed ? 'justify-center' : 'justify-between px-2'}`}>
+        <div className={`mb-3 flex w-full items-center ${collapsed ? 'justify-center' : 'justify-between px-2'}`}>
           {!collapsed && (
             <span className="text-xs font-bold tracking-[0.2em] text-[#b8b8b8] uppercase animate-in fade-in duration-300">
               Navigation
@@ -55,7 +55,7 @@ export default function Sidebar({ collapsed, onToggleSidebar }) {
           )}
           <button
             onClick={() => onToggleSidebar?.()}
-            className="w-11 h-11 flex items-center justify-center rounded-full bg-[#ffffff]/5 border border-[#ffffff]/10  text-[#ffffff] hover:bg-[#ffffff]/10 transition-all duration-300 cursor-pointer focus:outline-none"
+            className="w-11 h-11 flex items-center justify-center rounded-xl text-white hover:bg-white/10 transition-all duration-300 cursor-pointer focus:outline-none"
             title={collapsed ? "Mở rộng menu" : "Thu gọn menu"}
           >
             <Menu className={`w-5 h-5 transition-transform duration-300 ${!collapsed ? 'rotate-180' : 'rotate-0'}`} />
@@ -63,7 +63,7 @@ export default function Sidebar({ collapsed, onToggleSidebar }) {
         </div>
 
         {/* CỤM MENU ĐIỀU HƯỚNG CHÍNH (Icon to chuẩn w-[22px] kịch trần khi đóng) */}
-        <nav aria-label="Điều hướng chính" className="w-full flex-1 flex flex-col gap-2">
+        <nav aria-label="Điều hướng chính" className="w-full flex-1 flex flex-col gap-1">
           {navItems.map((item) => {
             const active = pathname === item.href;
             const IconComponent = item.icon;
@@ -77,7 +77,7 @@ export default function Sidebar({ collapsed, onToggleSidebar }) {
                 className={`group relative flex items-center h-12 rounded-xl transition-all duration-300 border border-transparent
                   ${collapsed ? 'w-12 h-12 justify-center mx-auto' : 'w-full px-4 gap-4'}
                   ${active
-                    ? 'text-[#ffffff] bg-[#ffffff]/10  border border-[#ffffff]/20 font-bold'
+                    ? 'text-white font-semibold'
                     : 'text-[#b8b8b8] hover:bg-[#262626]/20 hover:text-[#e8e8e8] '
                   }`}
                 title={collapsed ? item.label : undefined}
@@ -112,7 +112,7 @@ export default function Sidebar({ collapsed, onToggleSidebar }) {
         </nav>
 
         {/* KHỐI TIỆN ÍCH DƯỚI CÙNG (Ngay ngắn tuyệt đối) */}
-        <div className="w-full mt-auto flex flex-col gap-2 border-t border-[#383838]/10 pt-4">
+        <div className="w-full mt-2 flex flex-col gap-1 border-t border-white/15 pt-2">
           <Link 
             href="/help" 
             className={`group relative flex items-center h-12 rounded-xl text-[#b8b8b8] hover:bg-[#262626]/10 hover:text-[#e8e8e8] transition-all duration-300 ${
@@ -130,7 +130,7 @@ export default function Sidebar({ collapsed, onToggleSidebar }) {
             }} 
             className={`group relative flex items-center h-12 rounded-xl transition-all duration-300 cursor-pointer focus:outline-none
               ${collapsed ? 'w-12 h-12 justify-center mx-auto' : 'w-full px-4 gap-4'} 
-              ${isLoggedIn ? 'text-[#b8b8b8] hover:bg-[#93000a]/20 hover:text-[#ffb4ab]' : 'text-[#ffffff] hover:bg-[#ffffff]/10'}`}
+              ${isLoggedIn ? 'text-[#b8b8b8] hover:bg-white/10 hover:text-white' : 'text-[#ffffff] hover:bg-[#ffffff]/10'}`}
           >
             {isLoggedIn ? <LogOut className={`${collapsed ? 'w-[22px] h-[22px]' : 'w-5 h-5'}`} /> : <LogIn className={`${collapsed ? 'w-[22px] h-[22px]' : 'w-5 h-5'}`} />}
             {!collapsed && <span className="text-sm tracking-wide font-medium">{isLoggedIn ? "Đăng Xuất" : "Đăng Nhập"}</span>}
@@ -141,7 +141,7 @@ export default function Sidebar({ collapsed, onToggleSidebar }) {
       {/* ========================================================================= */}
       {/* VỊ TRÍ 2: THANH BOTTOM NAVIGATION BAR DÀNH RIÊNG MOBILE (CHỈ HIỂN THỊ ICON) */}
       {/* ========================================================================= */}
-      <nav aria-label="Điều hướng trên điện thoại" className="floating-navigation fixed bottom-0 left-0 right-0 h-16 glass-surface flex items-center justify-around gap-0.5 p-1 md:hidden z-50 ">
+      <nav aria-label="Điều hướng trên điện thoại" className="floating-navigation fixed bottom-0 left-0 right-0 h-16 clear-glass flex items-center justify-around gap-0.5 p-1 md:hidden z-50 ">
         {navItems.map((item) => {
           const active = pathname === item.href;
           const IconComponent = item.icon;

@@ -76,9 +76,9 @@ export default function SearchPage({ searchParams }) {
 
         {/* ── 🚀 THANH TÌM KIẾM TRUNG TÂM TÙY BIẾN ĐỘC LẬP CHUẨN ĐIỆN ẢNH ── */}
         {/* Thiết kế to rộng trải dài, bo góc mềm mại, lồng kính mờ xanh đêm lộng lẫy */}
-        <div className="mb-6 max-w-2xl rounded-2xl border border-border-subtle bg-surface-container p-2 sm:p-3">
+        <div className="mb-6 max-w-2xl rounded-2xl clear-glass p-2 sm:p-3">
           <form role="search" aria-label="Tìm phim trong danh mục" key={keyword} onSubmit={handleLocalSubmit} className="flex w-full min-w-0 items-center gap-2">
-            <div className="relative flex min-h-11 min-w-0 flex-1 items-center gap-2 rounded-xl border border-border-subtle bg-black/30 px-3 focus-within:border-white/50">
+            <div className="relative flex min-h-11 min-w-0 flex-1 items-center gap-2 rounded-xl glass-trim px-3 focus-within:border-white/50">
               <Search className="w-4 h-4 text-[#b8b8b8] flex-shrink-0" />
               <input 
                 type="search" name="q" aria-label="Tên phim hoặc từ khóa"

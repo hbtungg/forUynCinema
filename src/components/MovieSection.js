@@ -20,8 +20,8 @@ export default function MovieSection({ title, movies, viewAllLink, onRetry }) {
           </Link>
           {!!movies?.length && (
             <div className="ml-2 hidden gap-1 md:flex">
-              <button type="button" aria-label={'Cuộn trái — ' + title} onClick={() => scroll(-1)} className="rail-control"><ChevronLeft size={19} /></button>
-              <button type="button" aria-label={'Cuộn phải — ' + title} onClick={() => scroll(1)} className="rail-control"><ChevronRight size={19} /></button>
+              <button type="button" aria-label={'Cuộn trái — ' + title} onClick={() => scroll(-1)} className="rail-control glass-trim"><ChevronLeft size={19} /></button>
+              <button type="button" aria-label={'Cuộn phải — ' + title} onClick={() => scroll(1)} className="rail-control glass-trim"><ChevronRight size={19} /></button>
             </div>
           )}
         </div>

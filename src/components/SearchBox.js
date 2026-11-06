@@ -49,7 +49,7 @@ export default function SearchBox() {
   }, []);
 
   return (
-    <form ref={container} role="search" aria-label="Tìm phim từ thanh điều hướng" className="relative flex min-w-0 items-center gap-1 rounded-full border border-border-subtle bg-surface-container px-2 focus-within:border-white/50"
+    <form ref={container} role="search" aria-label="Tìm phim từ thanh điều hướng" className="relative clear-glass glass-search flex min-w-0 items-center gap-1 px-2"
       onKeyDown={event => { if (event.key === 'Escape') setOpen(false); }}
       onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false); }}
       onSubmit={event => {
@@ -66,7 +66,7 @@ export default function SearchBox() {
         <Search size={18} aria-hidden="true" />
       </button>
       {showSuggestions && (
-        <div className="absolute top-full right-0 z-50 mt-2 w-72 max-w-[90vw] rounded-xl border border-border-subtle bg-surface-container p-2 shadow-lg">
+        <div className="absolute top-full right-0 z-50 mt-2 w-72 max-w-[90vw] rounded-xl clear-glass glass-popover p-2">
           {!currentResult || currentResult.error || !currentResult.items.length ? (
             <p role="status" className="p-3 text-sm text-on-surface-variant">
               {!currentResult ? 'Đang tìm phim…' : currentResult.error ? 'Không tải được gợi ý. Nhấn Tìm kiếm để thử nguồn khác.' : 'Không tìm thấy gợi ý.'}

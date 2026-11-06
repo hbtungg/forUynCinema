@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSession } from "next-auth/react";
 import Link from 'next/link';
-import { X, Sparkles, Play } from 'lucide-react';
+import { X, Play } from 'lucide-react';
 
 export default function ContinueWatching() {
   const { data: session, status } = useSession();
@@ -92,37 +92,13 @@ export default function ContinueWatching() {
 
   if (status !== "authenticated" || history.length === 0) return null;
 
-  const titleText = "Phim Đang Xem";
-
   return (
-    <section className="mt-12 md:mt-16 group/section font-sans select-none" style={{ fontFamily: "var(--font-main)" }}>
-
-      {/* TIÊU ĐỀ KHAY PHIM */}
-      <div className="flex items-center justify-between mb-6 md:mb-8 pr-4">
-        <div className="flex items-center gap-3">
-          <div className="w-1 h-6 md:h-7 bg-[#e8e8e8] rounded-full  shrink-0"></div>
-
-          <h2 className="text-lg md:text-xl font-bold text-white uppercase tracking-wider flex items-center gap-2">
-            <span className="inline">
-              {titleText.split(' ').map((word, i) => (
-                <span
-                  key={i}
-                  className={`${i === 1 ? 'text-[#e8e8e8] ' : ''} inline`}
-                >
-                  {word}{' '}
-                </span>
-              ))}
-            </span>
-            <Sparkles className="w-4 h-4 text-[#e8e8e8] animate-pulse shrink-0" />
-          </h2>
-        </div>
-      </div>
-
-      {/* KHAY LƯỚT NGANG */}
+    <section className="space-y-3">
+      <h2 className="text-lg font-semibold tracking-tight md:text-2xl">Phim đang xem</h2>
       <div ref={scrollRef} className="overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden touch-pan-x scroll-smooth px-1">
         <div className="flex gap-4 md:gap-6 pb-4" style={{ width: 'max-content' }}>
           {history.map((item) => (
-            <div key={item.slug} className="w-[240px] md:w-[320px] flex-shrink-0 relative group/card animate-in fade-in duration-300">
+            <div key={item.slug} className="w-[min(72vw,240px)] md:w-[300px] flex-shrink-0 relative group/card animate-in fade-in duration-300">
 
               {/* NÚT XÓA LỊCH SỬ */}
               <button
@@ -131,7 +107,7 @@ export default function ContinueWatching() {
                   e.stopPropagation();
                   removeHistory(item.slug);
                 }}
-                className="absolute top-2.5 right-2.5 w-7 h-7 md:w-8 md:h-8 glass-surface border border-white/10 rounded-full flex items-center justify-center text-[#b8b8b8] hover:bg-neutral-700/20 hover:text-neutral-300 transition-all z-50 opacity-100 md:opacity-0 md:group-hover/card:opacity-100 shadow-xl active:scale-75 cursor-pointer focus:outline-none"
+                className="absolute top-2.5 right-2.5 size-11 clear-glass glass-action flex items-center justify-center text-white z-20 cursor-pointer focus:outline-none"
                 title="Xóa khỏi danh sách xem tiếp"
               >
                 <X className="w-3.5 h-3.5 md:w-4 md:h-4" />
@@ -140,7 +116,7 @@ export default function ContinueWatching() {
               {/* CARD KHUNG HÌNH PHIM */}
               <Link
                 href={`/watch/${item.slug}?ep=${encodeURIComponent(item.episode || 1)}&provider=${encodeURIComponent(item.provider || 'auto')}`}
-                className="block relative aspect-video rounded-[1.5rem] md:rounded-[1.8rem] overflow-hidden border border-white/5 shadow-2xl bg-white/[0.04] transition-all duration-300 group-hover/card:border-[#e8e8e8]/30"
+                className="block relative aspect-video rounded-2xl overflow-hidden bg-surface-container"
               >
                 <img
                   src={getDisplayImage(item)}
@@ -150,24 +126,24 @@ export default function ContinueWatching() {
                 />
 
                 {/* NÚT PLAY KHI HOVER */}
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-opacity duration-300 z-10">
-                  <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-[#e8e8e8]/20 backdrop-blur-md border border-[#e8e8e8]/40 flex items-center justify-center text-[#e8e8e8]  transform group-hover/card:scale-110 transition-transform duration-300">
+                <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 group-focus-within/card:opacity-100 [@media(hover:hover)]:group-hover/card:opacity-100 transition-opacity duration-300">
+                  <div className="w-12 h-12 md:w-14 md:h-14 clear-glass glass-action flex items-center justify-center text-[#e8e8e8]  transform group-hover/card:scale-110 transition-transform duration-300">
                     <Play className="w-5 h-5 md:w-6 md:h-6 fill-current ml-1" />
                   </div>
                 </div>
 
                 {/* LỚP PHỦ GRADIENT THÔNG TIN */}
-                <div className="absolute inset-x-0 bottom-0 p-4 md:p-5 bg-gradient-to-t from-[#050505] via-[#050505]/90 to-transparent z-20">
-                  <h3 className="text-white font-bold text-xs md:text-sm truncate tracking-wide uppercase group-hover/card:text-[#ffffff] transition-colors">{item.name}</h3>
+                <div className="absolute inset-x-0 bottom-0 px-3 pb-3 pt-6 continue-card-scrim">
+                  <h3 className="text-white font-semibold text-sm truncate group-hover/card:text-[#ffffff] transition-colors">{item.name}</h3>
 
-                  <span className="text-[#ffffff] text-[9px] md:text-[10px] font-bold uppercase tracking-widest mt-1.5 block font-mono">
-                    ● Progress: Tập {String(item.episode || '1').replace(/^(tập|tập|tâp|tap|ep|episode)\s*/i, '').trim()}
+                  <span className="text-white/85 text-xs mt-0.5 block">
+                    Tập {String(item.episode || '1').replace(/^(tập|tập|tâp|tap|ep|episode)\s*/i, '').trim()}
                   </span>
 
-                  {/* THANH TIMELINE PROGRESS */}
-                  <div className="mt-3 w-full h-[3px] bg-white/10 rounded-full overflow-hidden">
-                    <div className="w-1/2 h-full bg-[#e8e8e8]  rounded-full"></div>
-                  </div>
+                  {Number(item.durationSeconds) > 0 && Number(item.positionSeconds) > 0 && (
+                    <progress aria-label="Tiến độ xem" className="watch-progress mt-2 block w-full"
+                      max={Number(item.durationSeconds)} value={Math.min(Number(item.positionSeconds), Number(item.durationSeconds))} />
+                  )}
                 </div>
               </Link>
             </div>
